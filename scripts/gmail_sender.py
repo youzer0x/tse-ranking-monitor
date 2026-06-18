@@ -20,11 +20,27 @@ import json
 import base64
 import urllib.parse
 import urllib.request
+import urllib.error
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 SEND_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
+
+
+def _urlopen_json(req, what):
+    """urlopen して JSON を返す。HTTP エラー時は本文（理由）を出して例外送出。
+
+    Gmail の送信失敗（403 など）は本文に原因が書かれている（Gmail API 未有効化＝
+    SERVICE_DISABLED／スコープ不足＝ACCESS_TOKEN_SCOPE_INSUFFICIENT／送信元不一致＝
+    Delegation denied 等）。これをログに残すと原因が一目で分かる。
+    """
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")
+        raise RuntimeError(f"{what} failed: HTTP {e.code} {e.reason}\n{body}") from None
 
 
 def _access_token():
@@ -36,8 +52,7 @@ def _access_token():
         "grant_type": "refresh_token",
     }).encode()
     req = urllib.request.Request(TOKEN_URL, data=data, method="POST")
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.loads(r.read())["access_token"]
+    return _urlopen_json(req, "Gmail token")["access_token"]
 
 
 def _subject(session_date, count, total=None, capped=False):
@@ -74,7 +89,6 @@ def send_gmail(html_body, session_date, count, total=None, capped=False):
         SEND_URL, data=payload, method="POST",
         headers={"Authorization": f"Bearer {token}",
                  "Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        resp = json.loads(r.read())
+    resp = _urlopen_json(req, "Gmail send")
     print(f"  Email sent. id={resp.get('id')}")
     return True
