@@ -1,11 +1,11 @@
-# tse-day-ranking-monitor（自動化ルーチン仕様）
+# tse-ranking-monitor（自動化ルーチン仕様）
 
-東証 日中（レギュラー）値上がり率ランキングを**日次・無人**で生成し、**GitHub Pages（Web）＋ Gmail 通知**で配信する Claude クラウドルーチンの仕様。本ディレクトリは独立リポ `tse-day-ranking-monitor` として切り出すための**雛形**である（PTS 版 `pts-ranking-monitor` と同じ分担）。
+東証 日中（レギュラー）値上がり率ランキングを**日次・無人**で生成し、**GitHub Pages（Web）＋ Gmail 通知**で配信する Claude クラウドルーチンの仕様。本ディレクトリは独立リポ `tse-ranking-monitor` として切り出すための**雛形**である（PTS 版 `pts-ranking-monitor` と同じ分担）。
 
 ## 方法論の単一の真実源
 
 - 方法論（抽出条件・時価総額算出・厳密窓・変動要因の裏取り・文体・品質ゲート）は
-  **`news-financial-market/skills/tse-day-ranking-digest/SKILL.md`** が単一の真実源。本ファイルはそれに準拠する。
+  **`news-financial-market/skills/tse-ranking-digest/SKILL.md`** が単一の真実源。本ファイルはそれに準拠する。
 - 配信実装（Pages の体裁・Gmail）は on-disk の `tdnet-monitor`（`html_generator.py`・`gmail_sender.py`・`docs/`）を下敷きにしている。
 
 ## 起動とゲート
@@ -36,10 +36,10 @@
 
 ## レポート（任意）
 
-- オンデマンド版と同じ `である調` 全文を `reports/tse-day-rankings/<date>_tse-day-gainers.md` 相当として併せて出力してよい（リポ運用に合わせる）。
+- オンデマンド版と同じ `である調` 全文を `reports/tse-rankings/<date>_tse-gainers.md` 相当として併せて出力してよい（リポ運用に合わせる）。
 
 ## 関連
 
-- 方法論：`skills/tse-day-ranking-digest/SKILL.md`
+- 方法論：`skills/tse-ranking-digest/SKILL.md`
 - 配信下敷き：`project-private/tdnet-monitor`（Pages＋Gmail）
 - ルーチン方式の先行例：`pts-ranking-monitor`（PTS ナイト版・cron 06:06 JST）

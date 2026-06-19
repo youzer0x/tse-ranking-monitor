@@ -1,6 +1,6 @@
-# tse-day-ranking-monitor セットアップ手順
+# tse-ranking-monitor セットアップ手順
 
-東証 日中（レギュラー）値上がり率ランキングを**日次・無人**で生成し、**GitHub Pages（Web）＋ Gmail（API）**で配信するための手順。PTS 版 `pts-ranking-monitor` と**同じ構成・同じ Gmail 方式・Claude のスケジュール（ルーチン）機能**で運用する。方法論は `news-financial-market/skills/tse-day-ranking-digest/SKILL.md`、ルーチン仕様は本ディレクトリの `AGENTS.md`、貼り付けプロンプトは `ROUTINE_PROMPT.md`。
+東証 日中（レギュラー）値上がり率ランキングを**日次・無人**で生成し、**GitHub Pages（Web）＋ Gmail（API）**で配信するための手順。PTS 版 `pts-ranking-monitor` と**同じ構成・同じ Gmail 方式・Claude のスケジュール（ルーチン）機能**で運用する。方法論は `news-financial-market/skills/tse-ranking-digest/SKILL.md`、ルーチン仕様は本ディレクトリの `AGENTS.md`、貼り付けプロンプトは `ROUTINE_PROMPT.md`。
 
 > 用意するもの：GitHub アカウント／Gmail アカウント＋ Google Cloud（無料・OAuth クライアント作成に使用）／J-Quants の **Light 以上**の API キー／Claude（Claude Code のルーチンが使えるアカウント）。
 >
@@ -15,13 +15,13 @@
 本ディレクトリには `scripts/publish.py`・`scripts/html_generator.py`・`scripts/gmail_sender.py`・`scripts/get_gmail_token.py`・`scripts/check_gate.py` が同梱済み（Web/メールの体裁は `html_generator.py`＝PTS 版と同一トンマナ）。**Stage1 のパイプライン一式をスキルからコピー**する：
 
 ```bash
-cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-day-ranking-monitor
-cp ../../skills/tse-day-ranking-digest/scripts/{build_day_ranking.py,jquants.py,kabutan_pts.py,tdnet.py,business_day.py,market_cap_jquants.py,market_cap_yahoo.py} scripts/
+cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-ranking-monitor
+cp ../../skills/tse-ranking-digest/scripts/{build_day_ranking.py,jquants.py,kabutan_pts.py,tdnet.py,business_day.py,market_cap_jquants.py,market_cap_yahoo.py} scripts/
 ```
 
 ファイル構成（完成形）：
 ```
-tse-day-ranking-monitor/
+tse-ranking-monitor/
 ├── AGENTS.md                 # ルーチン仕様（方法論の真実源はスキル SKILL.md）
 ├── ROUTINE_PROMPT.md         # スケジュール作成フォームに貼る本文
 ├── scripts/
@@ -43,32 +43,32 @@ tse-day-ranking-monitor/
 ## Step 1：GitHub にリポジトリを作る
 
 1. https://github.com で右上「＋」→「New repository」。
-2. **Repository name**：`tse-day-ranking-monitor`／公開範囲：**Public**（Pages を無料で使うため）／「Add a README file」のチェックは**外す**。
-3. 「Create repository」。表示される URL（`https://github.com/<あなた>/tse-day-ranking-monitor.git`）を控える。
+2. **Repository name**：`tse-ranking-monitor`／公開範囲：**Public**（Pages を無料で使うため）／「Add a README file」のチェックは**外す**。
+3. 「Create repository」。表示される URL（`https://github.com/<あなた>/tse-ranking-monitor.git`）を控える。
 
 ## Step 2：このフォルダを GitHub にアップロード
 
 最も簡単なのは Claude Code に「このリポジトリを GitHub にプッシュして」と頼む方法。自分で行う場合（Git Bash）：
 ```bash
-cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-day-ranking-monitor
+cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-ranking-monitor
 git init && git add . && git commit -m "Initial commit: TSE day ranking monitor"
 git branch -M main
-git remote add origin https://github.com/<あなた>/tse-day-ranking-monitor.git
+git remote add origin https://github.com/<あなた>/tse-ranking-monitor.git
 git push -u origin main
 ```
-> 本ディレクトリは `news-financial-market` リポの一部なので、独立リポにするなら**この `tse-day-ranking-monitor` フォルダだけを別の場所へコピーしてから** `git init` するのが安全。
+> 本ディレクトリは `news-financial-market` リポの一部なので、独立リポにするなら**この `tse-ranking-monitor` フォルダだけを別の場所へコピーしてから** `git init` するのが安全。
 
 ## Step 3：Claude の GitHub App をリポジトリに入れる
 
 1. https://github.com/apps/claude を開く →「Install」（導入済みなら「Configure」）。
-2. 「Only select repositories」で `tse-day-ranking-monitor` を選択。
+2. 「Only select repositories」で `tse-ranking-monitor` を選択。
 3. 権限は **Contents: Read and write** を許可（クラウドの Claude が clone し `docs/` を push するため）。
 
 ## Step 4：GitHub Pages を有効にする
 
 1. リポジトリ「Settings」→「Pages」。
 2. **Source**：「Deploy from a branch」。**Branch**：「main」/ Folder「**/docs**」→「Save」。
-3. 数分後 `https://<あなた>.github.io/tse-day-ranking-monitor/` で公開される。
+3. 数分後 `https://<あなた>.github.io/tse-ranking-monitor/` で公開される。
 
 ---
 
@@ -83,7 +83,7 @@ git push -u origin main
 4. **OAuth クライアント ID 作成**：「認証情報」→「認証情報を作成」→「OAuth クライアント ID」→ 種類「**デスクトップ アプリ**」→ 作成。表示される **クライアント ID** と **クライアントシークレット** を控える。
 5. **リフレッシュトークン取得**（手元の Git Bash で1回だけ）：
    ```bash
-   cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-day-ranking-monitor
+   cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-ranking-monitor
    python scripts/get_gmail_token.py
    ```
    - クライアント ID／シークレットを貼り付け → ブラウザで自分の Google アカウントを選択。
@@ -97,7 +97,7 @@ git push -u origin main
 
 ## Step 7：Claude に「カスタム環境」を作る（環境変数・ネット許可・初期化）
 
-1. https://claude.ai/code/routines で **New routine**（または既存の鉛筆＝Edit）。Instructions 欄下の**雲アイコン**（最初は `Default`）→「Add environment / 環境を追加」→ 名前 `tse-day-ranking-monitor`（"Default" は共有なので使わない）。
+1. https://claude.ai/code/routines で **New routine**（または既存の鉛筆＝Edit）。Instructions 欄下の**雲アイコン**（最初は `Default`）→「Add environment / 環境を追加」→ 名前 `tse-ranking-monitor`（"Default" は共有なので使わない）。
 2. **環境変数**（`.env` 形式・1行 `KEY=value`・**引用符で囲まない**）：
    ```
    JQUANTS_API_KEY=（Step 6 の J-Quants API キー）
@@ -107,7 +107,7 @@ git push -u origin main
    GMAIL_ADDRESS=（送信元の Gmail アドレス）
    NOTIFY_TO=okawa.yujiro@gmail.com
    TZ=Asia/Tokyo
-   PAGES_URL=https://<あなた>.github.io/tse-day-ranking-monitor/
+   PAGES_URL=https://<あなた>.github.io/tse-ranking-monitor/
    ```
    - `TZ` … 営業日ゲートの日付判定を JST に固定（**必須**。これが無いと当日判定がずれる）。
    - `NOTIFY_TO` … カンマ区切りで複数可。
@@ -125,8 +125,8 @@ git push -u origin main
 
 1. claude.ai の Claude Code ルーチン作成画面（Routines / スケジュール）を開く。
 2. 設定：
-   - **リポジトリ**：`tse-day-ranking-monitor`
-   - **環境**：Step 7 の `tse-day-ranking-monitor`
+   - **リポジトリ**：`tse-ranking-monitor`
+   - **環境**：Step 7 の `tse-ranking-monitor`
    - **モデル**：**Sonnet 4.6**／**effort**：**max**
    - **スケジュール（cron）**：毎日 **18:10 JST**（タイムゾーン欄があれば Asia/Tokyo で `10 18 * * *`。UTC 指定なら `10 9 * * *` ＝ 09:10 UTC）
    - **プロンプト**：`ROUTINE_PROMPT.md` の```で囲んだ本文をそのまま貼り付け。
@@ -140,7 +140,7 @@ git push -u origin main
 1. ルーチンの「今すぐ実行 / Run now」で手動実行（**当日が東証営業日**なら最新セッションで動く。休場日は `check_gate.py` が `SKIP` を返して何もせず終了）。
 2. 実行ログにエラーが無いことを確認。
 3. 確認：
-   - Web：`https://<あなた>.github.io/tse-day-ranking-monitor/` に当日ランキング（該当が50社超なら**上位50社**）と変動要因、サマリ「該当M社（上位50社を掲載）」が出る。
+   - Web：`https://<あなた>.github.io/tse-ranking-monitor/` に当日ランキング（該当が50社超なら**上位50社**）と変動要因、サマリ「該当M社（上位50社を掲載）」が出る。
    - メール：`NOTIFY_TO` 宛に「[東証日中ランキング] YYYY-MM-DD｜…社該当（・上位50社）」が届く。
    - リポジトリ：`docs/data/` に新しい `YYYY-MM-DD.json`（`count_total`／`count`／`capped` 入り）が追加され、**main** に push されている。
 
@@ -151,7 +151,7 @@ git push -u origin main
 ## 手元での手動実行（任意・動作確認用）
 
 ```bash
-cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-day-ranking-monitor
+cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-ranking-monitor
 python scripts/check_gate.py                                   # SESSION=YYYY-MM-DD / SKIP
 python scripts/build_day_ranking.py --date YYYY-MM-DD --out docs/tmp/ranking.json
 # （必要なら docs/tmp/ranking.json の各 row の factor/factor_kind を編集）
