@@ -125,6 +125,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .header{background:linear-gradient(135deg,#11243f,#24507f);color:#fff;padding:24px 28px 18px;}
 .header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
 .header h1{font-size:21px;font-weight:700;}
+.tabs{display:inline-flex;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap;}
+.tabs .tab{margin:0;padding:7px 15px;border-radius:8px;font-size:15px;font-weight:700;line-height:1.35;text-decoration:none;color:#fff;white-space:nowrap;}
+.tabs .tab.active{background:var(--card);color:var(--primary);}
+.tabs a.tab:hover{background:rgba(255,255,255,.2);}
 .date-selector{display:flex;align-items:center;gap:8px;}
 .date-selector label{font-size:13px;opacity:.9;}
 .date-selector select{padding:7px 30px 7px 12px;font-size:14px;font-family:Arial,sans-serif;border:1px solid rgba(255,255,255,.3);border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
@@ -177,7 +181,10 @@ tbody tr:hover td{background:var(--hover);}
 </style></head>
 <body>
 <div class="header"><div class="header-inner">
-  <div><h1>📈 東証 値上がり率ランキング</h1></div>
+  <nav class="tabs">
+    <h1 class="tab active">📈 東証 値上がり率ランキング</h1>
+    <a class="tab" href="https://youzer0x.github.io/pts-ranking-monitor/">📈 PTS 夜間 値上がり率ランキング</a>
+  </nav>
   <div class="date-selector"><label for="dateSelect">セッション日:</label>
   <select id="dateSelect" onchange="loadDate(this.value)"><option>読み込み中...</option></select></div>
 </div></div>
