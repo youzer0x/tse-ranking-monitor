@@ -62,7 +62,9 @@ def code5(code4):
 def code4(code5):
     """J-Quants の5桁コードを4桁（または末尾英字）へ。97600→9760, 285A0→285A。"""
     c = str(code5)
-    if len(c) == 5 and c.endswith("0") and c[:-1].isdigit():
+    # 5桁コードは「4桁の証券コード＋予約桁0」。証券コードは数字4桁、または
+    # 新方式の英数字4桁（数字3桁＋英字1桁、例 268A）。末尾0を一律で外す。
+    if len(c) == 5 and c.endswith("0") and c[:4].isalnum():
         return c[:-1]
     return c
 
