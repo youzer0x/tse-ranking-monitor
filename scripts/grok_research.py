@@ -15,8 +15,8 @@ factor/factor_kind を起こす（発見は grok・判定と出典規律は Clau
   （既定 off ＝ 起動しない ＝ 従来の Claude 完結フロー）。
 
 usage:
-  # build_day_ranking.py の出力(ranking.json)から上位N社をリサーチ
-  python grok_research.py --in ranking.json --out-dir <research_dir> [--top N]
+  # build_day_ranking.py の出力(ranking.json)から上位N社（既定25・APIコスト削減方針）をリサーチ
+  python grok_research.py --in ranking.json --out-dir <research_dir> [--top N]   # 26位以降は Claude 手順B
   # 単発（スモークテスト）: コードとセッション日を指定（行データを J-Quants から構築）
   python grok_research.py --code 5803 --date 2026-06-19 --out-dir <research_dir>
   # API を叩かず、埋め込み済みプロンプトだけ確認
@@ -179,7 +179,8 @@ def main():
                     default=os.path.expanduser(
                         "~/project-private/tse-ranking-research/research"),
                     help="研究ファイル出力先（既定 project-private/tse-ranking-research/research）")
-    ap.add_argument("--top", type=int, default=0, help="ranking.json の上位N社のみ（0=全件）")
+    ap.add_argument("--top", type=int, default=25,
+                    help="grok 委譲する上昇率上位N社（既定25＝APIコスト削減方針。0で全件。26位以降は Claude 手順B）")
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--search-mode", default=DEFAULT_SEARCH_MODE, choices=["on", "off"],
                     help="web_search ツールの有無（on=有効/off=無効）")

@@ -21,8 +21,8 @@
    - 抽出条件：東証個別株のみ／値上がり率≥+5%／売買代金≥¥10M／時価総額≥100億。`rows`/`dropped_turnover`/`dropped_mcap` を得る。
    - **掲載上限＝値上がり率上位50社**（該当が50社超なら上位50社のみ `rows` に入る。`--max-rank` 既定50）。`counts.qualifying`＝該当総数、`counts.ranked`＝掲載数。
 2.5. **（任意・既定 off）grok 委譲リサーチ**：env **`TSE_USE_GROK=1`** のときのみ実行。
-   `python scripts/grok_research.py --in docs/tmp/ranking.json --out-dir docs/tmp/research [--top N]` を実行し、
-   各銘柄の変動要因を **xAI Grok API**（`XAI_API_KEY`・web_search ツール）でリサーチ → `<code>-<name>-<date>.md`（末尾に DIGEST_BLOCK）を生成する。
+   `python scripts/grok_research.py --in docs/tmp/ranking.json --out-dir docs/tmp/research --top 25` を実行し、
+   **上昇率上位25社**の変動要因を **xAI Grok API**（`XAI_API_KEY`・web_search ツール）でリサーチ → `<code>-<name>-<date>.md`（末尾に DIGEST_BLOCK）を生成する（**APIコスト削減方針：grok は上位25社まで。26位以降は Stage2 で Claude〔手順B〕が裏取り**）。
    `TSE_USE_GROK` 未設定/0 のときは本ステップを**完全にスキップ**（従来の Claude 完結フローと同一）。`grok_research.py` がエラー・API 失敗のときも、その回は grok を捨てて Stage2 を全行 Claude で実施する。
    方法論・プロンプトは `skills/tse-ranking-digest/grok/`（共有雛形）・`reference/sources.md §4`（3層ソース方針）に準拠。
 3. **Stage2（変動要因の充填）**：`rows`（上位50社）各銘柄の `factor`/`factor_kind` を
