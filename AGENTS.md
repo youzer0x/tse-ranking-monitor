@@ -20,9 +20,18 @@
 2. **Stage1（決定的）**：`build_day_ranking.py --date <today> --out ranking.json` を実行（`JQUANTS_API_KEY` 必須）。
    - 抽出条件：東証個別株のみ／値上がり率≥+5%／売買代金≥¥10M／時価総額≥100億。`rows`/`dropped_turnover`/`dropped_mcap` を得る。
    - **掲載上限＝値上がり率上位50社**（該当が50社超なら上位50社のみ `rows` に入る。`--max-rank` 既定50）。`counts.qualifying`＝該当総数、`counts.ranked`＝掲載数。
-3. **Stage2（Claude が変動要因をフル裏取り）**：`rows`（上位50社）各銘柄の `factor`/`factor_kind` を
+2.5. **（任意・既定 off）grok 委譲リサーチ**：env **`TSE_USE_GROK=1`** のときのみ実行。
+   `python scripts/grok_research.py --in docs/tmp/ranking.json --out-dir docs/tmp/research [--top N]` を実行し、
+   各銘柄の変動要因を **xAI Grok API**（`XAI_API_KEY`・web_search ツール）でリサーチ → `<code>-<name>-<date>.md`（末尾に DIGEST_BLOCK）を生成する。
+   `TSE_USE_GROK` 未設定/0 のときは本ステップを**完全にスキップ**（従来の Claude 完結フローと同一）。`grok_research.py` がエラー・API 失敗のときも、その回は grok を捨てて Stage2 を全行 Claude で実施する。
+   方法論・プロンプトは `skills/tse-ranking-digest/grok/`（共有雛形）・`reference/sources.md §4`（3層ソース方針）に準拠。
+3. **Stage2（変動要因の充填）**：`rows`（上位50社）各銘柄の `factor`/`factor_kind` を
    **[開示]（TDnet 前営業日15:30以降∪当日15:30未満）→[報道]（一次記事＋配信時刻を当日セッションに整合）→[テーマ]** の順で埋める。
-   検索要約を出典にせず、材料未確認は正直に記す。個人発信は不使用。
+   検索要約を出典にせず、材料未確認は正直に記す。
+   - **`TSE_USE_GROK=1` のとき（手順B'）**：Stage2.5 の `docs/tmp/research/<code>-<name>-<date>.md` の **DIGEST_BLOCK** を
+     `code`×`session_date` で取り込み、**3層ソース方針で再検証**（`sources_used`=採用／`sources_new_candidate`=ルーブリック再評価のうえ採用＋whitelist 昇格候補に記録／`sources_excluded`=不採用）し、`window_ok`/`trigger_time` の厳密窓整合を確認のうえ `factor`/`factor_kind` に転記する。
+     **DIGEST_BLOCK 欠落・検証落ち・窓不整合の行は従来の Claude 裏取りに fallback**。検証合格率が掲載行の半数未満なら grok を捨てて全行 Claude。
+   - **ソース規律（3層方針）**：①中核 whitelist は採用、②良質な非whitelist（フィスコ・みんかぶ編集記事等）はルーブリック合格なら採用、③個人発信・匿名・純アルゴ生成は不使用（`reference/sources.md §4`）。
    - **証券会社のレーティング変更（投資判断・目標株価）も必ずカバーする**。TDnet には出ないため、`disclosures` が空なのに日中上昇した銘柄は **株探の銘柄ニュース `https://kabutan.jp/stock/news?code=<4桁>`（ブラウザ UA）の「レーティング日報」「材料」**を確認する。寄り前に出た格上げ・目標株価引き上げ（当日15:30より前に伝わったもの）は日中上昇の有力材料。証券会社名・旧→新の投資判断/目標株価を具体的に記し、区分は `[報道]`。
 4. **Publish**：`publish.py --in docs/tmp/ranking.json --docs docs --pages-url "$PAGES_URL" --send`
    - `docs/data/<date>.json` 保存（ランキング＋要因）／`docs/data/manifest.json` 更新／30日より古い JSON を削除。

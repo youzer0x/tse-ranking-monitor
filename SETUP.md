@@ -17,6 +17,9 @@
 ```bash
 cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-ranking-monitor
 cp ../../skills/tse-ranking-digest/scripts/{build_day_ranking.py,jquants.py,kabutan_pts.py,tdnet.py,business_day.py,market_cap_jquants.py,market_cap_yahoo.py} scripts/
+# （任意・grok 委譲を使う場合のみ）リサーチスクリプトと共有プロンプト雛形もコピー：
+cp ../../skills/tse-ranking-digest/scripts/grok_research.py scripts/
+mkdir -p grok && cp ../../skills/tse-ranking-digest/grok/grok_research_prompt.md grok/
 ```
 
 ファイル構成（完成形）：
@@ -28,6 +31,7 @@ tse-ranking-monitor/
 │   ├── build_day_ranking.py  # Stage1（決定的）※スキルからコピー
 │   ├── jquants.py / tdnet.py / business_day.py / kabutan_pts.py
 │   ├── market_cap_jquants.py / market_cap_yahoo.py
+│   ├── grok_research.py      # （任意）grok 委譲＝xAI Grok API リサーチ ※スキルからコピー
 │   ├── check_gate.py         # 営業日ゲート（SESSION=日付 / SKIP を出力）
 │   ├── publish.py            # フルデータ保存・manifest・index 書出し・送信の取りまとめ
 │   ├── html_generator.py     # Pages SPA／メール HTML 生成（PTS と同一トンマナ・配色）
@@ -111,9 +115,16 @@ git push -u origin main
    ```
    - `TZ` … 営業日ゲートの日付判定を JST に固定（**必須**。これが無いと当日判定がずれる）。
    - `NOTIFY_TO` … カンマ区切りで複数可。
+   - **（任意）grok 委譲を使う場合のみ**追加する（未設定なら従来どおり Claude 完結＝即時ロールバック）：
+     ```
+     TSE_USE_GROK=1               # 1 で grok 委譲 ON（既定 off）
+     XAI_API_KEY=（xAI の API キー）
+     XAI_MODEL=grok-4.3           # 任意・利用モデル（既定 grok-4.3）
+     XAI_SEARCH_MODE=on           # 任意・web_search ツール: on|off
+     ```
 3. **ネットワーク許可（Network access）**：既定 `Trusted` だと外部サイトが `403` になる。次のどちらか：
    - **おすすめ＝`Full`**：すべて許可（記事取得が確実）。
-   - **`Custom`**：「Allowed domains」に `api.jquants.com`／`www.release.tdnet.info`／`finance.yahoo.co.jp`／`kabutan.jp`／報道各社（`nikkei.com`・`asia.nikkei.com`・`reuters.com`・`bloomberg.com`・`wsj.com`・`ft.com`・`cnbc.com`・`jiji.com`・`kyodonews.jp`・`toyokeizai.net`・`diamond.jp` 等）を1行ずつ。**「Also include default list of common package managers」に必ずチェック**（pip と Gmail API `*.googleapis.com` のため）。
+   - **`Custom`**：「Allowed domains」に `api.jquants.com`／`www.release.tdnet.info`／`finance.yahoo.co.jp`／`kabutan.jp`／報道各社（`nikkei.com`・`asia.nikkei.com`・`reuters.com`・`bloomberg.com`・`wsj.com`・`ft.com`・`cnbc.com`・`jiji.com`・`kyodonews.jp`・`toyokeizai.net`・`diamond.jp` 等）を1行ずつ。**grok 委譲を使う場合は `api.x.ai` を追加**。**「Also include default list of common package managers」に必ずチェック**（pip と Gmail API `*.googleapis.com` のため）。
    - Gmail API の `gmail.googleapis.com`・`oauth2.googleapis.com` は既定の `*.googleapis.com` に含まれ**追加不要**。
 4. **セットアップ・スクリプト（Setup script）**：クラウドの setup はリポジトリ外で走るため `-r requirements.txt` は使えない。パッケージ名を直接、PEP668 フォールバック付きで（クォートや `>=` は貼付で化けるので使わない）：
    ```bash
