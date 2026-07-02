@@ -50,7 +50,7 @@
      キャッシュ無効化付きで**最大5分ポーリング**し、確認後にメール HTML を **Gmail API（HTTPS）送信**（`gmail_sender.send_gmail`）。
      クラウド環境は SMTP(465) を通さないため **PTS 版と同じ Gmail API 方式**を用いる。必要な環境変数は
      `GMAIL_CLIENT_ID`／`GMAIL_CLIENT_SECRET`／`GMAIL_REFRESH_TOKEN`／`GMAIL_ADDRESS`／`NOTIFY_TO`
-     （リフレッシュトークンは `scripts/get_gmail_token.py` でローカル1回取得。SETUP.md 参照）。
+     （リフレッシュトークンは `scripts/get_gmail_token.py` でローカル1回取得。setup/SETUP.md 参照）。
    - **必ず step5 の push の後**に実行する。push 前にメールを送ると、読者がリンクを開いた時点で Pages が
      まだ前コミット（最新日付＝前営業日）を返し、当日分が見えない（=メールのリンク先ラグ）。`--notify` はその窓を閉じる。
    - ライブ確認の取得先は Pages ホスト（`*.github.io`）。ルーチンのカスタム環境の**ネット許可に `*.github.io` を含める**こと

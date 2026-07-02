@@ -16,7 +16,7 @@
 5. `docs/` を **main** に push（Pages 公開）
 
 ## セットアップ
-**[SETUP.md](SETUP.md)** に Step 0〜9 を詳述。ルーチンの貼り付け文面は **[ROUTINE_PROMPT.md](ROUTINE_PROMPT.md)**、ルーチン仕様は **[AGENTS.md](AGENTS.md)**。
+**[setup/SETUP.md](setup/SETUP.md)** に Step 0〜9 を詳述。ルーチンの貼り付け文面は **[setup/ROUTINE_PROMPT.md](setup/ROUTINE_PROMPT.md)**、ルーチン仕様は **[AGENTS.md](AGENTS.md)**。
 起動は **毎日 18:10 JST**（J-Quants の当日反映：四本値16:30・マスタ17:30・財務速報18:00 の後）。
 
 ## 免責

@@ -1,6 +1,6 @@
 # tse-ranking-monitor セットアップ手順
 
-東証 日中（レギュラー）値上がり率ランキングを**日次・無人**で生成し、**GitHub Pages（Web）＋ Gmail（API）**で配信するための手順。PTS 版 `pts-ranking-monitor` と**同じ構成・同じ Gmail 方式・Claude のスケジュール（ルーチン）機能**で運用する。方法論は `news-financial-market/skills/tse-ranking-digest/SKILL.md`、ルーチン仕様は本ディレクトリの `AGENTS.md`、貼り付けプロンプトは `ROUTINE_PROMPT.md`。
+東証 日中（レギュラー）値上がり率ランキングを**日次・無人**で生成し、**GitHub Pages（Web）＋ Gmail（API）**で配信するための手順。PTS 版 `pts-ranking-monitor` と**同じ構成・同じ Gmail 方式・Claude のスケジュール（ルーチン）機能**で運用する。方法論は `news-financial-market/skills/tse-ranking-digest/SKILL.md`、ルーチン仕様はリポジトリルートの `AGENTS.md`、貼り付けプロンプトは同じ `setup/` 内の `ROUTINE_PROMPT.md`。
 
 > 用意するもの：GitHub アカウント／Gmail アカウント＋ Google Cloud（無料・OAuth クライアント作成に使用）／J-Quants の **Light 以上**の API キー／Claude（Claude Code のルーチンが使えるアカウント）。
 >
@@ -25,12 +25,14 @@ mkdir -p grok && cp ../../skills/tse-ranking-digest/grok/grok_research_prompt.md
 ファイル構成（完成形）：
 ```
 tse-ranking-monitor/
-├── AGENTS.md                 # ルーチン仕様（方法論の真実源はスキル SKILL.md）
-├── ROUTINE_PROMPT.md         # スケジュール作成フォームに貼る本文
+├── README.md                 # 入口（概要・仕組み）
+├── AGENTS.md                 # ルーチン仕様（ルート・ルーチンが起動時に読む／真実源はスキル SKILL.md）
+├── requirements.txt
 ├── scripts/
 │   ├── build_day_ranking.py  # Stage1（決定的）※スキルからコピー
 │   ├── jquants.py / tdnet.py / business_day.py / kabutan_pts.py
 │   ├── market_cap_jquants.py / market_cap_yahoo.py
+│   ├── build_market_json.py  # 市場分析タブ用（test-jquants CSV＋ナラティブJSONを結合）
 │   ├── grok_research.py      # （任意）grok 委譲＝xAI Grok API リサーチ ※スキルからコピー
 │   ├── check_gate.py         # 営業日ゲート（SESSION=日付 / SKIP を出力）
 │   ├── publish.py            # フルデータ保存・manifest・index 書出し・送信の取りまとめ
@@ -38,8 +40,10 @@ tse-ranking-monitor/
 │   ├── gmail_sender.py       # Gmail API（HTTPS）送信（PTS と同方式）
 │   └── get_gmail_token.py    # ローカル1回：リフレッシュトークン取得
 ├── docs/                     # GitHub Pages（index.html・data/ は publish.py が生成）
-├── requirements.txt
-└── SETUP.md
+├── grok/                     # （任意）grok 委譲アセット（共有プロンプト雛形）
+└── setup/
+    ├── SETUP.md              # 本手順書
+    └── ROUTINE_PROMPT.md     # スケジュール作成フォームに貼る本文
 ```
 
 ---
@@ -141,7 +145,7 @@ git push -u origin main
    - **環境**：Step 7 の `tse-ranking-monitor`
    - **モデル**：**Sonnet 4.6**／**effort**：**max**
    - **スケジュール（cron）**：毎日 **18:10 JST**（タイムゾーン欄があれば Asia/Tokyo で `10 18 * * *`。UTC 指定なら `10 9 * * *` ＝ 09:10 UTC）
-   - **プロンプト**：`ROUTINE_PROMPT.md` の```で囲んだ本文をそのまま貼り付け。
+   - **プロンプト**：`setup/ROUTINE_PROMPT.md` の```で囲んだ本文をそのまま貼り付け。
 3. **Permissions タブ（フォーム最下部・リポジトリ追加後に出る）で「Allow unrestricted branch pushes」を ON**。これが無いとクラウドが `claude/` ブランチにしか push できず、Pages（main/docs）に反映されない。
 4. 保存。
 
