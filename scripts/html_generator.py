@@ -154,6 +154,7 @@ tbody tr:hover td{background:var(--hover);}
 .mkt{white-space:nowrap;}
 .num{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;}
 .pct{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--accent);font-weight:600;}
+.pct5{display:block;font-weight:400;font-size:11.5px;color:var(--sub);margin-top:1px;}
 .factor{font-size:12.5px;line-height:1.55;min-width:240px;}
 .kind{display:inline-block;font-size:10px;color:#fff;border-radius:3px;padding:1px 6px;margin-right:5px;white-space:nowrap;}
 .kind.k開示{background:#1b7f3b;} .kind.k報道{background:#1a6fd0;} .kind.kテーマ{background:#8a6d00;}
@@ -244,6 +245,7 @@ let data=null;
 let marketData=null;
 function fmtMcap(o,f){if(o==null)return '—';return o.toLocaleString('ja-JP')+(f||'');}
 function fmtPct(p){return p==null?'—':'+'+Number(p).toFixed(2)+'%';}
+function fmtPct5(p){return p==null?'':'('+(p>0?'+':'')+Number(p).toFixed(2)+'%)';}
 function fmtNum(x){return x==null?'—':Number(x).toLocaleString('ja-JP');}
 function fmtTurnover(t){return t==null?'—':Math.round(Number(t)).toLocaleString('ja-JP');}
 function fmtTurnoverOku(r){let v=(r.turnover_yen!=null)?Number(r.turnover_yen)/1e8:(r.turnover_m!=null?Number(r.turnover_m)/100:null);return v==null?'—':Math.round(v).toLocaleString('ja-JP');}
@@ -288,7 +290,7 @@ function render(){
   const c=data.criteria||{};
   document.getElementById('note').textContent=
     '抽出条件：値上がり率≥+'+(c.min_pct??5)+'% かつ 売買代金≥'+((c.min_turnover_yen??1e7)/1e6)+'百万円／東証個別株のみ・時価総額≥'+(c.min_mcap_oku??100)+'億円'+(c.max_rank?'・上昇率上位'+c.max_rank+'社':'')+'。時価総額は当日終値×発行済株式数（億円・四捨五入）。† は増資・自己株で株探最新株数と>1%乖離。';
-  let h='<table><thead><tr><th class="r">#</th><th>コード</th><th>銘柄</th><th>市場</th><th class="r">上昇率</th><th class="r">前日比<br>(円)</th><th class="r">終値<br>(円)</th><th class="r">売買代金<br>(億円)</th><th>変動要因</th></tr></thead><tbody>';
+  let h='<table><thead><tr><th class="r">#</th><th>コード</th><th>銘柄</th><th>市場</th><th class="r">前日比%<br>(5営業日)</th><th class="r">前日比<br>(円)</th><th class="r">終値<br>(円)</th><th class="r">売買代金<br>(億円)</th><th>変動要因</th></tr></thead><tbody>';
   rows.forEach(r=>{
     let factor=esc(r.factor||'（材料未確認）');
     const fk=(r.factor_kind||'').replace(/[\[\]]/g,'');
@@ -299,7 +301,7 @@ function render(){
       '<td class="code rankcode" data-rank="'+(r.rank||'')+'"><a href="https://kabutan.jp/stock/?code='+esc(code)+'" target="_blank">'+esc(code)+'</a></td>'+
       '<td class="name" data-code="'+esc(code)+'">'+esc(r.name)+'<span class="code-inline">（'+esc(code)+'）</span><span class="mcap">'+fmtMcapCell(r.mcap_oku,r.mcap_flag)+'</span></td>'+
       '<td class="mkt">'+esc(fmtMarket(r.market))+'</td>'+
-      '<td class="pct" data-label="上昇率">'+fmtPct(r.pct)+'</td>'+
+      '<td class="pct" data-label="前日比%(5営業日)">'+fmtPct(r.pct)+(r.pct5!=null?'<span class="pct5">'+fmtPct5(r.pct5)+'</span>':'')+'</td>'+
       '<td class="num" data-label="前日比(円)">'+fmtSigned(changeYen(r))+'</td>'+
       '<td class="num" data-label="終値(円)">'+fmtNum(r.close)+'</td>'+
       '<td class="num" data-label="売買代金(億円)">'+fmtTurnoverOku(r)+'</td>'+
@@ -316,14 +318,14 @@ function render(){
   let dh='';
   const dt=data.dropped_turnover||[];
   if(dt.length){
-    dh+='<details class="dropped card" style="padding:0 14px 10px;"><summary>参考：値上がり率≥+'+pctMin+'% だが売買代金&lt;'+tmM+'百万円 で除外（薄商い '+dt.length+'件）</summary><table><thead><tr><th>コード</th><th>銘柄</th><th class="r">上昇率</th><th class="r">売買代金<br>(百万円)</th></tr></thead><tbody>';
-    dt.forEach(r=>{dh+='<tr><td class="code">'+esc(fmtCode(r.code))+'</td><td class="name">'+esc(r.name)+'</td><td class="pct" data-label="上昇率">'+fmtPct(r.pct)+'</td><td class="num" data-label="売買代金(百万円)">'+fmtTurnover(r.turnover_m)+'</td></tr>';});
+    dh+='<details class="dropped card" style="padding:0 14px 10px;"><summary>参考：値上がり率≥+'+pctMin+'% だが売買代金&lt;'+tmM+'百万円 で除外（薄商い '+dt.length+'件）</summary><table><thead><tr><th>コード</th><th>銘柄</th><th class="r">前日比%<br>(5営業日)</th><th class="r">売買代金<br>(百万円)</th></tr></thead><tbody>';
+    dt.forEach(r=>{dh+='<tr><td class="code">'+esc(fmtCode(r.code))+'</td><td class="name">'+esc(r.name)+'</td><td class="pct" data-label="前日比%(5営業日)">'+fmtPct(r.pct)+(r.pct5!=null?'<span class="pct5">'+fmtPct5(r.pct5)+'</span>':'')+'</td><td class="num" data-label="売買代金(百万円)">'+fmtTurnover(r.turnover_m)+'</td></tr>';});
     dh+='</tbody></table></details>';
   }
   const dm=data.dropped_mcap||[];
   if(dm.length){
-    dh+='<details class="dropped card" style="padding:0 14px 10px;margin-top:12px;"><summary>参考：値上がり率・売買代金は満たすが時価総額&lt;'+mcO+'億円 で除外（'+dm.length+'件）</summary><table><thead><tr><th>コード</th><th>銘柄</th><th class="r">上昇率</th><th class="r">時価総額<br>(億円)</th></tr></thead><tbody>';
-    dm.forEach(r=>{dh+='<tr><td class="code">'+esc(fmtCode(r.code))+'</td><td class="name">'+esc(r.name)+'</td><td class="pct" data-label="上昇率">'+fmtPct(r.pct)+'</td><td class="num" data-label="時価総額(億円)">'+fmtMcap(r.mcap_oku)+'</td></tr>';});
+    dh+='<details class="dropped card" style="padding:0 14px 10px;margin-top:12px;"><summary>参考：値上がり率・売買代金は満たすが時価総額&lt;'+mcO+'億円 で除外（'+dm.length+'件）</summary><table><thead><tr><th>コード</th><th>銘柄</th><th class="r">前日比%<br>(5営業日)</th><th class="r">時価総額<br>(億円)</th></tr></thead><tbody>';
+    dm.forEach(r=>{dh+='<tr><td class="code">'+esc(fmtCode(r.code))+'</td><td class="name">'+esc(r.name)+'</td><td class="pct" data-label="前日比%(5営業日)">'+fmtPct(r.pct)+(r.pct5!=null?'<span class="pct5">'+fmtPct5(r.pct5)+'</span>':'')+'</td><td class="num" data-label="時価総額(億円)">'+fmtMcap(r.mcap_oku)+'</td></tr>';});
     dh+='</tbody></table></details>';
   }
   document.getElementById('droppedArea').innerHTML=dh;

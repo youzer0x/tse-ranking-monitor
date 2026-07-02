@@ -35,6 +35,14 @@ def prev_business_day(d):
     return x
 
 
+def nth_prev_business_day(d, n):
+    """d から数えて n 営業日前（n>=1）。"""
+    x = d
+    for _ in range(n):
+        x = prev_business_day(x)
+    return x
+
+
 def tse_session_date_for(run_day):
     """当日 run_day の夕方に報告すべき東証日中セッション日（= run_day が営業日ならその日）。
 

@@ -87,12 +87,14 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
     session_d = date.fromisoformat(session_iso)
     prev_d = date.fromisoformat(prev_iso)
 
-    # 1) J-Quants 一括（master / bars 当日・前営業日）
-    log(f"# J-Quants master/bars: session={session_iso} prev={prev_iso} ...")
+    # 1) J-Quants 一括（master / bars 当日・前営業日・5営業日前）
+    prev5_iso = business_day.nth_prev_business_day(session_d, 5).isoformat()
+    log(f"# J-Quants master/bars: session={session_iso} prev={prev_iso} prev5={prev5_iso} ...")
     master = jquants.master_by_date(session_iso)
     bars_now = jquants.bars_by_date(session_iso)
     bars_prev = jquants.bars_by_date(prev_iso)
-    log(f"# master={len(master)} bars_now={len(bars_now)} bars_prev={len(bars_prev)}")
+    bars_prev5 = jquants.bars_by_date(prev5_iso)
+    log(f"# master={len(master)} bars_now={len(bars_now)} bars_prev={len(bars_prev)} bars_prev5={len(bars_prev5)}")
 
     # 当日 AdjC を時価総額モジュールのキャッシュに流し込む（bars/daily の再取得を避ける）
     prices = {c: b["AdjC"] for c, b in bars_now.items() if b.get("AdjC") is not None}
@@ -114,25 +116,29 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
         pct = (adjC / adjCp - 1.0) * 100.0
         if pct < min_pct:
             continue
-        cand.append((c5, b, m, pct))
+        # 直近5営業日騰落率（5営業日前比）＝当日 AdjC ÷ 5営業日前 AdjC − 1。5営業日前値が無ければ None。
+        b5 = bars_prev5.get(c5)
+        adjC5 = b5.get("AdjC") if b5 else None
+        pct5 = round((adjC / adjC5 - 1.0) * 100.0, 2) if (adjC and adjC5) else None
+        cand.append((c5, b, m, pct, pct5))
     # 値上がり率の高い順。同率は売買代金の大きい順（上限 max_rank の境界を決定的にする）
     cand.sort(key=lambda x: (-x[3], -(x[1].get("Va") or 0)))
     log(f"# candidates(>= +{min_pct}%, TSE individual, prev-close 有)={len(cand)}")
 
     # 3) 売買代金 → 時価総額 の順でフィルタ（候補のみ・少数なので per-code 呼び出しで十分）
     qualifying, dropped_turnover, dropped_mcap = [], [], []
-    for c5, b, m, pct in cand:
+    for c5, b, m, pct, pct5 in cand:
         c4 = jquants.code4(c5)
         name = jquants.normalize_company_name(m.get("CoName"))
         va = b.get("Va")
         if va is None or va < min_turnover:
-            dropped_turnover.append({"code": c4, "name": name, "pct": round(pct, 2),
+            dropped_turnover.append({"code": c4, "name": name, "pct": round(pct, 2), "pct5": pct5,
                                      "turnover_m": (round(va / 1e6, 1) if va else 0.0)})
             continue
         mc, shoutfy, period_end, corr, source = mcap.compute_one(api_key, c4, prices, session_d)
         time.sleep(0.1)
         if mc is None or mc < min_mcap:
-            dropped_mcap.append({"code": c4, "name": name, "pct": round(pct, 2),
+            dropped_mcap.append({"code": c4, "name": name, "pct": round(pct, 2), "pct5": pct5,
                                  "turnover_m": round(va / 1e6, 1),
                                  "mcap_oku": (round(mc) if mc is not None else None),
                                  "mcap_source": source})
@@ -143,7 +149,7 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
             sec33=m.get("S33"), sec33_name=m.get("S33Nm"),
             scale_cat=m.get("ScaleCat"),
             mcap_oku=round(mc), mcap_oku_exact=mc, mcap_flag="", mcap_source=source,
-            pct=round(pct, 2), close=b.get("C"), adj_close=b.get("AdjC"),
+            pct=round(pct, 2), pct5=pct5, close=b.get("C"), adj_close=b.get("AdjC"),
             prev_adj_close=(bars_prev.get(c5) or {}).get("AdjC"),
             turnover_yen=round(va), turnover_m=round(va / 1e6, 1),
             shoutfy_jq=shoutfy, period_end=(period_end.isoformat() if period_end else None),
@@ -205,6 +211,7 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
     return {
         "session_date": session_iso,
         "prev_date": prev_iso,
+        "prev5_date": prev5_iso,
         "session_window": f"{session_iso} 09:00–15:30 JST（前場9:00-11:30／後場12:30-15:30）",
         "generated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M JST"),
         "criteria": {"min_pct": min_pct, "min_turnover_yen": min_turnover, "min_mcap_oku": min_mcap,
