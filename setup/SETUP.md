@@ -36,7 +36,8 @@ tse-ranking-monitor/
 │   ├── build_market_json.py  # 市場分析タブ step3.5-(c)：CSV＋stats＋ナラティブJSONを結合
 │   ├── market_fragment_defaults.json # 市場分析の静的テンプレ（title/universe/methodology/disclaimer）
 │   ├── grok_research.py      # （任意）grok 委譲＝xAI Grok API リサーチ ※スキルからコピー
-│   ├── check_gate.py         # 営業日ゲート（SESSION=日付 / SKIP を出力）
+│   ├── wait_for_data.py      # ルーチンstep1：営業日ゲート＋当日四本値の鮮度ガード（SESSION=日付 / SKIP / TIMEOUT）
+│   ├── check_gate.py         # 純・営業日ゲート（SESSION=日付 / SKIP）※手動確認/フォールバック用に残置
 │   ├── publish.py            # フルデータ保存・manifest・index 書出し・送信の取りまとめ
 │   ├── html_generator.py     # Pages SPA／メール HTML 生成（PTS と同一トンマナ・配色）
 │   ├── gmail_sender.py       # Gmail API（HTTPS）送信（PTS と同方式）
@@ -146,23 +147,23 @@ git push -u origin main
    - **リポジトリ**：`tse-ranking-monitor`
    - **環境**：Step 7 の `tse-ranking-monitor`
    - **モデル**：**Sonnet 4.6**／**effort**：**max**
-   - **スケジュール（cron）**：毎日 **18:10 JST**（タイムゾーン欄があれば Asia/Tokyo で `10 18 * * *`。UTC 指定なら `10 9 * * *` ＝ 09:10 UTC）
+   - **スケジュール（cron）**：毎日 **16:35 JST**（タイムゾーン欄があれば Asia/Tokyo で `35 16 * * *`。UTC 指定なら `35 7 * * *` ＝ 07:35 UTC）
    - **プロンプト**：`setup/ROUTINE_PROMPT.md` の```で囲んだ本文をそのまま貼り付け。
 3. **Permissions タブ（フォーム最下部・リポジトリ追加後に出る）で「Allow unrestricted branch pushes」を ON**。これが無いとクラウドが `claude/` ブランチにしか push できず、Pages（main/docs）に反映されない。
 4. 保存。
 
-> **18:10 JST の根拠**：J-Quants は当日の四本値を約16:30、銘柄マスタ（市場区分）を約17:30、財務速報を約18:00 に反映する。マスタ反映後に余裕をもって起動する（PTS 版は前営業日ゲート・朝06:06 で対象セッションが異なる）。
+> **16:35 JST の根拠**：核ランキングの唯一の必須依存は当日の四本値（J-Quants 公式反映「約16:30」・実際は前後）。銘柄マスタは当日分を日中取得可（約17:30 は"翌営業日"マスタの制約で非ボトルネック）、時価総額は前期末確定株数で足り財務速報（約18:00）は不使用。そこで 16:35 に起動し、`wait_for_data.py` が当日四本値の確定をポーリングで待ってから続行する（通常は16:30台に確定→即実行、遅延日のみ待機）。打ち切りは 18:10 JST 壁時計で、旧起動時刻より遅くならず「現行が配信できた日を取りこぼさない」ことを保証する。締切までに未到達なら配信せず障害報告（`build_day_ranking.py` に空/部分データの自己防御が無いためのフェイルセーフ）。PTS 版は前営業日ゲート・朝06:06 で対象セッションが異なる。
 
 ## Step 9：初回テスト
 
-1. ルーチンの「今すぐ実行 / Run now」で手動実行（**当日が東証営業日**なら最新セッションで動く。休場日は `check_gate.py` が `SKIP` を返して何もせず終了）。
+1. ルーチンの「今すぐ実行 / Run now」で手動実行（**当日が東証営業日**なら最新セッションで動く。休場日は `wait_for_data.py` が `SKIP` を返して何もせず終了。営業日で当日四本値が未反映の間は確定を待って続行、締切までに未到達なら `TIMEOUT` で配信せず終了）。
 2. 実行ログにエラーが無いことを確認。
 3. 確認：
    - Web：`https://<あなた>.github.io/tse-ranking-monitor/` に当日ランキング（該当が50社超なら**上位50社**）と変動要因、サマリ「該当M社（上位50社を掲載）」が出る。
    - メール：`NOTIFY_TO` 宛に「[東証日中ランキング] YYYY-MM-DD｜…社該当（・上位50社）」が届く。
    - リポジトリ：`docs/data/` に新しい `YYYY-MM-DD.json`（`count_total`／`count`／`capped` 入り）が追加され、**main** に push されている。
 
-以上で日次自動が稼働する。以後 毎日 18:10 JST に自動生成（休場日はスキップ）。
+以上で日次自動が稼働する。以後 毎日 16:35 JST に自動生成（休場日はスキップ・当日四本値の確定を待って続行）。
 
 ---
 
@@ -184,7 +185,7 @@ python scripts/publish.py --in docs/tmp/ranking.json --docs docs --pages-url "$P
 | 症状 | 対処 |
 |------|------|
 | 時価総額が「—」 | `JQUANTS_API_KEY` 未設定／Light 未満（Free は当日値なし）。新規上場は Yahoo 側も失敗時に発生 |
-| 当日データが空 | 18:10 より前に実行していないか（四本値16:30・マスタ17:30 反映後に起動）。休場日でないか（`check_gate.py` が `SKIP`） |
+| 当日データが空 / `TIMEOUT` | `wait_for_data.py` が当日四本値の確定を待つ（通常16:30台に確定・遅延日は待機）。`TIMEOUT`＝締切 18:10 JST までに四本値が未到達＝J-Quants の遅延/障害を疑う（この場合は生成・配信しない）。休場日は `SKIP` |
 | メール不達 | Gmail API の3変数（CLIENT_ID/SECRET/REFRESH_TOKEN）と `GMAIL_ADDRESS` を確認。**OAuth 同意画面を本番公開**したか（テストだと7日で失効） |
 | メールのリンク先が前営業日のまま | `--notify`（step6）を**必ず push の後**に実行しているか／ネット許可に `github.io` が入っているか確認。`--notify` が Pages 反映を待ってから送る。旧 `--send`（push 前送信）を使っていないか |
 | Pages が `claude/...` に出て未反映 | ルーチンの「Allow unrestricted branch pushes」ON＋プロンプトの `git push origin HEAD:main` を確認 |

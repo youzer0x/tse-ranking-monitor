@@ -10,8 +10,13 @@
 origin: pts-ranking-digest/scripts/jquants.py（時価総額関数は本 skill では未使用のため割愛）。stdlib のみ（urllib）。
 """
 import os, json, time, urllib.request, urllib.error, urllib.parse
+from datetime import date, timedelta
 
 API = "https://api.jquants.com/v2"
+
+# データ鮮度プローブ用の参照銘柄と探索窓（build_market_stats.py の resolve_prev_day と同値）。
+PROBE_CODE = "72030"   # トヨタ自動車（プライム大型・毎営業日必ず出来高がある基準銘柄）
+WINDOW_DAYS = 12       # 四本値を遡って探す暦日数（連休を跨いでも直近営業日に届く）
 
 
 def _key():
@@ -100,6 +105,24 @@ def master_by_date(target_iso):
 
 def bars_by_date(target_iso):
     return {r["Code"]: r for r in get("/equities/bars/daily", {"date": target_iso})}
+
+
+def last_confirmed_session(target_iso, probe_code=PROBE_CODE, window_days=WINDOW_DAYS):
+    """プローブ銘柄の四本値から、target_iso 以前で「当日終値 C が確定している」最新営業日を返す。
+
+    - 当日 target_iso の四本値が確定していれば target_iso を返す（＝当日データ到達の判定に使う）。
+    - まだ当日が未確定なら直近確定営業日（< target_iso）を返す。
+    - window_days 内に1日も確定が無ければ None。
+
+    build_market_stats.resolve_prev_day のプローブ核（days=sorted({Date | C is not None}) の最大）を
+    共有関数化したもの。単一銘柄の bars/daily を範囲取得するだけの安価な呼び出し。
+    """
+    t = date.fromisoformat(target_iso)
+    frm = (t - timedelta(days=window_days)).isoformat()
+    rows = get("/equities/bars/daily", {"code": probe_code, "from": frm, "to": target_iso})
+    days = sorted({r["Date"] for r in rows if r.get("C") is not None})
+    days = [d for d in days if d <= target_iso]
+    return days[-1] if days else None
 
 
 def is_tse_individual(m):

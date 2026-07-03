@@ -7,7 +7,7 @@
   },
   "methodology": {
     "lines": [
-      "**データ** ▶ [J-Quants API V2](https://jpx-jquants.com/)（Lightプラン）。エンドポイント= /equities/bars/daily（四本値）／/equities/master（業種・区分）／/indices/bars/daily/topix（TOPIX）／/fins/summary（当日決算開示）。取得・集計は本リポジトリの build_market_stats.py（sector_analysis.py 移植版・決定的）。",
+      "**データ** ▶ [J-Quants API V2](https://jpx-jquants.com/)（Lightプラン）。エンドポイント= /equities/bars/daily（四本値）／/equities/master（業種・区分）／/indices/bars/daily/topix（TOPIX）。取得・集計は本リポジトリの build_market_stats.py（sector_analysis.py 移植版・決定的）。",
       "**対象** ▶ 東証プライム/スタンダード/グロースの内国普通株（ProdCat=011・Mkt∈{0111,0112,0113}・コード末尾0）。",
       "**流動性フィルタ** ▶ 当日売買代金1億円以上（薄商いの小型・低位株による騰落率上位の歪みを排除）＝ {n_liquid}銘柄。",
       "**騰落率** ▶ 調整済み終値(AdjC)ベースの前日比。セクター代表値は**売買代金加重平均**を主に、単純平均・中央値・騰落銘柄数を併記。"

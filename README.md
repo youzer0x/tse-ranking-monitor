@@ -9,7 +9,7 @@
 - **掲載上限＝値上がり率上位50社**（該当が50社超なら上位50社のみ掲載）
 
 ## 仕組み
-1. `scripts/check_gate.py` … 当日が東証営業日かを判定（休場ならスキップ）
+1. `scripts/wait_for_data.py` … 当日が東証営業日かを判定（休場ならスキップ）し、当日四本値が J-Quants に反映されるまで待つ鮮度ガード（未反映のまま締切なら配信しない）。※`scripts/check_gate.py` は純・ネット無しの営業日判定として手動確認/フォールバック用に残置
 2. `scripts/build_day_ranking.py` … J-Quants V2 で決定的にスクリーニング（Stage1）。TDnet 開示（前営業日15:30以降∪当日15:30未満）と株探†を結合
 3. Claude が各銘柄の変動要因（[開示]→[報道]→[テーマ]）を一次情報で裏取り（Stage2）
 4. `scripts/publish.py` … `docs/`（Pages JSON/SPA）更新＋ `scripts/gmail_sender.py` で Gmail API 送信
@@ -17,7 +17,7 @@
 
 ## セットアップ
 **[setup/SETUP.md](setup/SETUP.md)** に Step 0〜9 を詳述。ルーチンの貼り付け文面は **[setup/ROUTINE_PROMPT.md](setup/ROUTINE_PROMPT.md)**、ルーチン仕様は **[AGENTS.md](AGENTS.md)**。
-起動は **毎日 18:10 JST**（J-Quants の当日反映：四本値16:30・マスタ17:30・財務速報18:00 の後）。
+起動は **毎日 16:35 JST**（`scripts/wait_for_data.py` が当日四本値〔J-Quants 公式反映「16:30頃」〕の確定をポーリングで待つ鮮度ガード付き。通常は16:30台に確定→即実行、遅延日のみ待機し、打ち切りは 18:10 JST 壁時計で「現状より遅くしない」を保証）。核ランキングの必須依存は四本値のみで、マスタ17:30・財務速報18:00 は使わない。
 
 ## 免責
 本情報は参考であり投資助言ではない。投資判断は利用者自身が最新の一次情報を確認のうえ行うこと。

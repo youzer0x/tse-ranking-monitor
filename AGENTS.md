@@ -10,13 +10,13 @@
 
 ## 起動とゲート
 
-- **cron：当日 18:10 JST**（J-Quants が当日の四本値 16:30・銘柄マスタ 17:30・財務速報 18:00 を反映済み。`reference-jquants-data-update-timing`）。
-- **営業日ゲート**：`business_day.is_business_day(today)` が真のときのみ実行（休場日はスキップ）。
+- **cron：当日 16:35 JST**（`scripts/wait_for_data.py` が当日四本値の反映を待つ適応型ゲート）。核ランキングの**唯一の必須依存は当日 `/equities/bars/daily`（四本値・公式反映「16:30頃」・実際は前後）**。`/equities/master` は当日分を日中取得可（17:30 制約は"翌営業日"マスタで非ボトルネック）、時価総額の `/fins/summary` は前期末確定株数で足り、財務速報 18:00 は配信物に不使用。打ち切りは 18:10 JST 壁時計で「現状より遅くしない／現行が配信できた日を取りこぼさない」を保証。`reference-jquants-data-update-timing`。
+- **営業日ゲート＋鮮度ガード**：`wait_for_data.py` が休場日を即 `SKIP`（ネット無し）、営業日は当日四本値が確定するまで待って `SESSION=` を出す。締切までに未到達なら `TIMEOUT`＝**配信しない**（`build_day_ranking.py` に空/部分データの自己防御が無いためのフェイルセーフ）。
 - 使用モデル：Sonnet 4.6・effort=max（PTS ルーチンに合わせる）。
 
 ## フロー
 
-1. **ゲート**：`python scripts/check_gate.py` を実行。`SKIP`（休場）なら Pages もメールも更新せず即終了。`SESSION=YYYY-MM-DD` ならその日付を SESSION として続行。
+1. **ゲート（鮮度ガード付き）**：`python scripts/wait_for_data.py` を実行。`SKIP`（休場）なら Pages もメールも更新せず即終了。`SESSION=YYYY-MM-DD`（当日四本値の確定を待って出力。**呼び出しは待機で数分ブロックしうる＝正常**）ならその日付を SESSION として続行。`TIMEOUT`（締切 18:10 JST までに当日四本値が未到達）なら**生成・配信せず**、J-Quants の遅延/障害として最終報告する。準完全で続行した場合は stderr の `WARN` を最終報告に含める。
 2. **Stage1（決定的）**：`build_day_ranking.py --date <today> --kabutan-news --out ranking.json` を実行（`JQUANTS_API_KEY` 必須）。
    - 抽出条件：東証個別株のみ／値上がり率≥+5%／売買代金≥¥10M／時価総額≥100億。`rows`/`dropped_turnover`/`dropped_mcap` を得る。
    - **掲載上限＝値上がり率上位50社**（該当が50社超なら上位50社のみ `rows` に入る。`--max-rank` 既定50）。`counts.qualifying`＝該当総数、`counts.ranked`＝掲載数。
@@ -39,7 +39,7 @@
    - **セクター連動クロスチェック（必須）**：各 row の `sector_cluster`／トップレベル `theme_clusters` を読み、同一33業種で束で動いた銘柄は、クラスタ内で具体的[開示]を持つ銘柄（`has_disclosure=true`。`leader_code` は機械的ヒントなので開示内容を読んで真の牽引役を選び直す）を名指しで根拠化し `[テーマ]`（連鎖）として帰属する。業種をまたぐテーマ（例：光部品＝非鉄金属〔電線〕＋電気機器〔光部品〕＋精密機器）は各クラスタの leader と地合いから横断的に結ぶ。**同一テーマの co-mover を材料未確認で放置しない**。連鎖／継続（決算後ドリフト）／需給（前日反動・薄商い）の別は本文で書き分ける（区分は3タグ維持）。
    - **材料未確認ゲート**：「材料未確認」は (i)`disclosures` (ii)`kabutan_news`（株探材料/レーティング） (iii)Web 検索 `<コード> <銘柄名> 急騰/ストップ高` (iv)`sector_cluster` の leader 連動 (v)（M&A観・出来高急増の小型株は）EDINET の TOB/大量保有 を**すべて確認**してもなお当日窓に材料が無い行にのみ残す。**ペイウォールで本文が取れないだけで即材料未確認にしない**（他の①②媒体で二次裏取り→当日テーマへの帰属が成れば [テーマ]）。
    - **EDINET（任意・環境依存）**：EDINET DB MCP が利用可能な環境では、買収観・大量保有が疑われる行で TOB（公開買付届出）・大量保有報告書を一次情報として確認する。MCP が無い環境では本パスは任意で、既存パスへフォールスルーする（**ハードな依存にしない**）。
-3.5. **市場分析タブのデータ生成（best-effort・ランキング配信をブロックしない）**：ランキングと**同一の push** に載せるため Publish（step4）の前に生成する。手順の詳細は §「市場分析タブ（日次自動生成）」に従う。要点のみ：
+3.5. **市場分析タブのデータ生成（best-effort・ランキング配信をブロックしない）**：ランキングと**同一の push** に載せるため Publish（step4）の前に生成する。16:35 起動では当日 `/fins/summary`（速報~18:00頃）は未反映だが、**市場分析タブに表示されるのは bars/master/topix 由来の要素のみ**（セクター騰落・breadth・TOPIX・movers 表・乖離フラグ）で、当日決算開示は配信物に出ないため影響しない。手順の詳細は §「市場分析タブ（日次自動生成）」に従う。要点のみ：
    - **(a) 決定的データ**：`python scripts/build_market_stats.py --date <SESSION> --out-dir docs/tmp/market`。`docs/tmp/market/` に `sector_return_<SESSION>.csv`・`movers_top_<SESSION>.csv`（sector_analysis.py 移植版）と `market_stats_<SESSION>.json`（TOPIX 前日比・breadth・最大代金セクター/銘柄〔全ユニバース真値〕・**⚠乖離フラグ候補 `divergence_flags`**・movers の TDnet 開示文脈 `movers_context`）を出力。
    - **(b) ナラティブ・フラグメント執筆**：`docs/tmp/market/narrative_<SESSION>.json`（**コミットしない**）を §「市場分析フラグメント執筆」の品質要件で執筆する。
    - **(c) 結合**：`python scripts/build_market_json.py --date <SESSION> --csv-dir docs/tmp/market --stats docs/tmp/market/market_stats_<SESSION>.json --defaults scripts/market_fragment_defaults.json --narrative docs/tmp/market/narrative_<SESSION>.json --out docs/data/<SESSION>_market.json`。バリデーション die はフラグメントを直して**最大2回**再実行。
