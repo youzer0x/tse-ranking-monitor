@@ -120,11 +120,81 @@ def check_links(links, ctx):
         check_url(lk.get("url"), ctx)
 
 
+def load_json(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _oku_jp(oku):
+    """億円 → 表示文字列。1兆（10,000億）以上は「約X.X兆円」。"""
+    if oku is None:
+        return "-"
+    if oku >= 10000:
+        return "約%.1f兆円" % (oku / 10000.0)
+    return "%s億円" % format(int(round(oku)), ",")
+
+
+def fill_snapshot_row(row, stats):
+    """overview.snapshot の "auto" 行を stats から機械生成する（数値手書きの排除）。
+
+    フラグメントが label/value を明示していればそれを優先（auto は欠けた欄のみ補完）。
+    """
+    kind = row.get("auto")
+    if not kind:
+        return row
+    label = row.get("label")
+    value = row.get("value")
+    if kind == "topix":
+        tp = stats.get("topix_pct")
+        cl = stats.get("topix_close")
+        label = label or "TOPIX（終値ベース）"
+        if value is None:
+            value = ("%+.2f%%" % tp) if tp is not None else "取得不可"
+            if tp is not None and cl is not None:
+                value += " %s" % format(cl, ",")
+    elif kind == "breadth":
+        b = stats.get("breadth") or {}
+        label = label or "値上がり / 値下がり / 変わらず"
+        if value is None:
+            value = "%s / %s / %s" % (
+                format(b.get("up", 0), ","), format(b.get("down", 0), ","),
+                format(b.get("flat", 0), ","))
+    elif kind == "top_sector":
+        ts = stats.get("top_sector_by_turnover") or {}
+        label = label or "最大売買代金セクター"
+        if value is None:
+            value = "%s %s" % (ts.get("name", ""), _oku_jp(ts.get("turnover_oku")))
+    elif kind == "top_stock":
+        ts = stats.get("top_stock_by_turnover") or {}
+        label = label or "最大売買代金銘柄"
+        if value is None:
+            value = "%s %s" % (ts.get("name", ""), _oku_jp(ts.get("turnover_oku")))
+    else:
+        die("overview.snapshot の auto 種別が不正: %r" % kind)
+    # 出力キー順は {label, value, note, ...} で固定（既存スキーマに整合）
+    out = {"label": label, "value": value}
+    for k, v in row.items():
+        if k not in ("auto", "label", "value"):
+            out[k] = v
+    return out
+
+
+def top_stock_out(ts):
+    """market.json の top_stock_by_turnover は {code,name,turnover_oku} で固定（既存スキーマ）。"""
+    if not ts:
+        return None
+    return {"code": ts.get("code"), "name": ts.get("name"), "turnover_oku": ts.get("turnover_oku")}
+
+
 def main():
     ap = argparse.ArgumentParser(description="市場分析 Web 配信用 JSON を組み立てる")
     ap.add_argument("--date", required=True, help="セッション日 YYYY-MM-DD")
-    ap.add_argument("--csv-dir", required=True, help="test-jquants の output ディレクトリ")
+    ap.add_argument("--csv-dir", required=True, help="sector_return/movers_top CSV のディレクトリ")
     ap.add_argument("--narrative", required=True, help="ナラティブ・フラグメント JSON")
+    ap.add_argument("--stats", default=None,
+                    help="build_market_stats.py の market_stats JSON（CSV外の決定的数値）")
+    ap.add_argument("--defaults", default=None,
+                    help="静的テンプレ（title/universe/methodology/disclaimer）JSON")
     ap.add_argument("--out", required=True, help="出力先 <date>_market.json")
     args = ap.parse_args()
 
@@ -138,8 +208,17 @@ def main():
 
     movers = read_movers_csv(movers_path)
 
-    with open(args.narrative, "r", encoding="utf-8") as f:
-        frag = json.load(f)
+    frag = load_json(args.narrative)
+    # 静的テンプレ（defaults）を土台に、フラグメントで上書き（浅いマージ）。
+    if args.defaults:
+        base = load_json(args.defaults)
+        base.update(frag)
+        frag = base
+
+    stats = load_json(args.stats) if args.stats else None
+    if stats:
+        require(stats.get("session_date") == date,
+                "stats の session_date(%s) が --date(%s) と不一致" % (stats.get("session_date"), date))
 
     if frag.get("session_date"):
         require(frag["session_date"] == date,
@@ -154,9 +233,34 @@ def main():
             "騰落数合計(%d) と 銘柄数合計(%d) が不一致" % (up + down + flat, n_liquid))
 
     top_sector = max(sectors, key=lambda s: (s["turnover_oku"] or 0))
-    # 最大売買代金銘柄は movers（値上がり＋値下がり）の中の最大で近似する（手動反映範囲）。
+    # 最大売買代金銘柄は movers（値上がり＋値下がり）の中の最大で近似する（--stats 無しの手動範囲）。
     all_movers = list(movers["値上がり"].values()) + list(movers["値下がり"].values())
     top_stock = max(all_movers, key=lambda m: (m["turnover_oku"] or 0)) if all_movers else None
+
+    # ── stats（build_market_stats.py）との整合チェック＋決定的数値の採用
+    topix_pct = frag.get("topix_pct")
+    prev_date = frag.get("prev_date")
+    generated_at = frag.get("generated_at")
+    sources_accessed = frag.get("sources_accessed", "")
+    if stats:
+        sb = stats.get("breadth") or {}
+        require(sb.get("up") == up and sb.get("down") == down and sb.get("flat") == flat,
+                "stats.breadth(%s) が CSV 集計(%d-%d-%d) と不一致" % (sb, up, down, flat))
+        su = (stats.get("universe") or {}).get("n_liquid")
+        require(su is None or su == n_liquid,
+                "stats.universe.n_liquid(%s) が CSV 集計(%d) と不一致" % (su, n_liquid))
+        if stats.get("top_stock_by_turnover"):
+            top_stock = stats["top_stock_by_turnover"]  # 全ユニバース真値（movers 近似より優先）
+        s_topix = stats.get("topix_pct")
+        if s_topix is not None and topix_pct is not None and abs(s_topix - topix_pct) > 0.01:
+            die("topix_pct が stats(%.2f) と フラグメント(%.2f) で不一致（古いフラグメント？）"
+                % (s_topix, topix_pct))
+        if s_topix is not None:
+            topix_pct = s_topix
+        prev_date = stats.get("prev_date") or prev_date
+        generated_at = stats.get("generated_at") or generated_at
+    if not sources_accessed and generated_at:
+        sources_accessed = generated_at[:10]
 
     # ── strip：フラグメントはセクター名のみ、pct を join
     def strip_side(names):
@@ -239,40 +343,51 @@ def main():
     for ns in (frag.get("news_sources") or []):
         check_links(ns.get("links"), "news_sources %s" % ns.get("topic"))
 
+    # ── overview.snapshot の auto 行を stats から機械生成（{n_liquid} も置換）
+    def sub_n(s):
+        return s.replace("{n_liquid}", format(n_liquid, ",")) if isinstance(s, str) else s
+
+    overview = frag.get("overview") or {}
+    if stats and isinstance(overview.get("snapshot"), list):
+        overview = dict(overview)
+        overview["snapshot"] = [fill_snapshot_row(r, stats) for r in overview["snapshot"]]
+
+    methodology = frag.get("methodology") or {}
+    if isinstance(methodology.get("lines"), list):
+        methodology = dict(methodology)
+        methodology["lines"] = [sub_n(ln) for ln in methodology["lines"]]
+
     universe = frag.get("universe") or {}
     out = {
         "schema_version": SCHEMA_VERSION,
         "kind": "market_analysis",
         "session_date": date,
-        "prev_date": frag.get("prev_date"),
-        "generated_at": frag.get("generated_at"),
+        "prev_date": prev_date,
+        "generated_at": generated_at,
         "title": frag.get("title", "東京株式市場 セクター/テーマ 騰落率分析"),
         "universe": {
-            "description": universe.get("description", ""),
+            "description": sub_n(universe.get("description", "")),
             "min_turnover_yen": universe.get("min_turnover_yen", 100000000),
             "n_liquid": n_liquid,
         },
         "market": {
-            "topix_pct": frag.get("topix_pct"),
+            "topix_pct": topix_pct,
             "breadth": {"up": up, "down": down, "flat": flat},
             "top_sector_by_turnover": {"name": top_sector["name"], "turnover_oku": top_sector["turnover_oku"]},
-            "top_stock_by_turnover": (
-                {"code": top_stock["code"], "name": top_stock["name"], "turnover_oku": top_stock["turnover_oku"]}
-                if top_stock else None
-            ),
+            "top_stock_by_turnover": top_stock_out(top_stock),
         },
         "thesis": frag.get("thesis", ""),
         "strip": strip,
-        "overview": frag.get("overview") or {},
+        "overview": overview,
         "sectors33": sectors,
         "sector_notes": frag.get("sector_notes") or [],
         "bought": bought,
         "sold": sold,
         "movers": movers_out,
         "theme_matrix": frag.get("theme_matrix") or {},
-        "methodology": frag.get("methodology") or {},
+        "methodology": methodology,
         "news_sources": frag.get("news_sources") or [],
-        "sources_accessed": frag.get("sources_accessed", ""),
+        "sources_accessed": sources_accessed,
         "disclaimer": frag.get("disclaimer") or [],
     }
 

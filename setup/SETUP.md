@@ -32,7 +32,9 @@ tse-ranking-monitor/
 │   ├── build_day_ranking.py  # Stage1（決定的）※スキルからコピー
 │   ├── jquants.py / tdnet.py / business_day.py / kabutan_pts.py
 │   ├── market_cap_jquants.py / market_cap_yahoo.py
-│   ├── build_market_json.py  # 市場分析タブ用（test-jquants CSV＋ナラティブJSONを結合）
+│   ├── build_market_stats.py # 市場分析タブ step3.5-(a)：決定的CSV＋market_stats JSON生成（sector_analysis.py 移植版）
+│   ├── build_market_json.py  # 市場分析タブ step3.5-(c)：CSV＋stats＋ナラティブJSONを結合
+│   ├── market_fragment_defaults.json # 市場分析の静的テンプレ（title/universe/methodology/disclaimer）
 │   ├── grok_research.py      # （任意）grok 委譲＝xAI Grok API リサーチ ※スキルからコピー
 │   ├── check_gate.py         # 営業日ゲート（SESSION=日付 / SKIP を出力）
 │   ├── publish.py            # フルデータ保存・manifest・index 書出し・送信の取りまとめ

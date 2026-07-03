@@ -39,11 +39,17 @@
    - **セクター連動クロスチェック（必須）**：各 row の `sector_cluster`／トップレベル `theme_clusters` を読み、同一33業種で束で動いた銘柄は、クラスタ内で具体的[開示]を持つ銘柄（`has_disclosure=true`。`leader_code` は機械的ヒントなので開示内容を読んで真の牽引役を選び直す）を名指しで根拠化し `[テーマ]`（連鎖）として帰属する。業種をまたぐテーマ（例：光部品＝非鉄金属〔電線〕＋電気機器〔光部品〕＋精密機器）は各クラスタの leader と地合いから横断的に結ぶ。**同一テーマの co-mover を材料未確認で放置しない**。連鎖／継続（決算後ドリフト）／需給（前日反動・薄商い）の別は本文で書き分ける（区分は3タグ維持）。
    - **材料未確認ゲート**：「材料未確認」は (i)`disclosures` (ii)`kabutan_news`（株探材料/レーティング） (iii)Web 検索 `<コード> <銘柄名> 急騰/ストップ高` (iv)`sector_cluster` の leader 連動 (v)（M&A観・出来高急増の小型株は）EDINET の TOB/大量保有 を**すべて確認**してもなお当日窓に材料が無い行にのみ残す。**ペイウォールで本文が取れないだけで即材料未確認にしない**（他の①②媒体で二次裏取り→当日テーマへの帰属が成れば [テーマ]）。
    - **EDINET（任意・環境依存）**：EDINET DB MCP が利用可能な環境では、買収観・大量保有が疑われる行で TOB（公開買付届出）・大量保有報告書を一次情報として確認する。MCP が無い環境では本パスは任意で、既存パスへフォールスルーする（**ハードな依存にしない**）。
+3.5. **市場分析タブのデータ生成（best-effort・ランキング配信をブロックしない）**：ランキングと**同一の push** に載せるため Publish（step4）の前に生成する。手順の詳細は §「市場分析タブ（日次自動生成）」に従う。要点のみ：
+   - **(a) 決定的データ**：`python scripts/build_market_stats.py --date <SESSION> --out-dir docs/tmp/market`。`docs/tmp/market/` に `sector_return_<SESSION>.csv`・`movers_top_<SESSION>.csv`（sector_analysis.py 移植版）と `market_stats_<SESSION>.json`（TOPIX 前日比・breadth・最大代金セクター/銘柄〔全ユニバース真値〕・**⚠乖離フラグ候補 `divergence_flags`**・movers の TDnet 開示文脈 `movers_context`）を出力。
+   - **(b) ナラティブ・フラグメント執筆**：`docs/tmp/market/narrative_<SESSION>.json`（**コミットしない**）を §「市場分析フラグメント執筆」の品質要件で執筆する。
+   - **(c) 結合**：`python scripts/build_market_json.py --date <SESSION> --csv-dir docs/tmp/market --stats docs/tmp/market/market_stats_<SESSION>.json --defaults scripts/market_fragment_defaults.json --narrative docs/tmp/market/narrative_<SESSION>.json --out docs/data/<SESSION>_market.json`。バリデーション die はフラグメントを直して**最大2回**再実行。
+   - **失敗時**：(a)〜(c) のどこで失敗しても市場分析は**スキップして step4 へ進む**（`docs/data/<SESSION>_market.json` が無くても SPA はサマリー帯非表示・タブ empty に自然退避する。**ランキング配信は成功として扱う**）。`docs/tmp/` はコミットしない。
 4. **Publish（生成のみ・メールは送らない）**：`publish.py --in docs/tmp/ranking.json --docs docs --pages-url "$PAGES_URL"`
    - `docs/data/<date>.json` 保存（ランキング＋要因）／`docs/data/manifest.json` 更新／30日より古い JSON を削除。
    - `docs/index.html`（日付選択式 Pages）を更新（体裁は `html_generator.py`＝PTS 版と同一トンマナ・配色）。保存 JSON は rows に開示（pdf_url）を含むフルデータ。
    - メール HTML を生成・保存する**が、この段階では送信しない**（`--send` は付けない。送信は step6）。
 5. **デプロイ（必ず main へ）**：`docs/index.html` と `docs/data/` を commit し、`git push origin HEAD:main`。
+   `docs/data/` には step4 のランキング JSON に加え、step3.5 が成功していれば `<SESSION>_market.json`（市場分析）も含まれ、**同一 push** で配信される（`git add docs/index.html docs/data` が両方を拾う）。
    GitHub Pages は **main/docs** を配信するため、クラウドが `claude/` ブランチ上にいても **main へ直接 push**する（PR は作らない。リポジトリは unrestricted branch push 許可）。`docs/tmp/` はコミットしない。
 6. **メール通知（Pages 反映後に送信）**：`publish.py --in docs/tmp/ranking.json --docs docs --pages-url "$PAGES_URL" --notify`
    - **GitHub Pages が当日 SESSION を実際に配信し始める**（`data/manifest.json` の最新日付＝SESSION になる）まで
@@ -60,13 +66,24 @@
 
 - オンデマンド版と同じ `である調` 全文を `reports/tse-rankings/<date>_tse-gainers.md` 相当として併せて出力してよい（リポ運用に合わせる）。
 
-## 市場分析タブ（`<date>_market.json`・手動・**日次ルーチン対象外**）
+## 市場分析タブ（日次自動生成・**step3.5**）
 
-- ランキング Pages（`docs/index.html`）は、値上がりランキングに加えて **上部の市況サマリー帯**と **「📊 市場分析」タブ**（`#market` ハッシュで開く）を持つ。データは**ランキング JSON とは別ファイル** `docs/data/<date>_market.json`（スキーマ v1）から fetch する（無い日付はサマリー帯非表示・タブは empty 表示に自然退避）。`manifest.json` には**載せない**（`update_manifest()` が `_market` を意図的に除外）。
-- 市場分析データは `test-jquants` の `sector_analysis.py` が出す CSV（`sector_return_<date>.csv`・`movers_top_<date>.csv`）から**数値を機械転記**し、Claude/人が書いた**ナラティブ・フラグメント JSON**（テーゼ・背景・材料・出典）と結合して生成する。結合器は `scripts/build_market_json.py`（stdlib のみ・セクター名/銘柄コードの完全一致バリデーション・冪等出力）。
-  - 生成例：`python scripts/build_market_json.py --date <date> --csv-dir <test-jquants>/output --narrative <fragment>.json --out docs/data/<date>_market.json`
-  - フラグメントは作業用（コミットしない）。公開成果物は `docs/data/<date>_market.json` と再生成した `docs/index.html`。
-- **現状は手動反映のみ**（初回＝2026-07-01）。**上記の日次フロー（step1-6）には組み込まれていない**。`cleanup_old()` は `<date>_market.json` も同じ30日保持ポリシーで削除する（`base[:10]` 判定）。将来ルーチンへ統合する場合は「決定的CSV生成 → Claude がフラグメント執筆 → `build_market_json.py` → publish」を step4 前後に足すだけでよい（別プラン）。
+- ランキング Pages（`docs/index.html`）は、値上がりランキングに加えて **上部の市況サマリー帯**と **「📊 市場分析」タブ**（`#market` ハッシュで開く）を持つ。データは**ランキング JSON とは別ファイル** `docs/data/<date>_market.json`（スキーマ v1）から fetch する（無い日付はサマリー帯非表示・タブは empty 表示に自然退避）。`manifest.json` には**載せない**（`update_manifest()` が `_market` を意図的に除外）。`cleanup_old()` は `<date>_market.json` も同じ30日保持で削除する（`base[:10]` 判定）。
+- **二層構成（数値とナラティブの分離）**：数値は決定的スクリプトが、ナラティブは Claude が書き、結合器が機械ジョインする。転記ミスはセクター名・銘柄コードの完全一致バリデーションで構造的に排除される（不一致は非ゼロ終了）。
+  1. **決定的データ** `scripts/build_market_stats.py`（`test-jquants` の `sector_analysis.py` を本リポへ移植した無人版。`jquants.py`/`business_day.py`/`tdnet.py` を再利用・stdlib＋`JQUANTS_API_KEY` のみ）。`--out-dir docs/tmp/market` に `sector_return_<date>.csv`・`movers_top_<date>.csv`（33業種加重/単純/中央値・値上/値下上位30）と `market_stats_<date>.json` を出力。stats には CSV 外の決定的数値（`topix_pct`／`prev_date`／`generated_at`／`breadth`／`top_sector_by_turnover`／`top_stock_by_turnover`〔全ユニバース真値〕）と執筆ヒント（`divergence_flags`＝⚠乖離候補・`movers_context`＝movers の TDnet 開示）が入る。
+  2. **ナラティブ・フラグメント**（Claude 執筆・`docs/tmp/market/narrative_<date>.json`・コミットしない）：§「市場分析フラグメント執筆」参照。
+  3. **結合** `scripts/build_market_json.py`（stdlib のみ・冪等）：`--csv-dir docs/tmp/market --stats <market_stats>.json --defaults scripts/market_fragment_defaults.json --narrative <narrative>.json --out docs/data/<date>_market.json`。`--stats` から `topix_pct`/`prev_date`/`generated_at`/最大代金銘柄/`overview.snapshot` の auto 行を機械採用し、`breadth`・`n_liquid` を CSV と相互チェック（不一致は die）。`--defaults` は静的テンプレ（`title`/`universe`/`methodology`/`disclaimer`・`{n_liquid}` は結合時置換）を供給する。
+- 生成は日次フロー **step3.5**（Publish の前）に組み込み済み。**best-effort**（失敗時はスキップして step4 へ・ランキング配信はブロックしない）。公開成果物は `docs/data/<date>_market.json` と再生成した `docs/index.html`。フラグメント・`docs/tmp/` はコミットしない。
+
+## 市場分析フラグメント執筆
+
+`docs/tmp/market/narrative_<date>.json` に**当日ナラティブのみ**を書く（数値・静的テンプレは書かない）。フラグメントはセクター名・銘柄コードのみを指定し、数値は CSV/stats からジョインされる。
+
+- **Claude が書く項目**：`thesis`（市況テーゼ1行）／`strip`（注目セクター＝`sectors_up`/`sectors_down` にセクター名のみ。既定は `market_stats` の `strip_default`＝加重上位3/下位3。編集判断で差し替え可・CSV 実在名のみ）／`sector_flags`＋`sector_notes`（**`divergence_flags` の全件に応答義務**：⚠を採用するなら `sector_flags` にマーク＋`sector_notes` で「加重は大型株1銘柄の歪みで中央値・騰落数は別」を説明、採用しない場合は最終報告で理由に触れる）／`overview`（`snapshot` は決定的4行を `{"auto":"topix"|"breadth"|"top_sector"|"top_stock","note":"…"}` で置き、日経平均・為替など J-Quants 外の行のみ `label`/`value` を手書き＋出典明記。`points`/`flow`/`flow_conclusion`）／`bought`・`sold`（`table` に `{sector,note,flag?}`・`themes`）／`movers`（`gainers`/`losers` に `{code,note,links,emph?}`＋footnote）／`theme_matrix`／`news_sources`。
+- **書かない項目（defaults/stats が供給）**：`title`・`universe`・`methodology`・`disclaimer`・`topix_pct`・`prev_date`・`generated_at`・最大代金セクター/銘柄の数値。
+- **Stage2 の再利用**：値上がり側 movers がランキング rows（step3）と重複する銘柄は、step3 の `factor`/`factor_kind`・採用出典を**そのまま転用**し再リサーチしない。
+- **値下がり側の追加リサーチ**：`movers_context`（TDnet）→ 株探 `https://kabutan.jp/stock/news?code=<4桁>`（ブラウザUA）→ Web検索「<コード> <銘柄名> 急落/ストップ安」の順。出典規律は step3 と同じ3層方針（`reference/sources.md §4`）・**ランディングページ出典禁止**・個人発信不使用を継承。
+- **数値規律**：`note`/`themes` の数値は (a) CSV/stats に存在する値の言及、(b) 出典リンク付き記事からの引用、のみ。日経平均・為替など J-Quants 外の相場値は `snapshot` の手書き行に限り、①層出典（株探大引け・日経の東証大引け記事等）を `news_sources`「市場概況」に**必ず併記**したうえで記事内数値を転記する（創作禁止）。`links` は http(s) のみ（結合器が検証）。
 
 ## 関連
 
