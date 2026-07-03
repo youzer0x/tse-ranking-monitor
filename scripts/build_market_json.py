@@ -236,10 +236,11 @@ def validate_market(out):
             if not isinstance(it, str):
                 bad("%s[%d]" % (field, i), "文字列", _shape(it))
 
-    if not isinstance(out.get("thesis"), str):
-        bad("thesis", "文字列", _shape(out.get("thesis")))
+    th = out.get("thesis")
+    if not (isinstance(th, str) or (isinstance(th, list) and all(isinstance(x, str) for x in th))):
+        bad("thesis", "文字列 または 文字列の配列（箇条書き）", _shape(th))
 
-    # overview: snapshot=[{label,value}] / points,flow=[str] / flow_conclusion=str
+    # overview: snapshot=[{label,value}] / points,flow=[str] / flow_conclusion=str|[str]
     ov = out.get("overview")
     if not isinstance(ov, dict):
         bad("overview", "オブジェクト", _shape(ov))
@@ -249,22 +250,28 @@ def validate_market(out):
         for k in ("points", "flow"):
             if ov.get(k) is not None:
                 need_strs(ov[k], "overview.%s" % k)
-        if ov.get("flow_conclusion") is not None and not isinstance(ov["flow_conclusion"], str):
-            bad("overview.flow_conclusion", "文字列", _shape(ov["flow_conclusion"]))
+        fc = ov.get("flow_conclusion")
+        if fc is not None and not (isinstance(fc, str) or (isinstance(fc, list) and all(isinstance(x, str) for x in fc))):
+            bad("overview.flow_conclusion", "文字列 または 文字列の配列（箇条書き）", _shape(fc))
 
     # sector_notes: 配列 [{mark,text}]（オブジェクトにすると renderMarket が例外→タブ空）
     need_objs(out.get("sector_notes") or [], ["mark", "text"], "sector_notes",
               str_keys=("mark", "text"))
 
-    # theme_matrix: {} または {rows:[{theme,bought,sold}], character?:str}（配列にしない）
+    # theme_matrix: {} または {rows:[{side?,theme,stocks,background}], character?:str}（配列にしない）
+    # side="buy"|"sell"（省略時=買い）。stocks=銘柄名（列＝買い赤/売り緑で配色）／background=背景説明。
     tm = out.get("theme_matrix")
     if tm:  # 空 {} は「テーマ節を出さない」で許容
         if not isinstance(tm, dict):
-            bad("theme_matrix", "オブジェクト {rows:[{theme,bought,sold}], character?}", _shape(tm))
+            bad("theme_matrix", "オブジェクト {rows:[{side?,theme,stocks,background}], character?}", _shape(tm))
         else:
             if tm.get("rows") is not None:
-                need_objs(tm["rows"], ["theme", "bought", "sold"], "theme_matrix.rows",
-                          str_keys=("theme", "bought", "sold"))
+                need_objs(tm["rows"], ["theme", "stocks", "background"], "theme_matrix.rows",
+                          str_keys=("theme", "stocks", "background"))
+                for i, r in enumerate(tm["rows"] if isinstance(tm["rows"], list) else []):
+                    if isinstance(r, dict) and r.get("side") is not None \
+                            and r.get("side") not in ("buy", "sell", "買い", "売り"):
+                        bad("theme_matrix.rows[%d].side" % i, "'buy'|'sell'（省略可）", repr(r.get("side")))
             if tm.get("character") is not None and not isinstance(tm["character"], str):
                 bad("theme_matrix.character", "文字列", _shape(tm["character"]))
 

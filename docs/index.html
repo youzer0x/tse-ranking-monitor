@@ -82,6 +82,15 @@ table.kv td.k{color:var(--sub);white-space:nowrap;width:1%;} table.kv td.v{font-
 .barpos{position:absolute;left:50%;top:0;bottom:0;background:var(--accent);border-radius:0 3px 3px 0;}
 .barneg{position:absolute;right:50%;top:0;bottom:0;background:#2ca25f;border-radius:3px 0 0 3px;}
 .mmatrix td.mbuy{color:var(--accent);} .mmatrix td.msell{color:var(--down);}
+/* テーマ別資金フロー（買い/売り 行）：銘柄名のみ配色（背景説明の地の文は既定色のまま） */
+.sidebadge{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:4px;padding:2px 9px;white-space:nowrap;}
+.sidebadge.buy{background:var(--accent);} .sidebadge.sell{background:var(--down);}
+.mmatrix td.stkcol{min-width:88px;font-weight:700;}
+.mmatrix tr.rbuy td.stkcol,.mmatrix tr.rbuy .stk{color:var(--accent);}
+.mmatrix tr.rsell td.stkcol,.mmatrix tr.rsell .stk{color:var(--down);}
+/* 箇条書き版テーゼ／まとめ（thesis・flow_conclusion が配列で渡された場合） */
+blockquote.mthesis ul{margin:2px 0 0 1.15em;padding:0;} blockquote.mthesis li{font-size:14px;font-weight:700;color:var(--primary);line-height:1.6;margin:3px 0;}
+.msec .flowc ul{margin:2px 0 0 1.15em;padding:0;} .msec .flowc li{font-size:13.5px;font-weight:700;color:var(--primary);line-height:1.6;margin:3px 0;}
 .msec a{color:#1a6fd0;text-decoration:none;} .msec a:hover{text-decoration:underline;}
 @media(max-width:820px){
  .header{padding:18px 14px;} .header-inner{flex-direction:column;align-items:flex-start;}
@@ -249,7 +258,8 @@ function renderStrip(){
   if(b.up!=null)chips+='<span class="schip">値上がり '+b.up+' / 値下がり '+b.down+'</span>';
   asArr(st.sectors_up).forEach(function(s){chips+='<span class="schip up">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
   asArr(st.sectors_down).forEach(function(s){chips+='<span class="schip down">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
-  el.innerHTML='<div class="mstrip-inner"><div class="thesis">'+mdInline(marketData.thesis||'')+'</div><div class="chips">'+chips+'<a class="more" href="#market">市場分析を見る →</a></div></div>';
+  var th=marketData.thesis;var thTxt=Array.isArray(th)?asArr(th).map(mdInline).join('　'):mdInline(th||'');
+  el.innerHTML='<div class="mstrip-inner"><div class="thesis">'+thTxt+'</div><div class="chips">'+chips+'<a class="more" href="#market">市場分析を見る →</a></div></div>';
   el.style.display='';
   }catch(e){el.style.display='none';el.innerHTML='';}
 }
@@ -307,9 +317,25 @@ function sideSection(title,side,noteCol){
 }
 function themeSection(tm){
   tm=tm||{};
-  if(!asArr(tm.rows).length)return '';
-  var h='<div class="msec"><h2>テーマ別の資金フロー</h2><div class="tscroll"><table class="mmatrix"><thead><tr><th></th><th>🔴 買われた</th><th>🟢 売られた</th></tr></thead><tbody>';
-  asArr(tm.rows).forEach(function(r){h+='<tr><td class="thead-note">'+esc(r.theme)+'</td><td class="mbuy">'+mdInline(r.bought||'')+'</td><td class="msell">'+mdInline(r.sold||'')+'</td></tr>';});
+  var rows=asArr(tm.rows);
+  if(!rows.length)return '';
+  /* 新形式（買い/売り・テーマ・銘柄・背景）を優先。旧形式（theme/bought/sold の2列）は後方互換で描画。 */
+  var isNew=rows.some(function(r){return r&&(r.side!=null||r.stocks!=null||r.background!=null);});
+  var h='<div class="msec"><h2>テーマ別の資金フロー</h2><div class="tscroll"><table class="mmatrix">';
+  if(isNew){
+    h+='<thead><tr><th>方向</th><th>テーマ</th><th>主な銘柄</th><th>背景</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var sell=(r.side==='sell'||r.side==='売り');
+      var badge=sell?'<span class="sidebadge sell">売り</span>':'<span class="sidebadge buy">買い</span>';
+      h+='<tr class="'+(sell?'rsell':'rbuy')+'"><td>'+badge+'</td>'+
+        '<td class="thead-note">'+esc(r.theme)+'</td>'+
+        '<td class="stkcol">'+mdInline(r.stocks||'')+'</td>'+
+        '<td class="factor">'+mdInline(r.background||'')+'</td></tr>';
+    });
+  }else{
+    h+='<thead><tr><th></th><th>🔴 買われた</th><th>🟢 売られた</th></tr></thead><tbody>';
+    rows.forEach(function(r){h+='<tr><td class="thead-note">'+esc(r.theme)+'</td><td class="mbuy">'+mdInline(r.bought||'')+'</td><td class="msell">'+mdInline(r.sold||'')+'</td></tr>';});
+  }
   h+='</tbody></table></div>';
   if(tm.character)h+='<div class="mnote" style="margin-top:8px">'+mdInline(tm.character)+'</div>';
   return h+'</div>';
@@ -321,16 +347,22 @@ function renderMarket(){
   var d=marketData,u=d.universe||{},h='';
   h+='<div class="msec"><h2>'+esc(d.title||'市場分析')+'</h2>';
   h+='<div class="lead">対象日 '+esc(d.session_date||'')+(d.prev_date?'（前営業日 '+esc(d.prev_date)+'）':'')+(u.description?'　／　'+esc(u.description)+(u.n_liquid?'（'+Number(u.n_liquid).toLocaleString('ja-JP')+'銘柄）':''):'')+'</div>';
-  if(d.thesis)h+='<blockquote class="mthesis">'+mdInline(d.thesis)+'</blockquote>';
+  if(d.thesis){
+    if(Array.isArray(d.thesis)){h+='<blockquote class="mthesis"><ul>';asArr(d.thesis).forEach(function(t){h+='<li>'+mdInline(t)+'</li>';});h+='</ul></blockquote>';}
+    else h+='<blockquote class="mthesis">'+mdInline(d.thesis)+'</blockquote>';
+  }
   h+='</div>';
   var ov=d.overview||{};
   if(ov.snapshot&&ov.snapshot.length){
     h+='<div class="msec"><h2>市場概況</h2><table class="kv"><tbody>';
-    ov.snapshot.forEach(function(r){h+='<tr><td class="k">'+esc(r.label)+'</td><td class="v">'+esc(r.value)+'</td><td class="n">'+esc(r.note||'')+'</td></tr>';});
+    ov.snapshot.forEach(function(r){h+='<tr><td class="k">'+esc(r.label)+'</td><td class="v">'+esc(r.value)+'</td><td class="n">'+mdInline(r.note||'')+'</td></tr>';});
     h+='</tbody></table>';
     if(ov.points&&ov.points.length){h+='<ul>';ov.points.forEach(function(p){h+='<li>'+mdInline(p)+'</li>';});h+='</ul>';}
     if(ov.flow&&ov.flow.length){h+='<div class="lead" style="margin-top:6px">一日の構図</div><ol>';ov.flow.forEach(function(p){h+='<li>'+mdInline(p)+'</li>';});h+='</ol>';}
-    if(ov.flow_conclusion)h+='<div class="flowc">'+mdInline(ov.flow_conclusion)+'</div>';
+    if(ov.flow_conclusion){
+      if(Array.isArray(ov.flow_conclusion)){h+='<div class="flowc"><ul>';asArr(ov.flow_conclusion).forEach(function(p){h+='<li>'+mdInline(p)+'</li>';});h+='</ul></div>';}
+      else h+='<div class="flowc">'+mdInline(ov.flow_conclusion)+'</div>';
+    }
     h+='</div>';
   }
   h+=themeSection(d.theme_matrix);
