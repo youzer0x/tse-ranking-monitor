@@ -186,6 +186,116 @@ def top_stock_out(ts):
     return {"code": ts.get("code"), "name": ts.get("name"), "turnover_oku": ts.get("turnover_oku")}
 
 
+# ── SPA スキーマ検証（html_generator.py renderMarket が前提する型の強制）─────────────
+# フラグメント由来のフィールド（sector_notes / theme_matrix / overview / bought・sold.themes /
+# news_sources 等）は結合器が形を強制しないため、SPA が .forEach 等で前提する型からずれると
+# 配信画面（📊市場分析タブ）が壊れる。例：sector_notes を配列でなくオブジェクトにすると
+# renderMarket が `d.sector_notes.forEach` で TypeError を投げ、el.innerHTML に到達せずタブが空になる。
+# ここで die させておけば step3.5 の「バリデーション die はフラグメントを直して最大2回再実行」で
+# フラグメントが修正され、壊れた JSON を配信しない（＝自己修復）。
+def _shape(v):
+    if isinstance(v, dict):
+        return "オブジェクト(keys=%s)" % list(v)[:6]
+    if isinstance(v, list):
+        return "配列(len=%d)" % len(v)
+    if isinstance(v, str):
+        return "文字列"
+    if v is None:
+        return "null"
+    return type(v).__name__
+
+
+def validate_market(out):
+    """最終 market.json を SPA(renderMarket)が要求する構造に照らして検証する。
+
+    不正は**全件を集約して一度に die** する（step3.5 は最大2回しか再実行しないため、
+    フラグメントの複数の型崩れを1回の修正で直せるようにする）。
+    """
+    errors = []
+
+    def bad(field, expected, got):
+        errors.append("  - %s は %s であるべき（実際: %s）" % (field, expected, got))
+
+    def need_objs(v, keys, field, str_keys=()):
+        if not isinstance(v, list):
+            bad(field, "配列 [{...}]", _shape(v)); return
+        for i, it in enumerate(v):
+            if not isinstance(it, dict):
+                bad("%s[%d]" % (field, i), "オブジェクト {...}", _shape(it)); continue
+            for k in keys:
+                if k not in it:
+                    bad("%s[%d]" % (field, i), "キー %r を含むオブジェクト" % k, "keys=%s" % list(it))
+            for k in str_keys:
+                if not isinstance(it.get(k), str):
+                    bad("%s[%d].%s" % (field, i, k), "文字列", _shape(it.get(k)))
+
+    def need_strs(v, field):
+        if not isinstance(v, list):
+            bad(field, "文字列の配列 [\"…\"]", _shape(v)); return
+        for i, it in enumerate(v):
+            if not isinstance(it, str):
+                bad("%s[%d]" % (field, i), "文字列", _shape(it))
+
+    if not isinstance(out.get("thesis"), str):
+        bad("thesis", "文字列", _shape(out.get("thesis")))
+
+    # overview: snapshot=[{label,value}] / points,flow=[str] / flow_conclusion=str
+    ov = out.get("overview")
+    if not isinstance(ov, dict):
+        bad("overview", "オブジェクト", _shape(ov))
+    else:
+        if ov.get("snapshot") is not None:
+            need_objs(ov["snapshot"], ["label", "value"], "overview.snapshot")
+        for k in ("points", "flow"):
+            if ov.get(k) is not None:
+                need_strs(ov[k], "overview.%s" % k)
+        if ov.get("flow_conclusion") is not None and not isinstance(ov["flow_conclusion"], str):
+            bad("overview.flow_conclusion", "文字列", _shape(ov["flow_conclusion"]))
+
+    # sector_notes: 配列 [{mark,text}]（オブジェクトにすると renderMarket が例外→タブ空）
+    need_objs(out.get("sector_notes") or [], ["mark", "text"], "sector_notes",
+              str_keys=("mark", "text"))
+
+    # theme_matrix: {} または {rows:[{theme,bought,sold}], character?:str}（配列にしない）
+    tm = out.get("theme_matrix")
+    if tm:  # 空 {} は「テーマ節を出さない」で許容
+        if not isinstance(tm, dict):
+            bad("theme_matrix", "オブジェクト {rows:[{theme,bought,sold}], character?}", _shape(tm))
+        else:
+            if tm.get("rows") is not None:
+                need_objs(tm["rows"], ["theme", "bought", "sold"], "theme_matrix.rows",
+                          str_keys=("theme", "bought", "sold"))
+            if tm.get("character") is not None and not isinstance(tm["character"], str):
+                bad("theme_matrix.character", "文字列", _shape(tm["character"]))
+
+    # bought/sold themes: [{title, bullets:[str]}]（文字列配列にしない）
+    for side in ("bought", "sold"):
+        themes = (out.get(side) or {}).get("themes") or []
+        need_objs(themes, ["title", "bullets"], "%s.themes" % side, str_keys=("title",))
+        if isinstance(themes, list):
+            for i, t in enumerate(themes):
+                if isinstance(t, dict):
+                    need_strs(t.get("bullets") or [], "%s.themes[%d].bullets" % (side, i))
+
+    # movers: note=str（links は check_links 済み）
+    mv = out.get("movers") or {}
+    for side in ("gainers", "losers"):
+        for i, m in enumerate(mv.get(side) or []):
+            if not isinstance(m.get("note", ""), str):
+                bad("movers.%s[%d].note" % (side, i), "文字列", _shape(m.get("note")))
+
+    # news_sources: [{topic, links:[{label,url}]}]（links は check_links 済み）
+    need_objs(out.get("news_sources") or [], ["topic"], "news_sources", str_keys=("topic",))
+
+    # disclaimer: [str]
+    need_strs(out.get("disclaimer") or [], "disclaimer")
+
+    if errors:
+        die("市場分析 JSON が SPA スキーマに不適合（%d件）。ナラティブ・フラグメントを "
+            "AGENTS.md「市場分析フラグメント執筆」の JSON 形に直すこと：\n%s"
+            % (len(errors), "\n".join(errors)))
+
+
 def main():
     ap = argparse.ArgumentParser(description="市場分析 Web 配信用 JSON を組み立てる")
     ap.add_argument("--date", required=True, help="セッション日 YYYY-MM-DD")
@@ -390,6 +500,9 @@ def main():
         "sources_accessed": sources_accessed,
         "disclaimer": frag.get("disclaimer") or [],
     }
+
+    # SPA が要求する構造を最終検証（不正はここで die → step3.5 が最大2回フラグメントを直して再実行）。
+    validate_market(out)
 
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     with open(args.out, "w", encoding="utf-8", newline="\n") as f:

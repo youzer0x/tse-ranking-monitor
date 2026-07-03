@@ -225,6 +225,10 @@ function mdInline(s){
   s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
   return s;
 }
+/* 配列でない値（オブジェクト等）が来ても .forEach で例外を投げず空配列に退避する防御ヘルパ。
+   フラグメントの型崩れ（例: sector_notes をオブジェクトにする）で市場分析タブ全体が
+   空になる事故を防ぐ（結合器 build_market_json.validate_market が本来は弾くが二重の安全網）。*/
+function asArr(x){return Array.isArray(x)?x:[];}
 function pctClass(v){return (Number(v)>=0)?'pct':'pdown';}
 function pctStr(v){if(v==null)return '—';var n=Number(v);return (n>=0?'+':'')+n.toFixed(2)+'%';}
 function applyHash(){
@@ -239,18 +243,20 @@ function applyHash(){
 function renderStrip(){
   var el=document.getElementById('marketStrip');if(!el)return;
   if(!marketData){el.style.display='none';el.innerHTML='';return;}
+  try{
   var m=marketData.market||{},b=m.breadth||{},st=marketData.strip||{},chips='';
   if(m.topix_pct!=null)chips+='<span class="schip '+pctClass(m.topix_pct)+'">TOPIX '+pctStr(m.topix_pct)+'</span>';
   if(b.up!=null)chips+='<span class="schip">値上がり '+b.up+' / 値下がり '+b.down+'</span>';
-  (st.sectors_up||[]).forEach(function(s){chips+='<span class="schip up">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
-  (st.sectors_down||[]).forEach(function(s){chips+='<span class="schip down">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
+  asArr(st.sectors_up).forEach(function(s){chips+='<span class="schip up">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
+  asArr(st.sectors_down).forEach(function(s){chips+='<span class="schip down">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
   el.innerHTML='<div class="mstrip-inner"><div class="thesis">'+mdInline(marketData.thesis||'')+'</div><div class="chips">'+chips+'<a class="more" href="#market">市場分析を見る →</a></div></div>';
   el.style.display='';
+  }catch(e){el.style.display='none';el.innerHTML='';}
 }
 function sectorBars(sectors){
-  var maxAbs=1;sectors.forEach(function(s){var a=Math.abs(Number(s.w_pct)||0);if(a>maxAbs)maxAbs=a;});
+  var maxAbs=1;asArr(sectors).forEach(function(s){var a=Math.abs(Number(s.w_pct)||0);if(a>maxAbs)maxAbs=a;});
   var h='<div class="tscroll"><table><thead><tr><th>33業種</th><th class="r">加重騰落率</th><th class="barcell"></th><th class="r">単純平均</th><th class="r">中央値</th><th class="r">上昇/下落</th><th class="r">売買代金<br>(億円)</th></tr></thead><tbody>';
-  sectors.forEach(function(s){
+  asArr(sectors).forEach(function(s){
     var w=Number(s.w_pct)||0,width=Math.abs(w)/maxAbs*50;
     var bar='<div class="barwrap">'+(w>=0?'<div class="barpos" style="width:'+width+'%"></div>':'<div class="barneg" style="width:'+width+'%"></div>')+'</div>';
     h+='<tr><td>'+esc(s.name)+(s.flag?'<span class="mtag">'+esc(s.flag)+'</span>':'')+'</td>'+
@@ -265,9 +271,9 @@ function sectorBars(sectors){
 }
 function moverRows(list){
   var h='<div class="tscroll"><table><thead><tr><th>コード</th><th>銘柄</th><th class="r">前日比</th><th class="r">売買代金<br>(億円)</th><th>材料</th></tr></thead><tbody>';
-  list.forEach(function(m){
+  asArr(list).forEach(function(m){
     var code=fmtCode(m.code);
-    var links=(m.links||[]).map(function(l){return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>';}).join('　');
+    var links=asArr(m.links).map(function(l){return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>';}).join('　');
     var note=mdInline(m.note||'')+(links?' <span style="color:var(--sub)">（'+links+'）</span>':'');
     h+='<tr><td class="code"><a href="https://kabutan.jp/stock/?code='+esc(code)+'" target="_blank" rel="noopener">'+esc(code)+'</a></td>'+
       '<td class="name">'+(m.emph?'<strong>'+esc(m.name)+'</strong>':esc(m.name))+'</td>'+
@@ -278,7 +284,7 @@ function moverRows(list){
   return h+'</tbody></table></div>';
 }
 function sideSection(title,side,noteCol){
-  side=side||{};var tbl=side.table||[],themes=side.themes||[];
+  side=side||{};var tbl=asArr(side.table),themes=asArr(side.themes);
   if(!tbl.length&&!themes.length)return '';
   var h='<div class="msec"><h2>'+esc(title)+'</h2>';
   if(tbl.length){
@@ -294,16 +300,16 @@ function sideSection(title,side,noteCol){
   }
   themes.forEach(function(t){
     h+='<div class="thead-note" style="font-size:13px;margin:10px 0 2px">'+esc(t.title)+'</div><ul>';
-    (t.bullets||[]).forEach(function(b){h+='<li>'+mdInline(b)+'</li>';});
+    asArr(t.bullets).forEach(function(b){h+='<li>'+mdInline(b)+'</li>';});
     h+='</ul>';
   });
   return h+'</div>';
 }
 function themeSection(tm){
   tm=tm||{};
-  if(!tm.rows||!tm.rows.length)return '';
+  if(!asArr(tm.rows).length)return '';
   var h='<div class="msec"><h2>テーマ別の資金フロー</h2><div class="tscroll"><table class="mmatrix"><thead><tr><th></th><th>🔴 買われた</th><th>🟢 売られた</th></tr></thead><tbody>';
-  tm.rows.forEach(function(r){h+='<tr><td class="thead-note">'+esc(r.theme)+'</td><td class="mbuy">'+mdInline(r.bought||'')+'</td><td class="msell">'+mdInline(r.sold||'')+'</td></tr>';});
+  asArr(tm.rows).forEach(function(r){h+='<tr><td class="thead-note">'+esc(r.theme)+'</td><td class="mbuy">'+mdInline(r.bought||'')+'</td><td class="msell">'+mdInline(r.sold||'')+'</td></tr>';});
   h+='</tbody></table></div>';
   if(tm.character)h+='<div class="mnote" style="margin-top:8px">'+mdInline(tm.character)+'</div>';
   return h+'</div>';
@@ -311,6 +317,7 @@ function themeSection(tm){
 function renderMarket(){
   var el=document.getElementById('marketArea');if(!el)return;
   if(!marketData){el.innerHTML='<div class="empty">この日付の市場分析データはありません。</div>';return;}
+  try{
   var d=marketData,u=d.universe||{},h='';
   h+='<div class="msec"><h2>'+esc(d.title||'市場分析')+'</h2>';
   h+='<div class="lead">対象日 '+esc(d.session_date||'')+(d.prev_date?'（前営業日 '+esc(d.prev_date)+'）':'')+(u.description?'　／　'+esc(u.description)+(u.n_liquid?'（'+Number(u.n_liquid).toLocaleString('ja-JP')+'銘柄）':''):'')+'</div>';
@@ -329,7 +336,7 @@ function renderMarket(){
   h+=themeSection(d.theme_matrix);
   if(d.sectors33&&d.sectors33.length){
     h+='<div class="msec"><h2>セクター騰落率（東証33業種・売買代金加重）</h2>'+sectorBars(d.sectors33);
-    (d.sector_notes||[]).forEach(function(n){h+='<div class="mnote"><span class="thead-note">'+esc(n.mark)+'</span> '+mdInline(n.text)+'</div>';});
+    asArr(d.sector_notes).forEach(function(n){h+='<div class="mnote"><span class="thead-note">'+esc(n.mark)+'</span> '+mdInline(n.text)+'</div>';});
     h+='</div>';
   }
   h+=sideSection('買われたセクター/テーマ',d.bought,'位置づけ');
@@ -346,13 +353,14 @@ function renderMarket(){
   if(me.lines&&me.lines.length){h+='<ul style="margin-top:10px">';me.lines.forEach(function(l){h+='<li>'+mdInline(l)+'</li>';});h+='</ul>';}
   if(d.news_sources&&d.news_sources.length){
     h+='<div class="mnote" style="margin-top:8px"><span class="thead-note">ニュース・個別材料の出典'+(d.sources_accessed?'（アクセス: '+esc(d.sources_accessed)+'）':'')+'</span></div><ul>';
-    d.news_sources.forEach(function(ns){var ls=(ns.links||[]).map(function(l){return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>';}).join('／');h+='<li>'+esc(ns.topic)+'：'+ls+'</li>';});
+    asArr(d.news_sources).forEach(function(ns){var ls=asArr(ns.links).map(function(l){return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>';}).join('／');h+='<li>'+esc(ns.topic)+'：'+ls+'</li>';});
     h+='</ul>';
   }
   h+='</details>';
   if(d.disclaimer&&d.disclaimer.length){h+='<div class="mfoot" style="margin-top:10px">';d.disclaimer.forEach(function(l){h+='<div>・'+mdInline(l)+'</div>';});h+='</div>';}
   h+='</div>';
   el.innerHTML=h;
+  }catch(e){el.innerHTML='<div class="empty">市場分析の表示中にエラーが発生しました（データ形式の可能性）。</div>';if(window.console&&console.error)console.error(e);}
 }
 init();
 </script>

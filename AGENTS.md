@@ -79,6 +79,29 @@
 
 `docs/tmp/market/narrative_<date>.json` に**当日ナラティブのみ**を書く（数値・静的テンプレは書かない）。フラグメントはセクター名・銘柄コードのみを指定し、数値は CSV/stats からジョインされる。
 
+- **フラグメントの JSON 形（厳守）**：結合器 `build_market_json.validate_market()` が SPA（`html_generator.py renderMarket`）の要求型を検証し、不一致は**die → 本節の形に直して再実行**（型崩れは配信画面のタブを空にする＝過去に `sector_notes` をオブジェクトにして renderMarket が例外→タブ空という事故があった）。次の**配列/オブジェクトの別を厳守**する：
+  ```json
+  {
+    "thesis": "…（1行）",
+    "strip": {"sectors_up": ["セクター名"], "sectors_down": ["セクター名"]},
+    "overview": {
+      "snapshot": [{"auto": "topix|breadth|top_sector|top_stock"}, {"label": "…", "value": "…", "note": "…"}],
+      "points": ["…"], "flow": ["…"], "flow_conclusion": "…"
+    },
+    "sector_flags": {"セクター名": "⚠"},
+    "sector_notes": [{"mark": "⚠1|示唆|セクター名", "text": "…"}],
+    "bought": {"table": [{"sector": "…", "note": "…", "flag": "⚠?"}], "themes": [{"title": "…", "bullets": ["…"]}]},
+    "sold":   {"table": [{"sector": "…", "note": "…"}],              "themes": [{"title": "…", "bullets": ["…"]}]},
+    "movers": {"gainers": [{"code": "…", "note": "…", "links": [{"label": "…", "url": "https://…"}], "emph": true}],
+               "gainers_footnote": "…",
+               "losers":  [{"code": "…", "note": "…", "links": [{"label": "…", "url": "https://…"}]}],
+               "losers_footnote": "…"},
+    "theme_matrix": {"rows": [{"theme": "…", "bought": "…", "sold": "…"}], "character": "…"},
+    "news_sources": [{"topic": "…", "links": [{"label": "…", "url": "https://…"}]}]
+  }
+  ```
+  特に落とし穴：**`sector_notes` は配列 `[{mark,text}]`（オブジェクト `{セクター名: …}` にしない）／`theme_matrix` はオブジェクト `{rows:[{theme,bought,sold}], character}`（テーマ配列にしない）／`bought`・`sold` の `themes` は `[{title,bullets:[…]}]`（文字列配列にしない）／`overview.points`・`overview.flow` は文字列配列**。`theme_matrix` が無ければ省略（結合器が `{}` にし SPA はテーマ節を出さない）。
+
 - **Claude が書く項目**：`thesis`（市況テーゼ1行）／`strip`（注目セクター＝`sectors_up`/`sectors_down` にセクター名のみ。既定は `market_stats` の `strip_default`＝加重上位3/下位3。編集判断で差し替え可・CSV 実在名のみ）／`sector_flags`＋`sector_notes`（**`divergence_flags` の全件に応答義務**：⚠を採用するなら `sector_flags` にマーク＋`sector_notes` で「加重は大型株1銘柄の歪みで中央値・騰落数は別」を説明、採用しない場合は最終報告で理由に触れる）／`overview`（`snapshot` は決定的4行を `{"auto":"topix"|"breadth"|"top_sector"|"top_stock","note":"…"}` で置き、日経平均・為替など J-Quants 外の行のみ `label`/`value` を手書き＋出典明記。`points`/`flow`/`flow_conclusion`）／`bought`・`sold`（`table` に `{sector,note,flag?}`・`themes`）／`movers`（`gainers`/`losers` に `{code,note,links,emph?}`＋footnote）／`theme_matrix`／`news_sources`。
 - **書かない項目（defaults/stats が供給）**：`title`・`universe`・`methodology`・`disclaimer`・`topix_pct`・`prev_date`・`generated_at`・最大代金セクター/銘柄の数値。
 - **Stage2 の再利用**：値上がり側 movers がランキング rows（step3）と重複する銘柄は、step3 の `factor`/`factor_kind`・採用出典を**そのまま転用**し再リサーチしない。
