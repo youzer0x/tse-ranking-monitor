@@ -269,6 +269,10 @@ def validate_market(out):
                 need_objs(tm["rows"], ["theme", "stocks", "background"], "theme_matrix.rows",
                           str_keys=("theme", "stocks", "background"))
                 for i, r in enumerate(tm["rows"] if isinstance(tm["rows"], list) else []):
+                    if isinstance(r, dict) and ("bought" in r or "sold" in r):
+                        bad("theme_matrix.rows[%d]" % i,
+                            "新形式 {side,theme,stocks,background}（1行=1方向）",
+                            "旧 {theme,bought,sold} 形式（廃止。AGENTS.md §市場分析フラグメント執筆の形へ）")
                     if isinstance(r, dict) and r.get("side") is not None \
                             and r.get("side") not in ("buy", "sell", "買い", "売り"):
                         bad("theme_matrix.rows[%d].side" % i, "'buy'|'sell'（省略可）", repr(r.get("side")))

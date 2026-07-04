@@ -113,6 +113,17 @@ def test_validate_market_rejects_bad_thesis_type(market_golden):
         bmj.validate_market(broken)
 
 
+def test_validate_market_rejects_legacy_theme_matrix(market_golden, capsys):
+    # 旧 {theme,bought,sold} 形式は廃止（07-01/02 が旧形式のまま公開されていた監査指摘の再発防止）。
+    # 従来も stocks/background 欠落で落ちていたが、原因が分かる誘導メッセージを出す。
+    broken = copy.deepcopy(market_golden)
+    broken["theme_matrix"] = {"rows": [{"theme": "半導体", "bought": "A社", "sold": "B社"}]}
+    with pytest.raises(SystemExit):
+        bmj.validate_market(broken)
+    err = capsys.readouterr().err
+    assert "theme_matrix" in err and "旧" in err
+
+
 def test_validate_market_rejects_string_bullets(market_golden):
     # bought.themes[].bullets は文字列配列であるべき（テーマ節を文字列で書くと崩れる）
     broken = copy.deepcopy(market_golden)
