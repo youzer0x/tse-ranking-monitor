@@ -1,9 +1,13 @@
 """GitHub Pages 用 HTML と Gmail 本文 HTML の生成（東証 値上がり率ランキング）。
 
-トンマナ・書式・カラーは PTS 版（pts-ranking-monitor/scripts/html_generator.py）と**同一**。
-TSE 固有のデータ（列＝PTS気配なし・終値(円)／抽出条件＝≥+5%・¥10M・100億・上位50社／出典）
-のみ差し替えている。配色・フォント・ヘッダー・バッジ・株探リンク・[開示PDF]・薄商い折りたたみ・
-モバイルのカード化は PTS と一致。
+Gmail 本文（generate_email_html）のトンマナ・書式・カラーは PTS 版
+（pts-ranking-monitor/scripts/html_generator.py）と**同一**。TSE 固有のデータ
+（列＝PTS気配なし・終値(円)／抽出条件＝≥+5%・¥10M・100億・上位50社／出典）のみ差し替えている。
+
+Pages SPA（generate_pages_html）は 2026-07 の「金融紙エディトリアル」リデザインで PTS 版から
+**意図的に分岐**した（明色ペーパー基調・セリフ見出し（Noto Serif JP）・ヘアライン罫線・
+タブラー数字。ランキング表本体・株探リンク・[開示PDF]・薄商い折りたたみ・モバイルのカード化の
+挙動は従来どおり）。PTS 版と同期する際はメール HTML と共有ロジックのみを対象にする。
 
 公開データ（docs/data/YYYY-MM-DD.json）は build_day_ranking.py の出力に各行の変動要因（factor /
 factor_kind）を埋めたもの（rows に disclosures/pdf_url・counts・capped を含むフルデータ）。
@@ -117,25 +121,26 @@ def generate_pages_html():
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>東証 値上がり率ランキング</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef1f5;--card:#fff;--primary:#11243f;--accent:#c0392b;--down:#1b7f3b;--text:#222;--sub:#6b7785;--border:#e2e6ea;--hover:#f5f8ff;}
+:root{--bg:#f5f2ea;--card:#fefcf7;--primary:#11243f;--accent:#ae2b23;--down:#186a3b;--text:#262420;--sub:#6b6558;--border:#e2e6ea;--hairline:#ddd6c7;--rule:#11243f;--hover:#f5f8ff;--wash:#f3efe4;--serif:'Noto Serif JP','Hiragino Mincho ProN','Yu Mincho',serif;--sans:'Noto Sans JP',sans-serif;--numfont:'Helvetica Neue',Arial,'Noto Sans JP',sans-serif;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
-.header{background:linear-gradient(135deg,#11243f,#24507f);color:#fff;padding:24px 28px 18px;}
-.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
-.header h1{font-size:21px;font-weight:700;}
-.tabs{display:inline-flex;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap;}
-.tabs .tab{margin:0;padding:7px 15px;border-radius:8px;font-size:15px;font-weight:700;line-height:1.35;text-decoration:none;color:#fff;white-space:nowrap;}
-.tabs .tab.active{background:var(--card);color:var(--primary);}
-.tabs a.tab:hover{background:rgba(255,255,255,.2);}
-.date-selector{display:flex;align-items:center;gap:8px;}
-.date-selector label{font-size:13px;opacity:.9;}
-.date-selector select{padding:7px 30px 7px 12px;font-size:14px;font-family:Arial,sans-serif;border:1px solid rgba(255,255,255,.3);border-radius:6px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
-.date-selector select option{background:#11243f;color:#fff;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;}
+.header{background:var(--card);color:var(--text);border-top:4px solid var(--primary);border-bottom:1px solid var(--rule);padding:20px 28px 0;position:relative;}
+.header::after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--hairline);}
+.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.tabs{display:inline-flex;align-items:flex-end;flex-wrap:wrap;}
+.tabs .tab{margin:0 26px 0 0;padding:6px 2px 12px;border-bottom:3px solid transparent;font-size:15px;font-weight:500;line-height:1.35;text-decoration:none;color:var(--sub);white-space:nowrap;}
+.tabs h1.tab{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:.01em;color:var(--primary);cursor:pointer;}
+.tabs .tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+.tabs a.tab:hover{color:var(--primary);}
+.date-selector{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.date-selector label{font-size:12px;color:var(--sub);letter-spacing:.04em;}
+.date-selector select{padding:7px 30px 7px 12px;font-size:13.5px;font-family:var(--numfont);border:1px solid var(--hairline);border-radius:3px;background:var(--card);color:var(--primary);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2311243f' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.date-selector select option{background:var(--card);color:var(--text);}
 .summary{max-width:1280px;margin:16px auto 0;padding:0 16px;display:flex;gap:10px;flex-wrap:wrap;}
-.chip{background:var(--card);border-radius:8px;padding:8px 14px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-.chip .num{font-family:Arial,sans-serif;font-weight:700;font-size:16px;color:var(--primary);}
+.chip{background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:8px 14px;font-size:13px;}
+.chip .num{font-family:var(--numfont);font-weight:700;font-size:16px;color:var(--primary);}
 .container{max-width:1280px;margin:14px auto 28px;padding:0 16px;}
 .card{background:var(--card);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden;}
 .note{padding:10px 8px 12px;font-size:12px;color:var(--sub);}
@@ -161,53 +166,73 @@ tbody tr:hover td{background:var(--hover);}
 .factor a{color:#1a6fd0;text-decoration:none;} .factor a:hover{text-decoration:underline;}
 .dropped{margin-top:18px;}
 .dropped summary{cursor:pointer;font-size:13px;color:var(--sub);padding:8px 4px;}
-.footer{text-align:center;padding:18px;font-size:11px;color:var(--sub);}
+.footer{max-width:1280px;margin:12px auto 0;text-align:center;padding:16px 16px 24px;font-size:11px;color:var(--sub);border-top:1px solid var(--hairline);letter-spacing:.02em;}
 .loading,.empty{text-align:center;padding:50px 20px;color:var(--sub);}
-/* ---- 市況サマリー帯（ランキング上部） ---- */
-.mstrip{max-width:1280px;margin:16px auto 0;padding:0 16px;}
-.mstrip-inner{background:var(--card);border-radius:10px;border-left:4px solid var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.06);padding:12px 16px;}
-.mstrip .thesis{font-size:14px;font-weight:700;color:var(--primary);line-height:1.5;}
-.mstrip .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;}
-.mstrip .schip{font-size:12px;background:#f6f8fc;border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-family:Arial,'Noto Sans JP',sans-serif;}
+/* ---- 市況サマリー帯（ランキング上部・紙面のデッキ帯） ---- */
+.mstrip{max-width:1280px;margin:18px auto 0;padding:0 16px;}
+.mstrip-inner{background:transparent;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:14px 2px;}
+.mstrip .thesis{font-family:var(--serif);font-size:14.5px;font-weight:600;color:var(--text);line-height:1.8;}
+.mstrip .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+.mstrip .schip{font-size:12px;background:var(--card);border:1px solid var(--hairline);border-radius:2px;padding:3px 9px;font-family:var(--numfont);}
 .mstrip .schip.up{color:var(--accent);} .mstrip .schip.down{color:var(--down);}
-.mstrip a.more{margin-left:auto;font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;white-space:nowrap;}
+.mstrip a.more{margin-left:auto;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--primary);text-decoration:none;white-space:nowrap;}
 .mstrip a.more:hover{text-decoration:underline;}
-/* ---- 市場分析ビュー ---- */
-.msec{background:var(--card);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:18px 20px;margin-bottom:16px;}
-.msec h2{font-size:15px;color:var(--primary);font-weight:700;border-bottom:2px solid var(--primary);padding-bottom:6px;margin-bottom:12px;}
-.msec .lead{font-size:12px;color:var(--sub);margin-bottom:10px;}
-blockquote.mthesis{font-size:14px;font-weight:700;color:var(--primary);background:#fff8e6;border:1px solid #f0d97a;border-left:4px solid #d9a300;border-radius:0 6px 6px 0;padding:10px 14px;margin:0 0 6px;line-height:1.6;}
-.msec ul,.msec ol{margin:0 0 6px 1.2em;} .msec li{font-size:13px;line-height:1.6;margin:3px 0;}
-.msec .flowc{font-size:13.5px;font-weight:700;color:var(--primary);margin-top:10px;background:#f6f8fc;border-left:4px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;line-height:1.6;}
+/* ---- 市場分析ビュー（金融紙エディトリアル） ---- */
+#viewMarket .container{max-width:1040px;}
+.msec{background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:22px 24px;margin-bottom:24px;}
+.msec h2{font-family:var(--serif);font-size:17px;color:var(--primary);font-weight:600;letter-spacing:.01em;border-bottom:1px solid var(--hairline);padding-bottom:8px;margin-bottom:14px;position:relative;}
+.msec h2::after{content:'';position:absolute;left:0;bottom:-2px;width:36px;height:3px;background:var(--primary);}
+.msec .kick{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--sub);margin-bottom:6px;}
+.mhead h2{font-size:20px;border-bottom:0;padding-bottom:2px;margin-bottom:6px;}
+.mhead h2::after{display:none;}
+.msec .lead{font-size:11px;letter-spacing:.05em;color:var(--sub);margin-bottom:10px;}
+blockquote.mthesis{font-family:var(--serif);font-size:15.5px;font-weight:600;color:var(--text);background:transparent;border:0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);border-radius:0;padding:14px 4px;margin:10px 0 2px;line-height:1.9;}
+.msec ul,.msec ol{margin:0 0 6px 1.2em;} .msec li{font-size:13px;line-height:1.7;margin:4px 0;}
+.msec .flowc{font-size:13.5px;font-weight:700;color:var(--primary);margin-top:12px;background:var(--wash);border-left:3px solid var(--primary);border-radius:0;padding:12px 16px;line-height:1.7;}
 .stk{color:#0b7285;font-weight:700;}
 .msec .mfoot{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.55;}
 .msec .mnote{font-size:12px;color:var(--sub);line-height:1.55;margin-top:4px;}
 .msec .thead-note{font-weight:700;color:var(--primary);}
-table.kv{width:100%;border-collapse:collapse;font-size:13px;}
-table.kv td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
-table.kv td.k{color:var(--sub);white-space:nowrap;width:1%;} table.kv td.v{font-weight:700;font-family:Arial,'Noto Sans JP',sans-serif;white-space:nowrap;} table.kv td.n{color:var(--sub);font-size:12px;}
+table.kv{width:100%;border-collapse:collapse;font-size:13px;border-top:1px solid var(--hairline);}
+table.kv td{padding:8px 10px;border-bottom:1px solid var(--hairline);vertical-align:top;}
+table.kv td.k{color:var(--sub);font-size:11.5px;letter-spacing:.06em;white-space:nowrap;width:1%;padding-top:10px;} table.kv td.v{font-weight:700;font-family:var(--numfont);color:var(--text);white-space:nowrap;} table.kv td.n{color:var(--sub);font-size:12px;}
 .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .pdown{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--down);font-weight:600;}
-.mtag{display:inline-block;font-size:10px;color:#fff;background:var(--sub);border-radius:3px;padding:1px 6px;margin-left:5px;}
+.mtag{display:inline-block;font-size:10px;color:var(--sub);background:transparent;border:1px solid var(--hairline);border-radius:2px;padding:0 5px;margin-left:5px;}
 .barcell{min-width:150px;}
-.barwrap{position:relative;height:14px;background:#f0f2f5;border-radius:3px;margin-top:3px;}
-.barwrap::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:#c7ced6;}
-.barpos{position:absolute;left:50%;top:0;bottom:0;background:var(--accent);border-radius:0 3px 3px 0;}
-.barneg{position:absolute;right:50%;top:0;bottom:0;background:#2ca25f;border-radius:3px 0 0 3px;}
+.barwrap{position:relative;height:9px;background:transparent;border-radius:0;margin-top:4px;}
+.barwrap::before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#b8b09e;}
+.barpos{position:absolute;left:50%;top:0;bottom:0;background:var(--accent);border-radius:0;}
+.barneg{position:absolute;right:50%;top:0;bottom:0;background:var(--down);border-radius:0;}
 .mmatrix td.mbuy{color:var(--accent);} .mmatrix td.msell{color:var(--down);}
 /* テーマ別資金フロー（買い/売り 行）：銘柄名のみ配色（背景説明の地の文は既定色のまま） */
-.sidebadge{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:4px;padding:2px 9px;white-space:nowrap;}
+.sidebadge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.12em;color:#fff;border-radius:2px;padding:2px 8px;white-space:nowrap;}
 .sidebadge.buy{background:var(--accent);} .sidebadge.sell{background:var(--down);}
 .mmatrix td.stkcol{min-width:88px;font-weight:700;}
 .mmatrix tr.rbuy td.stkcol,.mmatrix tr.rbuy .stk{color:var(--accent);}
 .mmatrix tr.rsell td.stkcol,.mmatrix tr.rsell .stk{color:var(--down);}
 /* 箇条書き版テーゼ／まとめ（thesis・flow_conclusion が配列で渡された場合） */
-blockquote.mthesis ul{margin:2px 0 0 1.15em;padding:0;} blockquote.mthesis li{font-size:14px;font-weight:700;color:var(--primary);line-height:1.6;margin:3px 0;}
-.msec .flowc ul{margin:2px 0 0 1.15em;padding:0;} .msec .flowc li{font-size:13.5px;font-weight:700;color:var(--primary);line-height:1.6;margin:3px 0;}
+blockquote.mthesis ul{margin:0 0 0 1.15em;padding:0;list-style:none;}
+blockquote.mthesis li{font-size:15.5px;font-weight:600;color:var(--text);line-height:1.9;margin:4px 0;position:relative;}
+blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color:var(--primary);}
+.msec .flowc ul{margin:2px 0 0 1.15em;padding:0;} .msec .flowc li{font-size:13.5px;font-weight:700;color:var(--primary);line-height:1.7;margin:3px 0;}
 .msec a{color:#1a6fd0;text-decoration:none;} .msec a:hover{text-decoration:underline;}
+/* 絵文字に代わる活字マーカー（赤角=買い/緑角=売り・※脚注） */
+.mk{display:inline-block;width:9px;height:9px;border-radius:1px;margin-right:7px;}
+.mk-buy{background:var(--accent);} .mk-sell{background:var(--down);}
+.fnmark{color:var(--sub);font-weight:700;margin-right:2px;}
+.msum{cursor:pointer;color:var(--sub);font-size:11.5px;font-weight:500;letter-spacing:.08em;}
+/* 市場分析タブ内テーブル（ランキング表のグローバル規則とは分離したスコープ） */
+#viewMarket thead th{position:static;background:transparent;border-bottom:2px solid var(--rule);color:var(--sub);font-size:11px;letter-spacing:.06em;padding:6px 10px 8px;}
+#viewMarket tbody td{border-bottom:1px solid var(--hairline);}
+#viewMarket tbody tr:hover td{background:#f7f3e8;}
+.num,.pct,.pdown,.rank,.code,.chip .num,.mstrip .schip,table.kv td.v,#dateSelect{font-variant-numeric:tabular-nums lining-nums;}
 @media(max-width:820px){
- .header{padding:18px 14px;} .header-inner{flex-direction:column;align-items:flex-start;}
- .header h1{font-size:18px;}
+ .header{padding:14px 14px 0;} .header-inner{flex-direction:column;align-items:stretch;gap:0;}
+ .tabs{width:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+ .tabs .tab{margin-right:18px;padding-bottom:10px;}
+ .tabs h1.tab{font-size:17px;}
+ .date-selector{width:100%;margin:10px 0 12px;} .date-selector select{flex:1;}
  #viewRanking table,#viewRanking thead,#viewRanking tbody,#viewRanking tr,#viewRanking td{display:block;width:100%;}
  #viewRanking thead{display:none;}
  #viewRanking .card{background:transparent;box-shadow:none;border-radius:0;overflow:visible;}
@@ -223,15 +248,29 @@ blockquote.mthesis ul{margin:2px 0 0 1.15em;padding:0;} blockquote.mthesis li{fo
  #viewRanking td.pct,#viewRanking td.num{display:inline-block;width:49%;font-size:14px;margin-top:8px;text-align:left;vertical-align:top;}
  #viewRanking td.pct::before,#viewRanking td.num::before{content:attr(data-label)'\00a0';display:block;color:var(--sub);font-size:11px;font-weight:400;font-family:'Noto Sans JP';}
  #viewRanking td.factor{min-width:0;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)!important;}
- .msec{padding:14px 12px;} .mstrip .chips{gap:6px;} .mstrip a.more{margin-left:0;}
+ .msec{padding:16px 14px;} .mstrip .chips{gap:6px;} .mstrip a.more{margin-left:0;}
+ #viewMarket .container{padding:0 12px;}
+ .mhead h2{font-size:18px;}
+ blockquote.mthesis,blockquote.mthesis li{font-size:14.5px;}
+ table.kv,table.kv tbody,table.kv tr,table.kv td{display:block;width:100%;}
+ table.kv tr{border-bottom:1px solid var(--hairline);padding:8px 0;}
+ table.kv td{border-bottom:0;padding:1px 4px;white-space:normal;}
+ table.kv td.k{width:auto;padding-top:4px;}
+ table.kv td.v{font-size:15px;white-space:normal;}
+ table.kv td.n{font-size:11.5px;}
+ table.sec33 th:nth-child(4),table.sec33 td:nth-child(4),table.sec33 th:nth-child(5),table.sec33 td:nth-child(5){display:none;}
+ table.sec33 .barcell{min-width:90px;}
+ table.mmatrix{min-width:640px;} .mmatrix td{padding:8px;}
+ table.mvtbl th:nth-child(4),table.mvtbl td:nth-child(4){display:none;}
+ table.mvtbl .factor{min-width:180px;}
 }
 </style></head>
 <body>
 <div class="header"><div class="header-inner">
   <nav class="tabs">
-    <h1 class="tab active" id="tabRanking" onclick="location.hash=''">📈 東証 値上がり率ランキング</h1>
-    <a class="tab" id="tabMarket" href="#market">📊 市場分析</a>
-    <a class="tab" href="https://youzer0x.github.io/pts-ranking-monitor/">📈 PTS 夜間 値上がり率ランキング</a>
+    <h1 class="tab active" id="tabRanking" onclick="location.hash=''">東証 値上がり率ランキング</h1>
+    <a class="tab" id="tabMarket" href="#market">市場分析</a>
+    <a class="tab" href="https://youzer0x.github.io/pts-ranking-monitor/">PTS 夜間 値上がり率ランキング</a>
   </nav>
   <div class="date-selector"><label for="dateSelect">セッション日:</label>
   <select id="dateSelect" onchange="loadDate(this.value)"><option>読み込み中...</option></select></div>
@@ -378,7 +417,7 @@ function renderStrip(){
 }
 function sectorBars(sectors){
   var maxAbs=1;asArr(sectors).forEach(function(s){var a=Math.abs(Number(s.w_pct)||0);if(a>maxAbs)maxAbs=a;});
-  var h='<div class="tscroll"><table><thead><tr><th>33業種</th><th class="r">加重騰落率</th><th class="barcell"></th><th class="r">単純平均</th><th class="r">中央値</th><th class="r">上昇/下落</th><th class="r">売買代金<br>(億円)</th></tr></thead><tbody>';
+  var h='<div class="tscroll"><table class="sec33"><thead><tr><th>33業種</th><th class="r">加重騰落率</th><th class="barcell"></th><th class="r">単純平均</th><th class="r">中央値</th><th class="r">上昇/下落</th><th class="r">売買代金<br>(億円)</th></tr></thead><tbody>';
   asArr(sectors).forEach(function(s){
     var w=Number(s.w_pct)||0,width=Math.abs(w)/maxAbs*50;
     var bar='<div class="barwrap">'+(w>=0?'<div class="barpos" style="width:'+width+'%"></div>':'<div class="barneg" style="width:'+width+'%"></div>')+'</div>';
@@ -393,7 +432,7 @@ function sectorBars(sectors){
   return h+'</tbody></table></div>';
 }
 function moverRows(list){
-  var h='<div class="tscroll"><table><thead><tr><th>コード</th><th>銘柄</th><th class="r">前日比</th><th class="r">売買代金<br>(億円)</th><th>材料</th></tr></thead><tbody>';
+  var h='<div class="tscroll"><table class="mvtbl"><thead><tr><th>コード</th><th>銘柄</th><th class="r">前日比</th><th class="r">売買代金<br>(億円)</th><th>材料</th></tr></thead><tbody>';
   asArr(list).forEach(function(m){
     var code=fmtCode(m.code);
     var links=asArr(m.links).map(function(l){return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>';}).join('　');
@@ -446,7 +485,7 @@ function themeSection(tm){
         '<td class="factor">'+mdInline(r.background||'')+'</td></tr>';
     });
   }else{
-    h+='<thead><tr><th></th><th>🔴 買われた</th><th>🟢 売られた</th></tr></thead><tbody>';
+    h+='<thead><tr><th></th><th><span class="mk mk-buy"></span>買われた</th><th><span class="mk mk-sell"></span>売られた</th></tr></thead><tbody>';
     rows.forEach(function(r){h+='<tr><td class="thead-note">'+esc(r.theme)+'</td><td class="mbuy">'+mdInline(r.bought||'')+'</td><td class="msell">'+mdInline(r.sold||'')+'</td></tr>';});
   }
   h+='</tbody></table></div>';
@@ -458,7 +497,7 @@ function renderMarket(){
   if(!marketData){el.innerHTML='<div class="empty">この日付の市場分析データはありません。</div>';return;}
   try{
   var d=marketData,u=d.universe||{},h='';
-  h+='<div class="msec"><h2>'+esc(d.title||'市場分析')+'</h2>';
+  h+='<div class="msec mhead"><div class="kick">市場分析｜MARKET ANALYSIS</div><h2>'+esc(d.title||'市場分析')+'</h2>';
   h+='<div class="lead">対象日 '+esc(d.session_date||'')+(d.prev_date?'（前営業日 '+esc(d.prev_date)+'）':'')+(u.description?'　／　'+esc(u.description)+(u.n_liquid?'（'+Number(u.n_liquid).toLocaleString('ja-JP')+'銘柄）':''):'')+'</div>';
   if(d.thesis){
     if(Array.isArray(d.thesis)){h+='<blockquote class="mthesis"><ul>';asArr(d.thesis).forEach(function(t){h+='<li>'+mdInline(t)+'</li>';});h+='</ul></blockquote>';}
@@ -489,11 +528,11 @@ function renderMarket(){
   var mv=d.movers||{};
   if((mv.gainers&&mv.gainers.length)||(mv.losers&&mv.losers.length)){
     h+='<div class="msec"><h2>注目個別銘柄と材料</h2>';
-    if(mv.gainers&&mv.gainers.length){h+='<div class="thead-note" style="font-size:13px;margin-bottom:4px">🔴 買われた銘柄</div>'+moverRows(mv.gainers);if(mv.gainers_footnote)h+='<div class="mfoot">💡 '+mdInline(mv.gainers_footnote)+'</div>';}
-    if(mv.losers&&mv.losers.length){h+='<div class="thead-note" style="font-size:13px;margin:14px 0 4px">🟢 売られた銘柄</div>'+moverRows(mv.losers);if(mv.losers_footnote)h+='<div class="mfoot">💡 '+mdInline(mv.losers_footnote)+'</div>';}
+    if(mv.gainers&&mv.gainers.length){h+='<div class="thead-note" style="font-size:13px;margin-bottom:4px"><span class="mk mk-buy"></span>買われた銘柄</div>'+moverRows(mv.gainers);if(mv.gainers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.gainers_footnote)+'</div>';}
+    if(mv.losers&&mv.losers.length){h+='<div class="thead-note" style="font-size:13px;margin:14px 0 4px"><span class="mk mk-sell"></span>売られた銘柄</div>'+moverRows(mv.losers);if(mv.losers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.losers_footnote)+'</div>';}
     h+='</div>';
   }
-  h+='<div class="msec"><details><summary style="cursor:pointer;color:var(--sub);font-size:13px">データ・手法・出典</summary>';
+  h+='<div class="msec"><details><summary class="msum">データ・手法・出典</summary>';
   var me=d.methodology||{};
   if(me.lines&&me.lines.length){h+='<ul style="margin-top:10px">';me.lines.forEach(function(l){h+='<li>'+mdInline(l)+'</li>';});h+='</ul>';}
   if(d.news_sources&&d.news_sources.length){
