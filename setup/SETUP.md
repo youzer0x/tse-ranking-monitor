@@ -10,16 +10,16 @@
 
 ---
 
-## Step 0：スクリプトを揃える（リポに同梱されていない Stage1 一式をコピー）
+## Step 0：スクリプトを揃える（共有スクリプトは market-scripts-common からベンダリング）
 
-本ディレクトリには `scripts/publish.py`・`scripts/html_generator.py`・`scripts/gmail_sender.py`・`scripts/get_gmail_token.py`・`scripts/check_gate.py` が同梱済み（Web/メールの体裁は `html_generator.py`＝PTS 版と同一トンマナ）。**Stage1 のパイプライン一式をスキルからコピー**する：
+本ディレクトリには `scripts/publish.py`・`scripts/html_generator.py`・`scripts/gmail_sender.py`・`scripts/get_gmail_token.py`・`scripts/check_gate.py`・`scripts/build_day_ranking.py` 等の本リポ固有スクリプトが同梱済み（Web/メールの体裁は `html_generator.py`＝PTS 版と同一トンマナ）。データ取得系の共有スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・`market_cap_jquants.py`・`market_cap_yahoo.py`・`grok_research.py`）は共有リポ **`market-scripts-common`** が単一の真実源で、同リポの sync.py が配布と `scripts/vendor.lock.json` の刻印を行う（手動 `cp` はしない）：
 
 ```bash
-cd /c/Users/YujiroOkawa/project-private/news-financial-market/automation/tse-ranking-monitor
-cp ../../skills/tse-ranking-digest/scripts/{build_day_ranking.py,jquants.py,kabutan_pts.py,tdnet.py,business_day.py,market_cap_jquants.py,market_cap_yahoo.py} scripts/
-# （任意・grok 委譲を使う場合のみ）リサーチスクリプトと共有プロンプト雛形もコピー：
-cp ../../skills/tse-ranking-digest/scripts/grok_research.py scripts/
-mkdir -p grok && cp ../../skills/tse-ranking-digest/grok/grok_research_prompt.md grok/
+cd /c/Users/YujiroOkawa/project-private/market-scripts-common
+python sync.py    # manifest.json 記載の全消費リポへ配布
+# （任意・grok 委譲を使う場合のみ）共有プロンプト雛形をコピー：
+mkdir -p /c/Users/YujiroOkawa/project-private/tse-ranking-monitor/grok
+cp ../news-financial-market/skills/tse-ranking-digest/grok/grok_research_prompt.md /c/Users/YujiroOkawa/project-private/tse-ranking-monitor/grok/
 ```
 
 ファイル構成（完成形）：
@@ -29,13 +29,13 @@ tse-ranking-monitor/
 ├── AGENTS.md                 # ルーチン仕様（ルート・ルーチンが起動時に読む／真実源はスキル SKILL.md）
 ├── requirements.txt
 ├── scripts/
-│   ├── build_day_ranking.py  # Stage1（決定的）※スキルからコピー
-│   ├── jquants.py / tdnet.py / business_day.py / kabutan_pts.py
-│   ├── market_cap_jquants.py / market_cap_yahoo.py
+│   ├── build_day_ranking.py  # Stage1（決定的）※本リポ固有
+│   ├── jquants.py / tdnet.py / business_day.py / kabutan_pts.py   # ※market-scripts-common からベンダリング
+│   ├── market_cap_jquants.py / market_cap_yahoo.py                # ※同上（vendor.lock.json 参照）
 │   ├── build_market_stats.py # 市場分析タブ step3.5-(a)：決定的CSV＋market_stats JSON生成（sector_analysis.py 移植版）
 │   ├── build_market_json.py  # 市場分析タブ step3.5-(c)：CSV＋stats＋ナラティブJSONを結合
 │   ├── market_fragment_defaults.json # 市場分析の静的テンプレ（title/universe/methodology/disclaimer）
-│   ├── grok_research.py      # （任意）grok 委譲＝xAI Grok API リサーチ ※スキルからコピー
+│   ├── grok_research.py      # （任意）grok 委譲＝xAI Grok API リサーチ ※market-scripts-common からベンダリング
 │   ├── wait_for_data.py      # ルーチンstep1：営業日ゲート＋当日四本値の鮮度ガード（SESSION=日付 / SKIP / TIMEOUT）
 │   ├── check_gate.py         # 純・営業日ゲート（SESSION=日付 / SKIP）※手動確認/フォールバック用に残置
 │   ├── publish.py            # フルデータ保存・manifest・index 書出し・送信の取りまとめ

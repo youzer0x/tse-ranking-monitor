@@ -21,4 +21,5 @@ jobs:
         with:
           python-version: "3.12"   # ローカル 3.12.x と一致
       - run: python -m pip install -r requirements-dev.txt
+      - run: python scripts/check_vendor.py   # market-scripts-common ベンダリングのドリフト検知
       - run: python -m pytest

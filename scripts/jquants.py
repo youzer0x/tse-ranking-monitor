@@ -1,13 +1,19 @@
-"""J-Quants V2 API クライアント（市場区分・終値・四本値・発行済株式数）。
+# vendored-from: market-scripts-common — このファイルは共有リポジトリの正本のコピーです。
+# 消費リポジトリでは編集禁止。変更は market-scripts-common で行い sync.py で配布すること。
+"""J-Quants V2 API クライアント（市場区分・終値・四本値・発行済株式数・時価総額）。
 
 - 認証: ヘッダ `x-api-key`（環境変数 JQUANTS_API_KEY）。Light プラン以上で当日値が取れる。
 - 東証個別株の権威判定: master の ProdCat=="011"（内国株券）かつ Mkt∈{0111,0112,0113}
   （プライム/スタンダード/グロース）。地方単独上場は bars/daily 非収録で自動除外。
-- 本 skill（東証日中ランキング）では bars/daily の日通し終値 C・売買代金 Va・調整済み終値 AdjC を使う。
+- 東証日中ランキング（tse 系）では bars/daily の日通し終値 C・売買代金 Va・調整済み終値 AdjC を使う。
   値上がり率＝当日 AdjC ÷ 前営業日 AdjC（調整済みの連日比で分割・併合をクリーンに処理）。
-- 時価総額の算出は market_cap_jquants.py（tdnet-monitor 由来）に委譲する。
+  時価総額の算出は market_cap_jquants.py（tdnet-monitor 由来の算出方式）に委譲する。
+- PTS ナイトランキング（pts 系）では時価総額を本モジュールで算出する:
+  時価総額(億円) = 取引所終値 × 発行済株式数(ShOutFY) × 分割/併合補正(AdjFactor) / 1e8。
+  AdjFactor は株式分割・併合のみ補正。増資・自己株消却は非対象 → 株探の最新株数と
+  クロスチェックして乖離が大きい銘柄は呼び出し側で「†」注記する。
 
-origin: pts-ranking-digest/scripts/jquants.py（時価総額関数は本 skill では未使用のため割愛）。stdlib のみ（urllib）。
+stdlib のみ（urllib）。
 """
 import os, json, time, urllib.request, urllib.error, urllib.parse
 from datetime import date, timedelta
@@ -128,3 +134,55 @@ def last_confirmed_session(target_iso, probe_code=PROBE_CODE, window_days=WINDOW
 def is_tse_individual(m):
     """master 行が東証本則の内国株券か。"""
     return bool(m) and m.get("ProdCat") == "011" and m.get("Mkt") in ("0111", "0112", "0113")
+
+
+def latest_shares(code4):
+    """最新の (期末日 CurFYEn, 期末発行済株式数 ShOutFY) を返す。無ければ None。"""
+    data = get("/fins/summary", {"code": code4})
+    cands = []
+    for r in data:
+        sh = r.get("ShOutFY"); disc = r.get("DiscDate"); cur = r.get("CurFYEn") or disc
+        if sh in (None, "", 0) or not disc:
+            continue
+        cands.append((disc, cur, sh))
+    if not cands:
+        return None
+    cands.sort(key=lambda x: x[0])
+    _disc, cur, sh = cands[-1]
+    try:
+        return cur, int(float(sh))
+    except (ValueError, TypeError):
+        return None
+
+
+def split_corr(code4, since_iso, target_iso):
+    """since の翌日〜target の AdjFactor 累積積の逆数（分割・併合の株数補正係数）。"""
+    try:
+        since = date.fromisoformat(since_iso); tgt = date.fromisoformat(target_iso)
+    except (ValueError, TypeError):
+        return 1.0
+    if since >= tgt:
+        return 1.0
+    data = get("/equities/bars/daily",
+               {"code": code4, "from": (since + timedelta(days=1)).isoformat(), "to": target_iso})
+    corr = 1.0
+    for r in data:
+        f = r.get("AdjFactor")
+        if f and float(f) != 1.0:
+            corr /= float(f)
+    return corr
+
+
+def market_cap_oku(code4, close, target_iso):
+    """1銘柄の時価総額(億円)を算出して返す。返り値: (mcap_oku|None, shoutfy|None, cur_end|None, corr)。"""
+    if close is None:
+        return None, None, None, 1.0
+    sh = latest_shares(code4)
+    if not sh:
+        return None, None, None, 1.0
+    cur_end, shoutfy = sh
+    try:
+        corr = split_corr(code4, cur_end, target_iso)
+    except Exception:
+        corr = 1.0
+    return close * shoutfy * corr / 1e8, shoutfy, cur_end, corr

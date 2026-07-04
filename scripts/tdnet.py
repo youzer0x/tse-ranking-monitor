@@ -1,3 +1,5 @@
+# vendored-from: market-scripts-common — このファイルは共有リポジトリの正本のコピーです。
+# 消費リポジトリでは編集禁止。変更は market-scripts-common で行い sync.py で配布すること。
 """TDnet 適時開示情報の取得（一次情報）。
 
 ソース: https://www.release.tdnet.info/inbs/I_list_{NNN}_{YYYYMMDD}.html
@@ -9,10 +11,10 @@
   「前営業日 15:30（前回引け後）〜 当日 15:30 直前（当日引け）」の窓。
   - 前営業日 15:30 ちょうど以降：後場終了後の開示で翌日（＝当日）寄りに織り込まれる → 含める。
   - 当日 15:30 ちょうど：後場終了後で日中に反応不能（今夜の PTS 材料）→ 除外（厳密に < 15:30）。
+  → disclosures_window()。PTS ナイト要因候補の突合には disclosures_by_code()（単日・引け後）を使う。
 
 データ供給は **自前取得**（隣接2営業日のみ・軽量）で自己完結する（tdnet-monitor の
 docs/data には依存しない）。stdlib のみ（urllib + 正規表現、bs4 不要）。
-origin: pts-ranking-digest/scripts/tdnet.py（disclosures_window を追加）。
 """
 import re, time, urllib.request
 from datetime import date
@@ -79,7 +81,7 @@ def fetch_disclosures(target, max_pages=30):
 
 
 def disclosures_by_code(target, since_hhmm="15:30"):
-    """{4桁コード: [開示...]}（since_hhmm 以降のみ・単日）。"""
+    """{4桁コード: [開示...]}（since_hhmm 以降のみ・単日）。PTSナイト要因候補の突合に使う。"""
     by = {}
     for d in fetch_disclosures(target):
         if d["time"] >= since_hhmm:

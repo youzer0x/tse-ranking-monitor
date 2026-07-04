@@ -6,6 +6,9 @@
 
 - 方法論（抽出条件・時価総額算出・厳密窓・変動要因の裏取り・文体・品質ゲート）は
   **`news-financial-market/skills/tse-ranking-digest/SKILL.md`** が単一の真実源。本ファイルはそれに準拠する。
+- データ取得系の共有スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・
+  `market_cap_*.py`・`grok_research.py`）の**コード**は共有リポ **`market-scripts-common`** が
+  単一の真実源（`scripts/` へベンダリング。`scripts/vendor.lock.json` 参照・直接編集禁止）。
 - 配信実装（Pages の体裁・Gmail）は on-disk の `tdnet-monitor`（`html_generator.py`・`gmail_sender.py`・`docs/`）を下敷きにしている。
 
 ## 起動とゲート

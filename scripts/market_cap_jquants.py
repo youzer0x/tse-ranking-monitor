@@ -1,3 +1,5 @@
+# vendored-from: market-scripts-common — このファイルは共有リポジトリの正本のコピーです。
+# 消費リポジトリでは編集禁止。変更は market-scripts-common で行い sync.py で配布すること。
 """時価総額データの取得 (J-Quants V2 API)
 
 J-Quants V2 から終値・発行済株式数・分割係数を取得し、時価総額(億円)を算出する。
@@ -10,8 +12,8 @@ fins/summary に決算データが無い銘柄 (新規上場等) は market_cap_
   - 分割補正 = (period_end+1 〜 price_date) の AdjFactor 累積積の逆数。
   - fins/summary に決算が無い銘柄は Yahoo Finance JP にフォールバック。
 
-origin: project-private/tdnet-monitor/scripts/market_cap_jquants.py（時価総額算出方式を参照・採用）。
-アルゴリズム変更時は tdnet-monitor と同期すること。Yahoo インポートは遅延（フォールバック時のみ）。
+正本は market-scripts-common（算出方式の出自は tdnet-monitor）。tdnet-monitor を含む各消費リポへは
+sync.py で配布する。Yahoo インポートは遅延（フォールバック時のみ）。
 """
 
 import os

@@ -1,3 +1,5 @@
+# vendored-from: market-scripts-common — このファイルは共有リポジトリの正本のコピーです。
+# 消費リポジトリでは編集禁止。変更は market-scripts-common で行い sync.py で配布すること。
 """自動版（schedule 統合）: 各銘柄の変動要因を xAI Grok API でリサーチし、リサーチ本文＋末尾
 DIGEST_BLOCK の研究ファイル（grok レスポンス全文）を生成する。Claude は後段（手順B'）でこの
 **本文を主入力**として読み（DIGEST_BLOCK は索引／構造化サマリで単独依存しない＝当日ドライバーを
