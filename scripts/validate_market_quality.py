@@ -10,9 +10,12 @@ build_market_json.py の validate_market() が「SPA が描画できる形か」
   3. emph movers    — 強調表示（emph:true）の銘柄は links 必須
   4. 禁止 URL       — 銘柄ランディングページ（みんかぶ銘柄・株探銘柄・日経会社情報・
                       Yahoo!quote）を出典に使わない（具体記事・TDnet/EDINET・会社 IR へ）
-  5. 精密主張リンク — 時価総額・目標株価・TOB 等のトリガー語を含む本文要素は、
-                      同一要素内に Markdown リンク（[出典名](URL)）を要求
-                      （movers の note は行の links 非空でも可＝材料列にリンクが併記されるため）
+  5. 精密主張リンク — 時価総額・目標株価・TOB 等のトリガー語は、そのトリガーに言及する
+                      いずれかの本文要素（原則、最初の言及）に Markdown リンク
+                      （[出典名](URL)）または movers の links があること
+  6. 重複URL禁止    — 同一出典URLの掲載は本文中（インラインリンク＋movers.links）に
+                      1箇所＋news_sources に1箇所の最大2箇所まで（URL単位。同一内容でも
+                      URLが異なる別ソースは別カウント）
 
 検出時の修正方針（重要）：**主張を削って通さない**。Stage2 で収集済みの出典
 （kabutan_news・TDnet・grok research）を再利用して文末に `（[出典名](URL)）` を
@@ -179,12 +182,51 @@ def check_doc(doc):
         for _label, url in MD_LINK_RE.findall(text):
             check_banned(url, path)
 
-    # 4) 精密主張トリガー：同一要素内にリンクが無ければエラー
+    # 4) 精密主張トリガー：トリガー語ごとに「リンク付きの言及」が文書内に1箇所以上あること。
+    #    同一URLの重複掲載を禁止している（下記5）ため、要素ごとのリンク要求はしない：
+    #    最初の言及の文末にリンクを付け、以降の同一内容への言及には再掲しない（AGENTS.md「出典規律」）。
+    mentions = {}   # トリガー語 -> 言及要素パスの一覧
+    covered = set()  # リンク付き言及が1箇所以上あるトリガー語
     for path, text, has_adjacent_links in units:
         norm = unicodedata.normalize("NFKC", text)
-        hits = [t for t in PRECISE_CLAIM_TRIGGERS if t in norm]
-        if hits and not MD_LINK_RE.search(text) and not has_adjacent_links:
-            errors.append("%s: 精密主張（%s）に出典リンクが無い" % (path, "・".join(hits)))
+        linked = bool(MD_LINK_RE.search(text)) or has_adjacent_links
+        for t in PRECISE_CLAIM_TRIGGERS:
+            if t in norm:
+                mentions.setdefault(t, []).append(path)
+                if linked:
+                    covered.add(t)
+    for t in sorted(mentions, key=lambda k: mentions[k][0]):
+        if t not in covered:
+            paths = mentions[t]
+            errors.append("精密主張（%s）にリンク付きの言及が1箇所も無い（言及箇所: %s）。"
+                          "最初の言及の文末に `（[出典名](URL)）` を付ける"
+                          % (t, "、".join(paths[:4]) + ("…" if len(paths) > 4 else "")))
+
+    # 5) 同一出典URLの重複掲載禁止（URL単位）：本文（インライン＋movers.links）1箇所＋
+    #    news_sources 1箇所の最大2箇所まで。同一内容でも別URLなら別カウント。
+    body_urls = {}
+    for path, text, _links in units:
+        for _label, url in MD_LINK_RE.findall(text):
+            body_urls.setdefault(url, []).append(path)
+    for side in ("gainers", "losers"):
+        for i, m in enumerate(mv.get(side) or []):
+            for lk in (m.get("links") or []):
+                if lk.get("url"):
+                    body_urls.setdefault(lk["url"], []).append(
+                        "movers.%s[%d](%s).links" % (side, i, m.get("name") or m.get("code")))
+    for url, paths in body_urls.items():
+        if len(paths) > 1:
+            errors.append("同一URLが本文に%d回掲載（最初の言及1箇所のみに残し他は削除する）: %s（%s）"
+                          % (len(paths), url, "、".join(paths)))
+    ns_urls = {}
+    for i, s in enumerate(ns):
+        for lk in (s.get("links") or []):
+            if lk.get("url"):
+                ns_urls.setdefault(lk["url"], []).append("news_sources[%d](%s)" % (i, s.get("topic")))
+    for url, paths in ns_urls.items():
+        if len(paths) > 1:
+            errors.append("同一URLが news_sources に%d回掲載（1箇所に統合する）: %s（%s）"
+                          % (len(paths), url, "、".join(paths)))
 
     return errors
 

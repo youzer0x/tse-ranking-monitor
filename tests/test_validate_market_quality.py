@@ -95,33 +95,48 @@ def test_banned_url_in_mover_links_rejected(market_golden):
 
 
 # ── 精密主張トリガー ──────────────────────────────────────────
-def test_precise_claim_without_link_rejected(market_golden):
+# 判定は文書単位：トリガー語ごとに「リンク付きの言及」が1箇所以上あればよい
+# （同一URLの重複掲載を禁止しているため、2回目以降の言及には出典を再掲しない）。
+def test_precise_claim_without_any_linked_mention_rejected(market_golden):
+    # 「格下げ」は golden に存在しないトリガー＝リンク付き言及ゼロで注入するとエラー
     broken = copy.deepcopy(market_golden)
-    broken["overview"]["points"].append("野村證券が目標株価を大幅に引き上げた。")
+    broken["overview"]["points"].append("米系証券が投資判断を格下げした。")
     errs = vmq.check_doc(broken)
-    assert any("overview.points" in e and "目標株価" in e and "出典リンクが無い" in e for e in errs)
+    assert any("格下げ" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
 
 
 def test_precise_claim_with_link_in_same_element_accepted(market_golden):
     doc = copy.deepcopy(market_golden)
     doc["overview"]["points"].append(
-        "野村證券が目標株価を大幅に引き上げた（[トレーダーズウェブ](https://example.com/rating)）。")
+        "米系証券が投資判断を格下げした（[トレーダーズウェブ](https://example.com/rating)）。")
     assert vmq.check_doc(doc) == []
 
 
-def test_fullwidth_trigger_normalized(market_golden):
-    # ＴＯＢ（全角）も NFKC 正規化で捕捉する
-    broken = copy.deepcopy(market_golden)
-    broken["overview"]["flow"].append("ＴＯＢ観測で急伸した。")
-    errs = vmq.check_doc(broken)
-    assert any("overview.flow" in e and "出典リンクが無い" in e for e in errs)
+def test_trigger_covered_by_earlier_linked_mention(market_golden):
+    # golden は thesis で TOB にリンク付きで言及済み → 以降の TOB 言及は再掲不要で通る
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("電通総研のTOB観測を巡る物色が続いた。")
+    assert vmq.check_doc(doc) == []
+
+
+def test_fullwidth_trigger_normalized():
+    # ＴＯＢ（全角）も NFKC 正規化で捕捉する（最小構成の合成ドキュメントで検証）
+    doc = {
+        "thesis": "ＴＯＢ観測で買われた。",
+        "overview": {},
+        "sector_notes": [],
+        "news_sources": [{"topic": "t", "links": [{"label": "l", "url": "https://example.com/news"}]}],
+        "disclaimer": [],
+    }
+    errs = vmq.check_doc(doc)
+    assert any("TOB" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
 
 
 def test_mover_note_precise_claim_relaxed_by_entry_links(market_golden):
-    # movers は材料列にリンクが併記描画されるため、行の links 非空なら note 内リンク不要
+    # movers は材料列にリンクが併記描画されるため、行の links がリンク付き言及として数えられる
     doc = copy.deepcopy(market_golden)
     doc["movers"]["gainers"].append(
-        {"code": "9996", "name": "テスト", "note": "上方修正を発表し急伸。",
+        {"code": "9996", "name": "テスト", "note": "証券会社の格下げ観測を跳ね返し急伸。",
          "links": [{"label": "会社IR", "url": "https://example.com/ir.pdf"}]})
     assert vmq.check_doc(doc) == []
 
@@ -129,27 +144,62 @@ def test_mover_note_precise_claim_relaxed_by_entry_links(market_golden):
 def test_mover_note_precise_claim_without_any_link_rejected(market_golden):
     broken = copy.deepcopy(market_golden)
     broken["movers"]["gainers"].append(
-        {"code": "9996", "name": "テスト", "note": "上方修正を発表し急伸。", "links": []})
+        {"code": "9996", "name": "テスト", "note": "米系証券が格下げし急落。", "links": []})
     errs = vmq.check_doc(broken)
-    assert any("movers.gainers" in e and "上方修正" in e for e in errs)
+    assert any("格下げ" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
 
 
 def test_theme_matrix_row_link_in_background_suffices(market_golden):
     # theme セルにトリガー語が入っても background 側の文末リンクで満たせる（行単位判定）
     doc = copy.deepcopy(market_golden)
     doc.setdefault("theme_matrix", {}).setdefault("rows", []).append(
-        {"side": "buy", "theme": "電通総研TOB", "stocks": "電通総研",
-         "background": "富士通による完全子会社化が報じられた（[日経](https://www.nikkei.com/article/xxx)）。"})
+        {"side": "buy", "theme": "公開買付観測", "stocks": "テスト銘柄",
+         "background": "公開買付の観測が報じられた（[日経](https://www.nikkei.com/article/xxx)）。"})
     assert vmq.check_doc(doc) == []
 
 
 def test_theme_matrix_row_without_link_rejected(market_golden):
     broken = copy.deepcopy(market_golden)
     broken.setdefault("theme_matrix", {}).setdefault("rows", []).append(
-        {"side": "buy", "theme": "電通総研TOB", "stocks": "電通総研",
-         "background": "富士通による完全子会社化が報じられた。"})
+        {"side": "buy", "theme": "公開買付観測", "stocks": "テスト銘柄",
+         "background": "公開買付の観測が報じられた。"})
     errs = vmq.check_doc(broken)
-    assert any("theme_matrix.rows" in e and "TOB" in e for e in errs)
+    assert any("公開買付" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
+
+
+# ── 同一出典URLの重複掲載禁止（URL単位）──────────────────────────
+def test_rejects_duplicate_url_in_body(market_golden):
+    broken = copy.deepcopy(market_golden)
+    broken["overview"]["points"].append("材料視された（[記事](https://example.com/dup)）。")
+    broken["overview"]["flow"].append("引き続き材料視（[記事](https://example.com/dup)）。")
+    errs = vmq.check_doc(broken)
+    assert any("同一URLが本文に2回掲載" in e and "example.com/dup" in e for e in errs)
+
+
+def test_rejects_duplicate_url_between_body_and_mover_links(market_golden):
+    broken = copy.deepcopy(market_golden)
+    broken["overview"]["points"].append("材料視された（[記事](https://example.com/dup2)）。")
+    broken["movers"]["gainers"].append(
+        {"code": "9995", "name": "テスト", "note": "急伸。",
+         "links": [{"label": "記事", "url": "https://example.com/dup2"}]})
+    errs = vmq.check_doc(broken)
+    assert any("同一URLが本文に2回掲載" in e and "example.com/dup2" in e for e in errs)
+
+
+def test_allows_same_url_in_body_and_news_sources(market_golden):
+    # 本文1箇所＋news_sources 1箇所の合計2箇所は許容される正規パターン
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("材料視された（[記事](https://example.com/ok)）。")
+    doc["news_sources"].append({"topic": "テスト", "links": [{"label": "記事", "url": "https://example.com/ok"}]})
+    assert not any("同一URL" in e for e in vmq.check_doc(doc))
+
+
+def test_rejects_duplicate_url_in_news_sources(market_golden):
+    broken = copy.deepcopy(market_golden)
+    url = broken["news_sources"][0]["links"][0]["url"]
+    broken["news_sources"].append({"topic": "テスト", "links": [{"label": "重複", "url": url}]})
+    errs = vmq.check_doc(broken)
+    assert any("news_sources に2回掲載" in e for e in errs)
 
 
 def test_methodology_universe_disclaimer_excluded(market_golden):
@@ -164,7 +214,7 @@ def test_methodology_universe_disclaimer_excluded(market_golden):
 def test_errors_aggregated_across_checks(market_golden):
     broken = copy.deepcopy(market_golden)
     broken["news_sources"][0]["links"] = []                                   # 崩れ1
-    broken["overview"]["points"].append("目標株価を引き上げた。")               # 崩れ2
+    broken["overview"]["points"].append("米系証券が格下げした。")               # 崩れ2（リンク付き言及なし）
     errs = vmq.check_doc(broken)
     assert len(errs) >= 2
 
