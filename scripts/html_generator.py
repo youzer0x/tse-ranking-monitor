@@ -120,6 +120,7 @@ def generate_pages_html():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>東証 値上がり率ランキング</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -263,6 +264,22 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
  table.mmatrix{min-width:640px;} .mmatrix td{padding:8px;}
  table.mvtbl th:nth-child(4),table.mvtbl td:nth-child(4){display:none;}
  table.mvtbl .factor{min-width:180px;}
+}
+/* ---- ダークモード（OS自動追従・温色ダーク紙面。ライトは不変） ---- */
+@media (prefers-color-scheme: dark){
+ :root{--bg:#1a1512;--card:#221d18;--primary:#9ab3d8;--accent:#ef665d;--down:#40b070;--text:#ece4d6;--sub:#a89f8f;--border:#3a332b;--hairline:#463d31;--rule:#9ab3d8;--hover:#2a241d;--wash:#2b2620;}
+ thead th{background:#2a241d;}
+ .name .mcap{color:#948b7a;}
+ .factor a,.msec a{color:#6ea8ea;}
+ .stk{color:#3fb6cb;}
+ .barwrap::before{background:#635a4c;}
+ #viewMarket tbody tr:hover td{background:#2a241d;}
+ .card{box-shadow:0 2px 8px rgba(0,0,0,.45);border:1px solid var(--border);}
+ .sidebadge{color:#1a1512;}
+ .date-selector select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%239ab3d8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");}
+}
+@media (prefers-color-scheme: dark) and (max-width:820px){
+ #viewRanking tbody tr{box-shadow:0 2px 10px rgba(0,0,0,.55);border:1px solid var(--border);}
 }
 </style></head>
 <body>
