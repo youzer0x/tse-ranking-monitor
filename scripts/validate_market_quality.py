@@ -16,8 +16,9 @@ build_market_json.py の validate_market() が「SPA が描画できる形か」
   6. 重複URL禁止    — 同一出典URLの掲載は本文中（インラインリンク＋movers.links）に
                       1箇所＋news_sources に1箇所の最大2箇所まで（URL単位。同一内容でも
                       URLが異なる別ソースは別カウント）
-  7. 因果表現の監査 — 「点火」「波及」等の断定的因果語に出典・推定マーカーが無ければ
-                      WARN（終了コードには影響しない。check_warnings）
+  7. 因果表現の監査 — 「点火」「波及」等の断定的因果語、および直接材料の帰属
+                      （「決算/報道/開示/発表を受け」「材料視」）に出典・推定マーカーが
+                      無ければ WARN（終了コードには影響しない。check_warnings）
 
 検出時の修正方針（重要）：**主張を削って通さない**。Stage2 で収集済みの出典
 （kabutan_news・TDnet・grok research）を再利用して文末に `（[出典名](URL)）` を
@@ -73,6 +74,16 @@ HEDGE_MARKERS = ("とみられる", "連想", "思惑", "推定", "可能性", "
 # 自データ寄与が同一要素内に明示されている場合（加重・中央値・売買代金等の定量文脈＝
 # dominant-stock の歪み解説など）は、因果表現でも検証可能なので WARN を免除する。
 OWN_DATA_MARKERS = ("中央値", "加重", "売買代金", "代金シェア", "億円", "⚠")
+
+# 直接材料の帰属監査（WARN・因果語と同じ3免除）。AGENTS.md「要因帰属の規律」の文体階層(a)
+# 「一次/準一次出典のある直接材料＝『〜を受けて』『材料視』」をコード化したもの。
+# 直接材料の名詞（決算・報道・開示・発表）＋連用中止形「〜を受け(た/て)」に限定する：
+#   ・「恩恵/影響/メリット/打撃を受け」はフォロワー（上昇に相乗りした＝相関）を表す正しい
+#     語法であり、これを叩くと相関を相関として書く推奨形を誤検知するため対象にしない。
+#   ・上方修正・下方修正・TOB・受注残・契約 等の精密イベントは精密主張トリガー（FAIL・
+#     check_doc）が別途文末リンクを強制するため、ここでは重ねて監査しない。
+# 将来課題: 直接材料名詞の拡充（増資・提携 等）は誤検知率を見て候補に留め置き。
+TIER_A_RE = re.compile(r"(?:決算|報道|開示|発表)を受け|材料視")
 
 FIX_HINT = ("主張を削らず出典を足して直す：Stage2 で収集済みの出典・kabutan_news・TDnet/EDINET・"
             "会社IRを同一要素の文末に `（[出典名](URL)）` で付ける。削除・弱体化は裏取り探索を"
@@ -250,10 +261,13 @@ def check_doc(doc):
 
 
 def check_warnings(doc):
-    """因果表現の監査（warning・終了コードに影響しない）。純粋関数。
+    """因果表現・直接材料帰属の監査（warning・終了コードに影響しない）。純粋関数。
 
-    「点火」「波及」等の因果語を含む本文要素が、出典リンク（インライン or movers の links）も
-    推定マーカー（とみられる・連想 等）も持たない場合に警告する。構造 NG のドキュメントは
+    次のいずれかを含む本文要素が、出典リンク（インライン or movers の links）も推定マーカー
+    （とみられる・連想 等）も自データ定量文脈（加重・売買代金 等）も持たない場合に警告する：
+      ・因果語（点火・波及 等 CAUSAL_WORDS）
+      ・直接材料の帰属（決算/報道/開示/発表を受け・材料視 = TIER_A_RE）
+    どちらも「共起を出典なしで因果として書く」ことへの番犬。構造 NG のドキュメントは
     エラー側（check_doc）で報告済みなので対象外。
     """
     try:
@@ -263,16 +277,24 @@ def check_warnings(doc):
     warnings = []
     for path, text, has_adjacent_links in iter_text_units(doc):
         norm = unicodedata.normalize("NFKC", text)
-        hits = [w for w in CAUSAL_WORDS if w in norm]
-        if not hits:
+        causal_hits = [w for w in CAUSAL_WORDS if w in norm]
+        tier_a_hits = sorted({m.group(0) for m in TIER_A_RE.finditer(norm)})
+        if not causal_hits and not tier_a_hits:
             continue
-        linked = bool(MD_LINK_RE.search(text)) or has_adjacent_links
-        hedged = any(m in norm for m in HEDGE_MARKERS)
-        own_data = any(m in norm for m in OWN_DATA_MARKERS)
-        if not linked and not hedged and not own_data:
+        # 免除条件は因果語・直接材料で共通（出典リンク／推定マーカー／自データ定量文脈）。
+        exempt = (bool(MD_LINK_RE.search(text)) or has_adjacent_links
+                  or any(m in norm for m in HEDGE_MARKERS)
+                  or any(m in norm for m in OWN_DATA_MARKERS))
+        if exempt:
+            continue
+        if causal_hits:
             warnings.append("%s: 因果表現（%s）に出典も推定マーカーも無い"
                             "（出典を足す／推定表現にする／自データ寄与を確認して残す）"
-                            % (path, "・".join(hits)))
+                            % (path, "・".join(causal_hits)))
+        if tier_a_hits:
+            warnings.append("%s: 直接材料の帰属（%s）に出典も推定マーカーも無い"
+                            "（一次/準一次の出典を足す／推定表現〔連想・とみられる〕にする）"
+                            % (path, "・".join(tier_a_hits)))
     return warnings
 
 

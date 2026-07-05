@@ -284,6 +284,47 @@ def test_cli_warn_exit_zero(market_golden, tmp_path, capsys):
     assert "WARN" in capsys.readouterr().err
 
 
+# ── 直接材料の帰属監査（TIER_A・2026-07-05 追加。check_warnings・エラーにはしない）──
+def test_tier_a_material_without_source_warns(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("同社の決算を受けた見直し買いが継続した。")
+    warns = vmq.check_warnings(doc)
+    assert any("直接材料" in w and "決算を受け" in w for w in warns)
+    assert vmq.check_doc(doc) == []   # WARN は非ブロッキング（exit code に影響しない）
+
+
+def test_tier_a_zairyoushi_warns(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("月次動向を材料視した買いが先行した。")
+    assert any("材料視" in w for w in vmq.check_warnings(doc))
+
+
+def test_tier_a_with_hedge_no_warn(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("同社の決算を受けた見直し買いが入ったとみられる。")
+    assert vmq.check_warnings(doc) == []
+
+
+def test_tier_a_with_link_no_warn(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("決算を受けた見直し買い（[記事](https://example.com/kessan)）。")
+    assert vmq.check_warnings(doc) == []
+
+
+def test_tier_a_with_own_data_no_warn(market_golden):
+    # 加重・売買代金など自データの定量文脈が同一要素にあれば検証可能として免除
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("決算を受け売買代金トップに躍り出た。")
+    assert vmq.check_warnings(doc) == []
+
+
+def test_tier_a_follower_phrasing_not_flagged(market_golden):
+    # 「恩恵を受け」はフォロワー（上昇に相乗り＝相関）の正しい語法なので TIER_A の対象にしない
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("半導体市況回復の恩恵を受け急騰した。")
+    assert vmq.check_warnings(doc) == []
+
+
 # ── エラー集約・構造検証との連携 ───────────────────────────────
 def test_errors_aggregated_across_checks(market_golden):
     broken = copy.deepcopy(market_golden)
