@@ -1,0 +1,54 @@
+{
+  "session_date": "2026-07-03",
+  "prev_date": "2026-07-02",
+  "session_window": "2026-07-03 09:00–15:30 JST（前場9:00-11:30／後場12:30-15:30）",
+  "criteria": {"min_pct": 5.0, "min_turnover_yen": 10000000, "min_mcap_oku": 100, "max_rank": 50},
+  "capped": false,
+  "counts": {"qualifying": 4, "ranked": 4},
+  "rows": [
+    {
+      "code": "4596",
+      "name": "テスト製薬",
+      "pct": 22.5,
+      "factor": "子会社が供給・ライセンス契約に基づくマイルストーン対価受領を前日引け後（2026-07-02 15:30）に開示。希少疾患薬の実際のキャッシュ受領を好感し大幅高。",
+      "factor_kind": "開示",
+      "rank": 1,
+      "disclosures": [
+        {"time": "15:30", "code": "4596", "name": "テスト製薬", "title": "マイルストーン対価受領のお知らせ", "pdf_url": "https://www.release.tdnet.info/inbs/140120260507517556.pdf", "origin": "prev", "date": "2026-07-02"}
+      ],
+      "kabutan_news": []
+    },
+    {
+      "code": "7890",
+      "name": "テスト精機",
+      "pct": 14.0,
+      "factor": "半導体装置セクターへの物色が波及したとみられる。6/28の関連報道以来の連想買いが継続し、当日15:30前の個別開示は無い。",
+      "factor_kind": "テーマ",
+      "rank": 2,
+      "disclosures": [],
+      "kabutan_news": []
+    },
+    {
+      "code": "8306",
+      "name": "テスト証券対象",
+      "pct": 9.2,
+      "factor": "大和証券が投資判断を格上げし目標株価を引き上げた。寄り前に伝わり日中上昇の材料になった。",
+      "factor_kind": "報道",
+      "rank": 3,
+      "disclosures": [],
+      "kabutan_news": [
+        {"datetime": "2026-07-02 08:30", "category": "レーティング日報", "title": "大和証券が投資判断・目標株価を引き上げ", "url": "https://kabutan.jp/stock/news?code=8306"}
+      ]
+    },
+    {
+      "code": "3990",
+      "name": "テスト小型",
+      "pct": 6.1,
+      "factor": "当日固有の材料は確認できず（5パス確認済み）。地合い連動の需給とみられる。",
+      "factor_kind": "テーマ",
+      "rank": 4,
+      "disclosures": [],
+      "kabutan_news": []
+    }
+  ]
+}

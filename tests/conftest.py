@@ -25,3 +25,16 @@ def market_golden():
     """
     with open(FIXTURES / "market_2026-07-03.json", encoding="utf-8") as f:
         return json.load(f)
+
+
+@pytest.fixture
+def ranking_golden():
+    """validate_ranking_quality の正常系サンプル（全チェックを通す最小ランキング JSON）。
+
+    market_golden と違い実データのスナップショットではなく**手書きの合成 doc**。実 docs/data/ の
+    ランキングは監査で誤りが混じっている（開示タグの窓外材料・無出典因果 等）ため golden に使えない。
+    開示（窓内 disclosure・日付一致）／テーマ（連想・推定表現）／報道（kabutan_news 裏付け）／
+    材料未確認フォールバックの4行で、check_ranking / check_ranking_warnings をともに空で通す。
+    """
+    with open(FIXTURES / "ranking_sample.json", encoding="utf-8") as f:
+        return json.load(f)
