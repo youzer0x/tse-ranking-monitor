@@ -209,6 +209,9 @@ table.kv td.k{color:var(--sub);font-size:11.5px;letter-spacing:.06em;white-space
 .sidebadge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.12em;color:#fff;border-radius:2px;padding:2px 8px;white-space:nowrap;}
 .sidebadge.buy{background:var(--accent);} .sidebadge.sell{background:var(--down);}
 .mmatrix td.stkcol{min-width:88px;font-weight:700;}
+/* テーマ列は広め・背景列は狭めに割り付け（テーマ名の折返しを抑える） */
+.mmatrix th.thmcol,.mmatrix td.thmcol{width:24%;min-width:170px;}
+.mmatrix th.bgcol,.mmatrix td.factor{width:44%;}
 .mmatrix tr.rbuy td.stkcol,.mmatrix tr.rbuy .stk{color:var(--accent);}
 .mmatrix tr.rsell td.stkcol,.mmatrix tr.rsell .stk{color:var(--down);}
 /* 箇条書き版テーゼ／まとめ（thesis・flow_conclusion が配列で渡された場合） */
@@ -475,12 +478,12 @@ function themeSection(tm){
   var isNew=rows.some(function(r){return r&&(r.side!=null||r.stocks!=null||r.background!=null);});
   var h='<div class="msec"><h2>テーマ別の資金フロー</h2><div class="tscroll"><table class="mmatrix">';
   if(isNew){
-    h+='<thead><tr><th>方向</th><th>テーマ</th><th>主な銘柄</th><th>背景</th></tr></thead><tbody>';
+    h+='<thead><tr><th>方向</th><th class="thmcol">テーマ</th><th>主な銘柄</th><th class="bgcol">背景</th></tr></thead><tbody>';
     rows.forEach(function(r){
       var sell=(r.side==='sell'||r.side==='売り');
       var badge=sell?'<span class="sidebadge sell">売り</span>':'<span class="sidebadge buy">買い</span>';
       h+='<tr class="'+(sell?'rsell':'rbuy')+'"><td>'+badge+'</td>'+
-        '<td class="thead-note">'+esc(r.theme)+'</td>'+
+        '<td class="thead-note thmcol">'+esc(r.theme)+'</td>'+
         '<td class="stkcol">'+mdInline(r.stocks||'')+'</td>'+
         '<td class="factor">'+mdInline(r.background||'')+'</td></tr>';
     });
