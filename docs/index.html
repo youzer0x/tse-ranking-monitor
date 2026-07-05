@@ -365,8 +365,9 @@ function themeSection(tm){
     rows.forEach(function(r){
       var sell=(r.side==='sell'||r.side==='売り');
       var badge=sell?'<span class="sidebadge sell">売り</span>':'<span class="sidebadge buy">買い</span>';
+      /* theme はワンフレーズが原則。「A→B」形式が来た場合は「→」の直前で改行し2行表示する。 */
       h+='<tr class="'+(sell?'rsell':'rbuy')+'"><td>'+badge+'</td>'+
-        '<td class="thead-note thmcol">'+esc(r.theme)+'</td>'+
+        '<td class="thead-note thmcol">'+esc(r.theme).replace(/→/g,'<br>→')+'</td>'+
         '<td class="stkcol">'+mdInline(r.stocks||'')+'</td>'+
         '<td class="factor">'+mdInline(r.background||'')+'</td></tr>';
     });
