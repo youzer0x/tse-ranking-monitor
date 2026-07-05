@@ -16,6 +16,8 @@ build_market_json.py の validate_market() が「SPA が描画できる形か」
   6. 重複URL禁止    — 同一出典URLの掲載は本文中（インラインリンク＋movers.links）に
                       1箇所＋news_sources に1箇所の最大2箇所まで（URL単位。同一内容でも
                       URLが異なる別ソースは別カウント）
+  7. 因果表現の監査 — 「点火」「波及」等の断定的因果語に出典・推定マーカーが無ければ
+                      WARN（終了コードには影響しない。check_warnings）
 
 検出時の修正方針（重要）：**主張を削って通さない**。Stage2 で収集済みの出典
 （kabutan_news・TDnet・grok research）を再利用して文末に `（[出典名](URL)）` を
@@ -47,14 +49,30 @@ BANNED_URL_PATTERNS = (
     (re.compile(r"s\.kabutan\.jp/stocks/"), "株探(sp)銘柄ページ（記事は s.kabutan.jp/news/n…）"),
 )
 
-# 精密主張トリガー語（監査指定10語＋自然対）。含む本文要素は同一要素内に出典リンク必須。
+# 精密主張トリガー語（監査指定10語＋自然対＋2026-07-05 監査で9語追加）。
 # 判定は NFKC 正規化後（全角 ＴＯＢ 等も捕捉）。
-# 拡張候補（編集レビューのループで採用を判断）: 国内シェア・国内唯一・マイルストーン・投資判断・世界初・国内初
+# 見送り候補（誤検知が高いため不採用・再検討時の記録）:
+#   裸の「シェア」= 自データの「代金シェア82.5%」等を誤爆／裸の「受注」=「受注回復期待」等の
+#   推定表現を誤爆／「計画」「投資判断」「世界初」「国内初」= 文脈依存で保留
 PRECISE_CLAIM_TRIGGERS = (
     "時価総額", "国内トップ", "世界シェア", "目標株価", "値上げ",
     "TOB", "大量保有", "上方修正", "下方修正", "格上げ",
     "格下げ", "公開買付", "非公開化",
+    "世界首位", "国内唯一", "国内シェア", "受注残", "契約",
+    "マイルストーン", "業務提携", "増産", "FY20",
 )
+
+# 因果表現の監査（WARN・終了コードに影響しない）：断定的な因果語を含む本文要素が
+# 出典リンクも推定マーカーも持たない場合に警告する。対応は (a) 出典を足す
+# (b) 推定表現にする (c) 自データ寄与（売買代金構成比・騰落数等）を確認して残す、の
+# いずれか（AGENTS.md「要因帰属の規律」。残した WARN は最終報告に列挙する）。
+# 「牽引」は自データ由来の「代金集中を牽引」等の誤検知が高いため v1 見送り（候補）。
+# 将来課題: セクター寄与の自動定量チェック／theme_matrix×news_sources の対応検査。
+CAUSAL_WORDS = ("点火", "波及", "誘発", "押し上げ", "主導", "直接受益")
+HEDGE_MARKERS = ("とみられる", "連想", "思惑", "推定", "可能性", "期待", "一因", "並走", "示唆", "連れ高", "連れ安")
+# 自データ寄与が同一要素内に明示されている場合（加重・中央値・売買代金等の定量文脈＝
+# dominant-stock の歪み解説など）は、因果表現でも検証可能なので WARN を免除する。
+OWN_DATA_MARKERS = ("中央値", "加重", "売買代金", "代金シェア", "億円", "⚠")
 
 FIX_HINT = ("主張を削らず出典を足して直す：Stage2 で収集済みの出典・kabutan_news・TDnet/EDINET・"
             "会社IRを同一要素の文末に `（[出典名](URL)）` で付ける。削除・弱体化は裏取り探索を"
@@ -231,6 +249,33 @@ def check_doc(doc):
     return errors
 
 
+def check_warnings(doc):
+    """因果表現の監査（warning・終了コードに影響しない）。純粋関数。
+
+    「点火」「波及」等の因果語を含む本文要素が、出典リンク（インライン or movers の links）も
+    推定マーカー（とみられる・連想 等）も持たない場合に警告する。構造 NG のドキュメントは
+    エラー側（check_doc）で報告済みなので対象外。
+    """
+    try:
+        bmj.validate_market(doc)
+    except SystemExit:
+        return []
+    warnings = []
+    for path, text, has_adjacent_links in iter_text_units(doc):
+        norm = unicodedata.normalize("NFKC", text)
+        hits = [w for w in CAUSAL_WORDS if w in norm]
+        if not hits:
+            continue
+        linked = bool(MD_LINK_RE.search(text)) or has_adjacent_links
+        hedged = any(m in norm for m in HEDGE_MARKERS)
+        own_data = any(m in norm for m in OWN_DATA_MARKERS)
+        if not linked and not hedged and not own_data:
+            warnings.append("%s: 因果表現（%s）に出典も推定マーカーも無い"
+                            "（出典を足す／推定表現にする／自データ寄与を確認して残す）"
+                            % (path, "・".join(hits)))
+    return warnings
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="市場分析 JSON の出典品質検証（構造検証 validate_market も内包）")
     ap.add_argument("paths", nargs="+", help="docs/data/<date>_market.json（複数可）")
@@ -249,11 +294,15 @@ def main(argv=None):
         if errs:
             all_errors.extend("%s: %s" % (name, e) for e in errs)
         else:
-            sys.stderr.write("[validate_market_quality] OK: %s（news_sources %d / movers %d / 本文 %d 要素）\n"
+            warns = check_warnings(doc)
+            for w in warns:
+                sys.stderr.write("[validate_market_quality] WARN: %s: %s\n" % (name, w))
+            sys.stderr.write("[validate_market_quality] OK: %s（news_sources %d / movers %d / 本文 %d 要素%s）\n"
                              % (name,
                                 len(doc.get("news_sources") or []),
                                 sum(len((doc.get("movers") or {}).get(s) or []) for s in ("gainers", "losers")),
-                                len(list(iter_text_units(doc)))))
+                                len(list(iter_text_units(doc))),
+                                "・WARN %d件" % len(warns) if warns else ""))
 
     if all_errors:
         sys.stderr.write("[validate_market_quality] ERROR: %d件\n%s\n修正方針: %s\n"

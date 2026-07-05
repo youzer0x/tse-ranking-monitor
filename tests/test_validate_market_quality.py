@@ -210,6 +210,80 @@ def test_methodology_universe_disclaimer_excluded(market_golden):
     assert vmq.check_doc(doc) == []
 
 
+# ── 拡張トリガー（2026-07-05 監査反映）───────────────────────────
+def test_expanded_triggers_without_link_rejected(market_golden):
+    # golden にリンク付き言及が無い拡張トリガー語（国内シェア）で検証。
+    # 受注残・契約・業務提携・世界首位等は golden 自身がリンク付きで言及済みのため
+    # doc-level 判定でカバーされる（それが仕様）。
+    broken = copy.deepcopy(market_golden)
+    broken["overview"]["points"].append("同製品の国内シェア8割を握る。")
+    errs = vmq.check_doc(broken)
+    assert any("国内シェア" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
+
+
+def test_expanded_trigger_with_link_accepted(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("同製品の国内シェア8割を握る（[会社IR](https://example.com/share)）。")
+    assert vmq.check_doc(doc) == []
+
+
+# ── 因果表現の監査（check_warnings・エラーにはしない）────────────
+def test_warnings_zero_on_golden(market_golden):
+    assert vmq.check_warnings(market_golden) == []
+
+
+def test_causal_word_without_link_or_hedge_warns(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("同社の発表がセクター全体の物色に点火した。")
+    warns = vmq.check_warnings(doc)
+    assert any("点火" in w for w in warns)
+    assert vmq.check_doc(doc) == []   # WARN はエラーに数えない（exit code に影響しない）
+
+
+def test_causal_word_with_hedge_no_warn(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("同社の発表が物色に点火したとみられる。")
+    assert vmq.check_warnings(doc) == []
+
+
+def test_causal_word_with_link_no_warn(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("同社の発表がセクター物色に点火した（[記事](https://example.com/ignite)）。")
+    assert vmq.check_warnings(doc) == []
+
+
+def test_causal_word_with_own_data_no_warn(market_golden):
+    # 加重・中央値・売買代金など自データの定量文脈が同一要素にあれば検証可能として免除
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("加重+9.86%は同社1銘柄が押し上げた歪み。")
+    assert vmq.check_warnings(doc) == []
+
+
+def test_causal_word_in_mover_with_links_no_warn(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["movers"]["gainers"].append(
+        {"code": "9994", "name": "テスト", "note": "同業の物色を主導。",
+         "links": [{"label": "記事", "url": "https://example.com/lead"}]})
+    assert vmq.check_warnings(doc) == []
+
+
+def test_check_warnings_skips_broken_structure(market_golden, capsys):
+    # 構造 NG はエラー側（check_doc）が報告するため warnings は出さない
+    broken = copy.deepcopy(market_golden)
+    broken["sector_notes"] = {"mark": "x", "text": "y"}
+    assert vmq.check_warnings(broken) == []
+    capsys.readouterr()
+
+
+def test_cli_warn_exit_zero(market_golden, tmp_path, capsys):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("同社の発表がセクター全体の物色に点火した。")
+    p = tmp_path / "warn_market.json"
+    p.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+    assert vmq.main([str(p)]) == 0
+    assert "WARN" in capsys.readouterr().err
+
+
 # ── エラー集約・構造検証との連携 ───────────────────────────────
 def test_errors_aggregated_across_checks(market_golden):
     broken = copy.deepcopy(market_golden)

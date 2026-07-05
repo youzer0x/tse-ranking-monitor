@@ -46,7 +46,7 @@
    - **(a) 決定的データ**：`python scripts/build_market_stats.py --date <SESSION> --out-dir docs/tmp/market`。`docs/tmp/market/` に `sector_return_<SESSION>.csv`・`movers_top_<SESSION>.csv`（sector_analysis.py 移植版）と `market_stats_<SESSION>.json`（TOPIX 前日比・breadth・最大代金セクター/銘柄〔全ユニバース真値〕・**⚠乖離フラグ候補 `divergence_flags`**・movers の TDnet 開示文脈 `movers_context`）を出力。
    - **(b) ナラティブ・フラグメント執筆**：`docs/tmp/market/narrative_<SESSION>.json`（**コミットしない**）を §「市場分析フラグメント執筆」の品質要件で執筆する。
    - **(c) 結合**：`python scripts/build_market_json.py --date <SESSION> --csv-dir docs/tmp/market --stats docs/tmp/market/market_stats_<SESSION>.json --defaults scripts/market_fragment_defaults.json --narrative docs/tmp/market/narrative_<SESSION>.json --out docs/data/<SESSION>_market.json`。バリデーション die はフラグメントを直して**最大2回**再実行。
-   - **(d) 品質検証**：`python scripts/validate_market_quality.py docs/data/<SESSION>_market.json`。出典品質（news_sources/emph movers の links 空・ランディングページ URL・精密主張のリンク欠落・同一URLの重複掲載）を検査する。非ゼロ終了なら**出典を足して**（Stage2 の採用出典・`kabutan_news`・TDnet/EDINET の再利用が第一手。**本文の削除・弱体化で通すことを禁止**）フラグメントを直し、(b)〜(d) を最大2回再実行。裏取り探索を尽くしても出典が無い主張のみ数値を外して弱め、最終報告に理由を残す。
+   - **(d) 品質検証**：`python scripts/validate_market_quality.py docs/data/<SESSION>_market.json`。出典品質（news_sources/emph movers の links 空・ランディングページ URL・精密主張のリンク欠落・同一URLの重複掲載）を検査する。非ゼロ終了なら**出典を足して**（Stage2 の採用出典・`kabutan_news`・TDnet/EDINET の再利用が第一手。**本文の削除・弱体化で通すことを禁止**）フラグメントを直し、(b)〜(d) を最大2回再実行。裏取り探索を尽くしても出典が無い主張のみ数値を外して弱め、最終報告に理由を残す。**WARN（因果表現の監査）**はエラーではないが、各件について「出典追加／推定表現化／自データ寄与を確認して残す」のいずれかを行い、残した WARN は最終報告に列挙する。
    - **失敗時**：(a)〜(d) のどこで失敗しても市場分析は**スキップして step4 へ進む**（`docs/data/<SESSION>_market.json` が無くても SPA はサマリー帯非表示・タブ empty に自然退避する。**ランキング配信は成功として扱う**）。`docs/tmp/` はコミットしない。
 4. **Publish（生成のみ・メールは送らない）**：`publish.py --in docs/tmp/ranking.json --docs docs --pages-url "$PAGES_URL"`
    - `docs/data/<date>.json` 保存（ランキング＋要因）／`docs/data/manifest.json` 更新／30日より古い JSON を削除。
@@ -134,7 +134,9 @@
   - **(i) 当日窓（前営業日15:30〜当日15:30）の自社開示** → **(ii) 窓内の関連企業・業界ニュースからの連想波及** → (iii) セクター連動クロスチェック → (iv) 継続テーマ。(ii) では Web検索「<銘柄名> 急騰 <日付>」に加え、**事業内容から導いた業界キーワード**（主要顧客・納入先・同業大手の増産/設備投資/大型受注の報道。例：発電用バルブ→ガスタービン増産・原発再稼働・電力インフラ投資）で当日報道を必ず探す。
   - **窓外の既知テーマ（過去の報道）を当日ドライバーとして書かない**。窓内に新規材料が無い場合のみ「継続物色」「テーマ再燃」と明示し、**テーマ起点の報道日付を本文に記す**（例「6/28の三菱重工ガスタービン増産報道以来の」）。日付の無い曖昧な「〜報道を受け」は禁止。
   - **事実と推論を書き分ける**：直接受注・業績寄与が未確認の関連は「連想」「思惑」と明示して断定しない。急騰を単一要因に断定せず、トリガー報道×業績下地×需給（小型株の値動きの軽さ）の重なりとして書く。掲示板・SNS は市場心理の把握目的でも引用・参照しない（既存規律のまま）。
-  - **セクター因果の限定（2026-07-05 追記・OSG「点火剤」過大表現の再発防止）**：「点火剤」「セクター全体へ波及」等のセクター因果は、報道等で裏付けられる場合か、当該材料に帰属できる銘柄の範囲に限定して使う。裏付けの無い同業連動は「連れ高（とみられる）」等の**推定表現**にとどめる。ある銘柄を「セクター上昇の主因」と書く前に**自データで主導性を確認**する（売買代金構成比・加重寄与が小さい銘柄をセクター全体の主因としない）。複数テーマ・地合いが併存する広範高（騰落数で確認）は「並走」と書く。
+  - **セクター因果の限定（2026-07-05 追記・OSG「点火剤」過大表現の再発防止）**：「点火剤」「セクター全体へ波及」等のセクター因果は、報道等で裏付けられる場合か、当該材料に帰属できる銘柄の範囲に限定して使う。裏付けの無い同業連動は「連れ高（とみられる）」等の**推定表現**にとどめる。ある銘柄を「セクター上昇の主因」と書く前に**自データで主導性を確認**する（売買代金構成比・加重寄与が小さい銘柄をセクター全体の主因としない）。複数テーマ・地合いが併存する広範高（騰落数で確認）は「並走」と書く。`sector_cluster` の **`leader_code` は機械的ヒントであり因果の証拠ではない**（開示内容と自データ寄与で判断する）。
+  - **文体の階層（2026-07-05 恒久化）**：確度に応じて表現を使い分ける — (a) 一次/準一次出典のある直接材料＝「〜を受けて」「〜を材料視」、(b) 同業・テーマからの推論＝「連想」「〜とみられる」「連れ高か」、(c) 定量寄与が弱い・複数要因併存＝「一因」「並走」。因果語（点火・波及・誘発・押し上げ・主導・直接受益）を出典・推定マーカー無しで使うと `validate_market_quality.py` が **WARN** を出す。
+  - **根拠パック（執筆前チェック・2026-07-05 恒久化）**：フラグメント執筆前に `docs/tmp/ranking.json` の `theme_clusters`／各 row の `factor`・`disclosures` 有無と、`market_stats` の寄与情報（最大代金・divergence_flags）を確認し、**その範囲で書く**（根拠に無いセクター因果・テーマ帰属を創作しない。一覧化スクリプトは将来課題）。
 
 ## 関連
 
