@@ -7,8 +7,9 @@
 - 方法論（抽出条件・時価総額算出・厳密窓・変動要因の裏取り・文体・品質ゲート）は
   **`news-financial-market/skills/tse-ranking-digest/SKILL.md`** が単一の真実源。本ファイルはそれに準拠する。
 - データ取得系の共有スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・
-  `market_cap_*.py`・`grok_research.py`）の**コード**は共有リポ **`market-scripts-common`** が
-  単一の真実源（`scripts/` へベンダリング。`scripts/vendor.lock.json` 参照・直接編集禁止）。
+  `market_cap_*.py`・`grok_research.py`・`merge_factors.py`）とサブエージェント定義
+  （`.claude/agents/stock-factor-researcher.md`）の**コード**は共有リポ **`market-scripts-common`** が
+  単一の真実源（ベンダリング。各配布先の `vendor.lock.json` 参照・直接編集禁止）。
 - 配信実装（Pages の体裁・Gmail）は on-disk の `tdnet-monitor`（`html_generator.py`・`gmail_sender.py`・`docs/`）を下敷きにしている。
 
 ## 起動とゲート
@@ -33,7 +34,30 @@
 3. **Stage2（変動要因の充填）**：`rows`（上位50社）各銘柄の `factor`/`factor_kind` を
    **[開示]（TDnet 前営業日15:30以降∪当日15:30未満）→[報道]（一次記事＋配信時刻を当日セッションに整合）→[セクター連動クロスチェック]→[テーマ]** の順で埋める。
    検索要約を出典にせず、材料未確認は5パス確認後にのみ正直に記す（詳細は `SKILL.md §5 手順B`）。
-   - **`TSE_USE_GROK=1` のとき（手順B'）**：Stage2.5 の `docs/tmp/research/<code>-<name>-<date>.md` を `code`×`session_date` で取り込む。
+   調査は **1銘柄=1サブエージェント（`stock-factor-researcher`・`.claude/agents/` 配布・編集禁止）の並列委譲**を基本とし、
+   `ranking.json` への書き込みは**必ず `scripts/merge_factors.py` 経由**で行う（手編集しない）：
+   - **(a) ハイブリッド判定（親が直接書く行）**：窓内 `disclosures[]` のタイトルだけで上昇が明快に説明できる行
+     （決算・上方/下方修正・TOB・新株予約権・大型受注等）は親が直接 `factor`（具体的に）/`factor_kind="開示"` を起こす（委譲しない）。
+   - **(b) 委譲**：残りの行を **1銘柄=1タスク・約10並列のバッチ**で `stock-factor-researcher` に委譲する。
+     タスクプロンプト＝下の**【調査パラメータ】雛形**（`<SESSION>` 置換。`TSE_USE_GROK=1` なら grok 研究 md の行を含める）
+     ＋**当該 row の JSON 全体**（`disclosures`/`kabutan_news`/`sector_cluster` 含む）。返却は `{code, status, factor, factor_kind, sources}` の JSON 1個。
+   - **(c) 収集とマージ**：親が直接書いた行のエントリと返却 JSON をあわせて **JSON 配列**として `docs/tmp/factors.json` に保存し、
+     `python scripts/merge_factors.py --ranking docs/tmp/ranking.json --factors docs/tmp/factors.json` を実行する。
+     `MISSING`/`REJECTED` の行は親がインライン調査（従来手順）で埋め、factors.json を更新して再実行する（factor が空の row を残さない）。
+   - **(d) 横断整合（親の必須後工程）**：下記の**セクター連動クロスチェック**と**材料未確認ゲート**は横断視点（`theme_clusters`・全行）が
+     必要なため**マージ後に親が実施**し、修正は factors.json 更新→merge_factors.py 再実行で反映する（`ranking.json` を手編集しない）。
+   【調査パラメータ】雛形（委譲タスクプロンプトの先頭に貼る）：
+   ```
+   【調査パラメータ】
+   - SESSION: <SESSION>（東証日中セッション＝9:00-15:30）
+   - 材料窓: 前営業日15:30以降〜当日15:30未満（当日15:30ちょうど以降の開示は日中に反応不能＝要因にしない。今夜のPTS材料）
+   - [開示]の定義: row.disclosures（前営業日15:30以降∪当日15:30未満の TDnet 開示）が窓内材料
+   - レーティング確認: disclosures が空なら row.kabutan_news（事前充填済み）と株探 https://kabutan.jp/stock/news?code=<4桁>（ブラウザUA）の「レーティング日報」「材料」を確認。寄り前（当日15:30より前）に伝わった格上げ・目標株価引き上げは有力材料（factor_kind=報道・証券会社名と旧→新の投資判断/目標株価を具体記載）
+   - セクター文脈: row.sector_cluster（同一33業種の co-mover）を参考にする（クラスタ横断の最終帰属は親が行う）
+   - （TSE_USE_GROK=1 のとき）grok研究md: docs/tmp/research/<code>-<name>-<date>.md を Read で取り込み、手順B'の検証（ランディングページ出典の全削除・数値の一次再検証・窓外材料の格下げ・3層ソース再検証・窓整合）を経て factor を起こす。ファイル欠落・検証落ちなら通常手順で裏取りする
+   - 文体: である調。「開示なし」等の定型注記は書かない
+   ```
+   - **`TSE_USE_GROK=1` のとき（手順B'）**：Stage2.5 の `docs/tmp/research/<code>-<name>-<date>.md` を `code`×`session_date` で取り込む（上記雛形の grok 行で各サブエージェントに委ねる）。
      **研究本文を主入力**とし（DIGEST_BLOCK は索引・要約で単独依存しない＝当日ドライバーを取りこぼす）、取り込み時に **(a) ランディングページ出典の全削除（Yahoo `/quote`・日経会社ページ・株探銘柄トップ等）・(b) 数値を J-Quants/一次開示で再検証・(c) 窓外材料は「背景」に格下げ** を行い、
      **3層ソース再検証**（`sources_used`=採用／`sources_new_candidate`=ルーブリック再評価のうえ採用＋whitelist 昇格候補に記録／`sources_excluded`=不採用）＋`window_ok`/`trigger_time` の厳密窓整合を確認して `factor`/`factor_kind` を起こす（**発見は grok・判定は Claude**）。
      **研究ファイル欠落・検証落ち・窓不整合の行は従来の Claude 裏取りに fallback**。検証合格率が掲載行の半数未満なら grok を捨てて全行 Claude。
@@ -42,7 +66,7 @@
    - **セクター連動クロスチェック（必須）**：各 row の `sector_cluster`／トップレベル `theme_clusters` を読み、同一33業種で束で動いた銘柄は、クラスタ内で具体的[開示]を持つ銘柄（`has_disclosure=true`。`leader_code` は機械的ヒントなので開示内容を読んで真の牽引役を選び直す）を名指しで根拠化し `[テーマ]`（連鎖）として帰属する。業種をまたぐテーマ（例：光部品＝非鉄金属〔電線〕＋電気機器〔光部品〕＋精密機器）は各クラスタの leader と地合いから横断的に結ぶ。**同一テーマの co-mover を材料未確認で放置しない**。連鎖／継続（決算後ドリフト）／需給（前日反動・薄商い）の別は本文で書き分ける（区分は3タグ維持）。
    - **材料未確認ゲート**：「材料未確認」は (i)`disclosures` (ii)`kabutan_news`（株探材料/レーティング） (iii)Web 検索 `<コード> <銘柄名> 急騰/ストップ高` **＋事業内容から導いた業界キーワード（主要顧客・納入先・同業大手の増産/設備投資報道＝関連企業ニュースからの連想波及）** (iv)`sector_cluster` の leader 連動 (v)（M&A観・出来高急増の小型株は）EDINET の TOB/大量保有 を**すべて確認**してもなお当日窓に材料が無い行にのみ残す。**窓外の既知テーマを当日要因として書かない**（継続物色は起点報道の日付を明示。§市場分析フラグメント執筆「要因帰属の規律」参照）。**ペイウォールで本文が取れないだけで即材料未確認にしない**（他の①②媒体で二次裏取り→当日テーマへの帰属が成れば [テーマ]）。
    - **EDINET（任意・環境依存）**：EDINET DB MCP が利用可能な環境では、買収観・大量保有が疑われる行で TOB（公開買付届出）・大量保有報告書を一次情報として確認する。MCP が無い環境では本パスは任意で、既存パスへフォールスルーする（**ハードな依存にしない**）。
-   - **品質検証（変動要因の機械ゲート）**：`factor`/`factor_kind` 充填後（`docs/tmp/ranking.json` 上書き後・step3.5 の前）に `python scripts/validate_ranking_quality.py docs/tmp/ranking.json` を実行する。市場分析タブと**同一基準**（因果語・精密主張トリガー・禁止URL・推定マーカーの語彙を `validate_market_quality.py` から import 再利用）で変動要因の出典品質を機械検査する（検査内容と対応は §「変動要因の品質規律」）。**非ゼロ終了（ERROR）でもランキング配信自体はブロックしない**（1行の弱い要因で当日全体を落とさない）。ERROR/WARN は**本文を削らず**裏取りで解消（第一手は `disclosures`・`kabutan_news`・TDnet/EDINET の再利用による再タグ・出典追加・推定表現化）→ step3 を最大2回やり直す。解消しきれない残件は最終報告に列挙する。
+   - **品質検証（変動要因の機械ゲート）**：`factor`/`factor_kind` の充填完了後（merge_factors.py によるマージと (d) 横断整合の後・step3.5 の前）に `python scripts/validate_ranking_quality.py docs/tmp/ranking.json` を実行する。指摘の修正も factors.json 更新→merge_factors.py 再実行で反映する。市場分析タブと**同一基準**（因果語・精密主張トリガー・禁止URL・推定マーカーの語彙を `validate_market_quality.py` から import 再利用）で変動要因の出典品質を機械検査する（検査内容と対応は §「変動要因の品質規律」）。**非ゼロ終了（ERROR）でもランキング配信自体はブロックしない**（1行の弱い要因で当日全体を落とさない）。ERROR/WARN は**本文を削らず**裏取りで解消（第一手は `disclosures`・`kabutan_news`・TDnet/EDINET の再利用による再タグ・出典追加・推定表現化）→ step3 を最大2回やり直す。解消しきれない残件は最終報告に列挙する。
 3.5. **市場分析タブのデータ生成（best-effort・ランキング配信をブロックしない）**：ランキングと**同一の push** に載せるため Publish（step4）の前に生成する。16:35 起動では当日 `/fins/summary`（速報~18:00頃）は未反映だが、**市場分析タブに表示されるのは bars/master/topix 由来の要素のみ**（セクター騰落・breadth・TOPIX・movers 表・乖離フラグ）で、当日決算開示は配信物に出ないため影響しない。手順の詳細は §「市場分析タブ（日次自動生成）」に従う。要点のみ：
    - **(a) 決定的データ**：`python scripts/build_market_stats.py --date <SESSION> --out-dir docs/tmp/market`。`docs/tmp/market/` に `sector_return_<SESSION>.csv`・`movers_top_<SESSION>.csv`（sector_analysis.py 移植版）と `market_stats_<SESSION>.json`（TOPIX 前日比・breadth・最大代金セクター/銘柄〔全ユニバース真値〕・**⚠乖離フラグ候補 `divergence_flags`**・movers の TDnet 開示文脈 `movers_context`）を出力。
    - **(b) ナラティブ・フラグメント執筆**：`docs/tmp/market/narrative_<SESSION>.json`（**コミットしない**）を §「市場分析フラグメント執筆」の品質要件で執筆する。

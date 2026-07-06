@@ -21,9 +21,11 @@
 ## SOT（単一の真実源）との同期
 
 データ取得系の共有スクリプト（`jquants.py` / `business_day.py` / `kabutan_pts.py` / `tdnet.py` /
-`market_cap_jquants.py` / `market_cap_yahoo.py` / `grok_research.py`）は、共有リポ
-**`market-scripts-common`** を単一の真実源とするベンダリング。`scripts/vendor.lock.json` に
-バージョン・コミット・ファイル別 sha256 が刻印される。`build_day_ranking.py` /
+`market_cap_jquants.py` / `market_cap_yahoo.py` / `grok_research.py` / `merge_factors.py`）と
+サブエージェント定義（`.claude/agents/stock-factor-researcher.md`）は、共有リポ
+**`market-scripts-common`** を単一の真実源とするベンダリング。各配布先の `vendor.lock.json` に
+バージョン・コミット・ファイル別 sha256 が刻印される（`.claude/agents/` 分は CI の check_vendor
+対象外で、SOT 側 `python sync.py --check` で検証する）。`build_day_ranking.py` /
 `build_market_stats.py` / `build_market_json.py` / `html_generator.py` / `publish.py` 等の
 配信インフラ・Stage1 は本リポ固有（ベンダリング対象外）。
 
