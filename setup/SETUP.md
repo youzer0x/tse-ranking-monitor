@@ -12,14 +12,11 @@
 
 ## Step 0：スクリプトを揃える（共有スクリプトは market-scripts-common からベンダリング）
 
-本ディレクトリには `scripts/publish.py`・`scripts/html_generator.py`・`scripts/gmail_sender.py`・`scripts/get_gmail_token.py`・`scripts/check_gate.py`・`scripts/build_day_ranking.py` 等の本リポ固有スクリプトが同梱済み（Web/メールの体裁は `html_generator.py`＝PTS 版と同一トンマナ）。データ取得系の共有スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・`market_cap_jquants.py`・`market_cap_yahoo.py`・`grok_research.py`）は共有リポ **`market-scripts-common`** が単一の真実源で、同リポの sync.py が配布と `scripts/vendor.lock.json` の刻印を行う（手動 `cp` はしない）：
+本ディレクトリには `scripts/publish.py`・`scripts/html_generator.py`・`scripts/gmail_sender.py`・`scripts/get_gmail_token.py`・`scripts/check_gate.py`・`scripts/build_day_ranking.py` 等の本リポ固有スクリプトが同梱済み（Web/メールの体裁は `html_generator.py`＝PTS 版と同一トンマナ）。データ取得系の共有スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・`market_cap_jquants.py`・`market_cap_yahoo.py`）は共有リポ **`market-scripts-common`** が単一の真実源で、同リポの sync.py が配布と `scripts/vendor.lock.json` の刻印を行う（手動 `cp` はしない）：
 
 ```bash
 cd /c/Users/YujiroOkawa/project-private/market-scripts-common
 python sync.py    # manifest.json 記載の全消費リポへ配布
-# （任意・grok 委譲を使う場合のみ）共有プロンプト雛形をコピー：
-mkdir -p /c/Users/YujiroOkawa/project-private/tse-ranking-monitor/grok
-cp ../news-financial-market/skills/tse-ranking-digest/grok/grok_research_prompt.md /c/Users/YujiroOkawa/project-private/tse-ranking-monitor/grok/
 ```
 
 ファイル構成（完成形）：
@@ -35,7 +32,6 @@ tse-ranking-monitor/
 │   ├── build_market_stats.py # 市場分析タブ step3.5-(a)：決定的CSV＋market_stats JSON生成（sector_analysis.py 移植版）
 │   ├── build_market_json.py  # 市場分析タブ step3.5-(c)：CSV＋stats＋ナラティブJSONを結合
 │   ├── market_fragment_defaults.json # 市場分析の静的テンプレ（title/universe/methodology/disclaimer）
-│   ├── grok_research.py      # （任意）grok 委譲＝xAI Grok API リサーチ ※market-scripts-common からベンダリング
 │   ├── wait_for_data.py      # ルーチンstep1：営業日ゲート＋当日四本値の鮮度ガード（SESSION=日付 / SKIP / TIMEOUT）
 │   ├── check_gate.py         # 純・営業日ゲート（SESSION=日付 / SKIP）※手動確認/フォールバック用に残置
 │   ├── publish.py            # フルデータ保存・manifest・index 書出し・送信の取りまとめ
@@ -43,7 +39,6 @@ tse-ranking-monitor/
 │   ├── gmail_sender.py       # Gmail API（HTTPS）送信（PTS と同方式）
 │   └── get_gmail_token.py    # ローカル1回：リフレッシュトークン取得
 ├── docs/                     # GitHub Pages（index.html・data/ は publish.py が生成）
-├── grok/                     # （任意）grok 委譲アセット（共有プロンプト雛形）
 └── setup/
     ├── SETUP.md              # 本手順書
     └── ROUTINE_PROMPT.md     # スケジュール作成フォームに貼る本文
@@ -122,16 +117,9 @@ git push -u origin main
    ```
    - `TZ` … 営業日ゲートの日付判定を JST に固定（**必須**。これが無いと当日判定がずれる）。
    - `NOTIFY_TO` … カンマ区切りで複数可。
-   - **（任意）grok 委譲を使う場合のみ**追加する（未設定なら従来どおり Claude 完結＝即時ロールバック）：
-     ```
-     TSE_USE_GROK=1               # 1 で grok 委譲 ON（既定 off）
-     XAI_API_KEY=（xAI の API キー）
-     XAI_MODEL=grok-4.3           # 任意・利用モデル（既定 grok-4.3）
-     XAI_SEARCH_MODE=on           # 任意・web_search ツール: on|off
-     ```
 3. **ネットワーク許可（Network access）**：既定 `Trusted` だと外部サイトが `403` になる。次のどちらか：
    - **おすすめ＝`Full`**：すべて許可（記事取得が確実）。
-   - **`Custom`**：「Allowed domains」に `api.jquants.com`／`www.release.tdnet.info`／`finance.yahoo.co.jp`／`kabutan.jp`／**`<あなた>.github.io`（または `github.io`）**／報道各社（`nikkei.com`・`asia.nikkei.com`・`reuters.com`・`bloomberg.com`・`wsj.com`・`ft.com`・`cnbc.com`・`jiji.com`・`kyodonews.jp`・`toyokeizai.net`・`diamond.jp` 等）を1行ずつ。**grok 委譲を使う場合は `api.x.ai` を追加**。**「Also include default list of common package managers」に必ずチェック**（pip と Gmail API `*.googleapis.com` のため）。
+   - **`Custom`**：「Allowed domains」に `api.jquants.com`／`www.release.tdnet.info`／`finance.yahoo.co.jp`／`kabutan.jp`／**`<あなた>.github.io`（または `github.io`）**／報道各社（`nikkei.com`・`asia.nikkei.com`・`reuters.com`・`bloomberg.com`・`wsj.com`・`ft.com`・`cnbc.com`・`jiji.com`・`kyodonews.jp`・`toyokeizai.net`・`diamond.jp` 等）を1行ずつ。**「Also include default list of common package managers」に必ずチェック**（pip と Gmail API `*.googleapis.com` のため）。
    - Gmail API の `gmail.googleapis.com`・`oauth2.googleapis.com` は既定の `*.googleapis.com` に含まれ**追加不要**。
    - **`github.io` は publish の `--notify`（メール前の Pages ライブ確認）で必要**。未許可だと毎回ライブ確認に失敗し、5分のタイムアウト後に送信する（＝従来どおりメールは届くがリンク先ラグが残る）。`Full` なら追加不要。
 4. **セットアップ・スクリプト（Setup script）**：クラウドの setup はリポジトリ外で走るため `-r requirements.txt` は使えない。パッケージ名を直接、PEP668 フォールバック付きで（クォートや `>=` は貼付で化けるので使わない）：

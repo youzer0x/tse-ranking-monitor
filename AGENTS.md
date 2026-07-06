@@ -7,7 +7,7 @@
 - 方法論（抽出条件・時価総額算出・厳密窓・変動要因の裏取り・文体・品質ゲート）は
   **`news-financial-market/skills/tse-ranking-digest/SKILL.md`** が単一の真実源。本ファイルはそれに準拠する。
 - データ取得系の共有スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・
-  `market_cap_*.py`・`grok_research.py`・`merge_factors.py`）とサブエージェント定義
+  `market_cap_*.py`・`merge_factors.py`）とサブエージェント定義
   （`.claude/agents/stock-factor-researcher.md`）の**コード**は共有リポ **`market-scripts-common`** が
   単一の真実源（ベンダリング。各配布先の `vendor.lock.json` 参照・直接編集禁止）。
 - 配信実装（Pages の体裁・Gmail）は on-disk の `tdnet-monitor`（`html_generator.py`・`gmail_sender.py`・`docs/`）を下敷きにしている。
@@ -26,11 +26,6 @@
    - **掲載上限＝値上がり率上位50社**（該当が50社超なら上位50社のみ `rows` に入る。`--max-rank` 既定50）。`counts.qualifying`＝該当総数、`counts.ranked`＝掲載数。
    - 各 row に **`sector_cluster`**（同一33業種＝`S33` で当日ともに上昇した co-mover ＋ leader 候補）が付き、トップレベルに **`theme_clusters`**（クラスタ要約）が入る（Stage2 のセクター連動クロスチェックに使う）。
    - **`--kabutan-news`** を付けると各 row（上位50社）の **`kabutan_news[]`**（株探 材料・特集〔レーティング日報〕・5%ルール等の直近見出し＋時刻。テクニカル定型ノイズは除外）が事前充填され、Stage2 で「材料未確認」へ落とす前の確認材料になる。best-effort（失敗時は空配列）。
-2.5. **（任意・既定 off）grok 委譲リサーチ**：env **`TSE_USE_GROK=1`** のときのみ実行。
-   `python scripts/grok_research.py --in docs/tmp/ranking.json --out-dir docs/tmp/research --top 25` を実行し、
-   **上昇率上位25社**の変動要因を **xAI Grok API**（`XAI_API_KEY`・web_search ツール）でリサーチ → `<code>-<name>-<date>.md`（末尾に DIGEST_BLOCK）を生成する（**APIコスト削減方針：grok は上位25社まで。26位以降は Stage2 で Claude〔手順B〕が裏取り**）。
-   `TSE_USE_GROK` 未設定/0 のときは本ステップを**完全にスキップ**（従来の Claude 完結フローと同一）。`grok_research.py` がエラー・API 失敗のときも、その回は grok を捨てて Stage2 を全行 Claude で実施する。
-   方法論・プロンプトは `skills/tse-ranking-digest/grok/`（共有雛形）・`reference/sources.md §4`（3層ソース方針）に準拠。
 3. **Stage2（変動要因の充填）**：`rows`（上位50社）各銘柄の `factor`/`factor_kind` を
    **[開示]（TDnet 前営業日15:30以降∪当日15:30未満）→[報道]（一次記事＋配信時刻を当日セッションに整合）→[セクター連動クロスチェック]→[テーマ]** の順で埋める。
    検索要約を出典にせず、材料未確認は5パス確認後にのみ正直に記す（詳細は `SKILL.md §5 手順B`）。
@@ -39,7 +34,7 @@
    - **(a) ハイブリッド判定（親が直接書く行）**：窓内 `disclosures[]` のタイトルだけで上昇が明快に説明できる行
      （決算・上方/下方修正・TOB・新株予約権・大型受注等）は親が直接 `factor`（具体的に）/`factor_kind="開示"` を起こす（委譲しない）。
    - **(b) 委譲**：残りの行を **1銘柄=1タスク・約10並列のバッチ**で `stock-factor-researcher` に委譲する。
-     タスクプロンプト＝下の**【調査パラメータ】雛形**（`<SESSION>` 置換。`TSE_USE_GROK=1` なら grok 研究 md の行を含める）
+     タスクプロンプト＝下の**【調査パラメータ】雛形**（`<SESSION>` 置換）
      ＋**当該 row の JSON 全体**（`disclosures`/`kabutan_news`/`sector_cluster` 含む）。返却は `{code, status, factor, factor_kind, sources}` の JSON 1個。
    - **(c) 収集とマージ**：親が直接書いた行のエントリと返却 JSON をあわせて **JSON 配列**として `docs/tmp/factors.json` に保存し、
      `python scripts/merge_factors.py --ranking docs/tmp/ranking.json --factors docs/tmp/factors.json` を実行する。
@@ -54,13 +49,8 @@
    - [開示]の定義: row.disclosures（前営業日15:30以降∪当日15:30未満の TDnet 開示）が窓内材料
    - レーティング確認: disclosures が空なら row.kabutan_news（事前充填済み）と株探 https://kabutan.jp/stock/news?code=<4桁>（ブラウザUA）の「レーティング日報」「材料」を確認。寄り前（当日15:30より前）に伝わった格上げ・目標株価引き上げは有力材料（factor_kind=報道・証券会社名と旧→新の投資判断/目標株価を具体記載）
    - セクター文脈: row.sector_cluster（同一33業種の co-mover）を参考にする（クラスタ横断の最終帰属は親が行う）
-   - （TSE_USE_GROK=1 のとき）grok研究md: docs/tmp/research/<code>-<name>-<date>.md を Read で取り込み、手順B'の検証（ランディングページ出典の全削除・数値の一次再検証・窓外材料の格下げ・3層ソース再検証・窓整合）を経て factor を起こす。ファイル欠落・検証落ちなら通常手順で裏取りする
    - 文体: である調。「開示なし」等の定型注記は書かない
    ```
-   - **`TSE_USE_GROK=1` のとき（手順B'）**：Stage2.5 の `docs/tmp/research/<code>-<name>-<date>.md` を `code`×`session_date` で取り込む（上記雛形の grok 行で各サブエージェントに委ねる）。
-     **研究本文を主入力**とし（DIGEST_BLOCK は索引・要約で単独依存しない＝当日ドライバーを取りこぼす）、取り込み時に **(a) ランディングページ出典の全削除（Yahoo `/quote`・日経会社ページ・株探銘柄トップ等）・(b) 数値を J-Quants/一次開示で再検証・(c) 窓外材料は「背景」に格下げ** を行い、
-     **3層ソース再検証**（`sources_used`=採用／`sources_new_candidate`=ルーブリック再評価のうえ採用＋whitelist 昇格候補に記録／`sources_excluded`=不採用）＋`window_ok`/`trigger_time` の厳密窓整合を確認して `factor`/`factor_kind` を起こす（**発見は grok・判定は Claude**）。
-     **研究ファイル欠落・検証落ち・窓不整合の行は従来の Claude 裏取りに fallback**。検証合格率が掲載行の半数未満なら grok を捨てて全行 Claude。
    - **ソース規律（3層方針）**：①中核 whitelist は採用、②良質な非whitelist（フィスコ・みんかぶ編集記事等）はルーブリック合格なら採用、③個人発信・匿名・純アルゴ生成は不使用（`reference/sources.md §4`）。
    - **証券会社のレーティング変更（投資判断・目標株価）も必ずカバーする**。TDnet には出ないため、`disclosures` が空なのに日中上昇した銘柄は **株探の銘柄ニュース `https://kabutan.jp/stock/news?code=<4桁>`（ブラウザ UA）の「レーティング日報」「材料」**を確認する（`--kabutan-news` 実行時は各 row の `kabutan_news[]` に充填済み）。寄り前に出た格上げ・目標株価引き上げ（当日15:30より前に伝わったもの）は日中上昇の有力材料。証券会社名・旧→新の投資判断/目標株価を具体的に記し、区分は `[報道]`。
    - **セクター連動クロスチェック（必須）**：各 row の `sector_cluster`／トップレベル `theme_clusters` を読み、同一33業種で束で動いた銘柄は、クラスタ内で具体的[開示]を持つ銘柄（`has_disclosure=true`。`leader_code` は機械的ヒントなので開示内容を読んで真の牽引役を選び直す）を名指しで根拠化し `[テーマ]`（連鎖）として帰属する。業種をまたぐテーマ（例：光部品＝非鉄金属〔電線〕＋電気機器〔光部品〕＋精密機器）は各クラスタの leader と地合いから横断的に結ぶ。**同一テーマの co-mover を材料未確認で放置しない**。連鎖／継続（決算後ドリフト）／需給（前日反動・薄商い）の別は本文で書き分ける（区分は3タグ維持）。

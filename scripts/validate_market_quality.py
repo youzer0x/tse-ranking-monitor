@@ -21,7 +21,7 @@ build_market_json.py の validate_market() が「SPA が描画できる形か」
                       無ければ WARN（終了コードには影響しない。check_warnings）
 
 検出時の修正方針（重要）：**主張を削って通さない**。Stage2 で収集済みの出典
-（kabutan_news・TDnet・grok research）を再利用して文末に `（[出典名](URL)）` を
+（kabutan_news・TDnet・サブエージェント調査）を再利用して文末に `（[出典名](URL)）` を
 足すのが第一手。削除・弱体化は裏取り探索を尽くした後の最終手段
 （AGENTS.md §市場分析フラグメント執筆「出典規律」）。
 
