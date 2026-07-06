@@ -8,3 +8,5 @@ ranking.json
 .DS_Store
 # 計画・設計メモ（履歴として手元に保持。リポジトリには追跡させない）
 /notes/
+# Claude Code のローカル権限設定（マシン固有。hooks 本体の settings.json は追跡する）
+.claude/settings.local.json

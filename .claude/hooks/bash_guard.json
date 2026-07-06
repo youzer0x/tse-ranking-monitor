@@ -1,0 +1,7 @@
+{
+  "checks": ["commit_gate"],
+  "commit_gate": {
+    "run_check_vendor": true,
+    "code_paths": ["scripts/", "tests/", "requirements", "pytest.ini"]
+  }
+}
