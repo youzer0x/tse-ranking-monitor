@@ -226,7 +226,7 @@ function render(){
     '抽出条件：値上がり率≥+'+(c.min_pct??5)+'% かつ 売買代金≥'+((c.min_turnover_yen??1e7)/1e6)+'百万円／東証個別株のみ・時価総額≥'+(c.min_mcap_oku??100)+'億円'+(c.max_rank?'・上昇率上位'+c.max_rank+'社':'')+'。時価総額は当日終値×発行済株式数（億円・四捨五入）。† は増資・自己株で株探最新株数と>1%乖離。';
   let h='<table><thead><tr><th class="r">#</th><th>コード</th><th>銘柄</th><th>市場</th><th class="r">前日比%<br>(5営業日)</th><th class="r">前日比<br>(円)</th><th class="r">終値<br>(円)</th><th class="r">売買代金<br>(億円)</th><th>変動要因</th></tr></thead><tbody>';
   rows.forEach(r=>{
-    let factor=esc(r.factor||'（材料未確認）');
+    let factor=mdInline(r.factor||'（材料未確認）');
     const fk=(r.factor_kind||'').replace(/[\[\]]/g,'');
     if(fk==='開示'&&r.disclosures&&r.disclosures.length&&r.disclosures[0].pdf_url){factor=factor+' <a href="'+esc(r.disclosures[0].pdf_url)+'" target="_blank">[開示PDF]</a>';}
     const code=fmtCode(r.code);
