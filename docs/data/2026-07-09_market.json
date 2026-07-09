@@ -1,0 +1,729 @@
+{
+  "schema_version": 1,
+  "kind": "market_analysis",
+  "session_date": "2026-07-09",
+  "prev_date": "2026-07-08",
+  "generated_at": "2026-07-09 17:24 JST",
+  "title": "東京株式市場 セクター/テーマ 騰落率分析",
+  "universe": {
+    "description": "東証プライム/スタンダード/グロースの内国普通株のうち当日売買代金1億円以上",
+    "min_turnover_yen": 100000000,
+    "n_liquid": 1480
+  },
+  "market": {
+    "topix_pct": 0.35,
+    "breadth": {
+      "up": 587,
+      "down": 854,
+      "flat": 39
+    },
+    "top_sector_by_turnover": {
+      "name": "電気機器",
+      "turnover_oku": 54739.1
+    },
+    "top_stock_by_turnover": {
+      "code": "285A",
+      "name": "キオクシアホールディングス",
+      "turnover_oku": 31136.7
+    }
+  },
+  "thesis": [
+    "SOX+2.23%（Apple-Broadcom カスタム半導体供給合意$30B超・NVIDIA製造遅延否定・SK Hynix ADR 7倍超申込・H200中国向け緩和報道が重なった）の波及で[[電気機器]]（加重+5.96%）へ資金が集中し、TOPIXは+0.35%と小幅反発。ただし騰落銘柄数は587上昇・854下落と下落優勢であり、電気機器セクターの売買代金・指数ウェイトの大きさが指数を支えた形。",
+    "半導体以外は幅広く利食いや様子見が優勢。[[空運業]]（-2.19%）・[[ゴム製品]]（-1.96%）・[[輸送用機器]]（-1.92%）が軟調。[[サービス業]]は加重+0.62%だが騰落35-63と実態は下落優勢（リクルートHDが上位シェアを占め加重を押し上げ）。"
+  ],
+  "strip": {
+    "sectors_up": [
+      {
+        "name": "電気機器",
+        "pct": 5.96
+      },
+      {
+        "name": "精密機器",
+        "pct": 3.28
+      },
+      {
+        "name": "非鉄金属",
+        "pct": 2.16
+      }
+    ],
+    "sectors_down": [
+      {
+        "name": "空運業",
+        "pct": -2.19
+      },
+      {
+        "name": "ゴム製品",
+        "pct": -1.96
+      },
+      {
+        "name": "輸送用機器",
+        "pct": -1.92
+      }
+    ]
+  },
+  "overview": {
+    "snapshot": [
+      {
+        "label": "TOPIX（終値ベース）",
+        "value": "+0.35% 4,020.37"
+      },
+      {
+        "label": "値上がり / 値下がり / 変わらず",
+        "value": "587 / 854 / 39"
+      },
+      {
+        "label": "最大売買代金セクター",
+        "value": "電気機器 約5.5兆円"
+      },
+      {
+        "label": "最大売買代金銘柄",
+        "value": "キオクシアホールディングス 約3.1兆円"
+      }
+    ],
+    "points": [
+      "半導体テーマが一極集中で市場全体の売買代金を牽引。[[キオクシアHD]]（285A）の売買代金3.1兆円が電気機器セクター全体（5.5兆円）の56.9%を占め、SOX+2.23%・Apple-Broadcom供給合意・SK Hynix ADR申込7倍超・H200中国向け緩和報道の4材料が重なった。",
+      "TOPIXは+0.35%と小幅プラスだが騰落銘柄数は587上昇・854下落と下落優勢。電気機器の売買代金・指数ウェイトの大きさが指数を下支えしており、体感的なセンチメントより指数の方が強い。",
+      "個別では[[ispace]]（9348）がSpaceXとの月輸送サービス開始をTDnet開示し+18.69%、[[エリアリンク]]（8914）がストレージ王へのTOB開始を開示し+7.71%。"
+    ],
+    "flow": [
+      "半導体・電気機器への集中買い（売買代金5.5兆円）が際立つ一方、輸送用機器・空運・ゴム製品への売り継続。",
+      "グロース小型株は二極化：テーマ性の強い銘柄（[[584A LiNKX]]+20.65%・[[218A Liberaware]]+19.72%）には追随買いが集まる一方、[[6522 アスタリスク]]は前週高騰後の利食いで-20.83%と値幅の大きい動きが続く。"
+    ],
+    "flow_conclusion": "半導体需要の再評価サイクルが続く限り、電気機器セクターへの集中と他セクターの選別は当面継続しやすい。次の注目点はSK Hynix ADR（7月10日上場）の初値反応と、決算シーズン本格化に伴う企業業績の精査。"
+  },
+  "sectors33": [
+    {
+      "name": "電気機器",
+      "n": 140,
+      "up": 100,
+      "down": 35,
+      "flat": 5,
+      "w_pct": 5.96,
+      "mean_pct": 1.11,
+      "median_pct": 0.87,
+      "turnover_oku": 54739.1,
+      "flag": "★"
+    },
+    {
+      "name": "精密機器",
+      "n": 33,
+      "up": 19,
+      "down": 14,
+      "flat": 0,
+      "w_pct": 3.28,
+      "mean_pct": 0.94,
+      "median_pct": 0.46,
+      "turnover_oku": 1112.6,
+      "flag": "⚠"
+    },
+    {
+      "name": "非鉄金属",
+      "n": 20,
+      "up": 12,
+      "down": 8,
+      "flat": 0,
+      "w_pct": 2.16,
+      "mean_pct": 0.18,
+      "median_pct": 0.48,
+      "turnover_oku": 5183.0
+    },
+    {
+      "name": "海運業",
+      "n": 6,
+      "up": 4,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 1.15,
+      "mean_pct": 0.86,
+      "median_pct": 1.13,
+      "turnover_oku": 368.0
+    },
+    {
+      "name": "機械",
+      "n": 108,
+      "up": 59,
+      "down": 48,
+      "flat": 1,
+      "w_pct": 1.14,
+      "mean_pct": 0.44,
+      "median_pct": 0.3,
+      "turnover_oku": 4819.2
+    },
+    {
+      "name": "鉱業",
+      "n": 5,
+      "up": 3,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 0.97,
+      "mean_pct": 0.15,
+      "median_pct": 0.84,
+      "turnover_oku": 214.1
+    },
+    {
+      "name": "ガラス･土石製品",
+      "n": 23,
+      "up": 10,
+      "down": 12,
+      "flat": 1,
+      "w_pct": 0.72,
+      "mean_pct": 0.02,
+      "median_pct": -0.27,
+      "turnover_oku": 743.5,
+      "flag": "⚠"
+    },
+    {
+      "name": "保険業",
+      "n": 10,
+      "up": 4,
+      "down": 6,
+      "flat": 0,
+      "w_pct": 0.7,
+      "mean_pct": -0.19,
+      "median_pct": -0.18,
+      "turnover_oku": 1093.3,
+      "flag": "⚠"
+    },
+    {
+      "name": "サービス業",
+      "n": 101,
+      "up": 35,
+      "down": 63,
+      "flat": 3,
+      "w_pct": 0.62,
+      "mean_pct": -0.48,
+      "median_pct": -0.4,
+      "turnover_oku": 1980.5,
+      "flag": "⚠"
+    },
+    {
+      "name": "石油･石炭製品",
+      "n": 5,
+      "up": 3,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 0.62,
+      "mean_pct": -0.04,
+      "median_pct": 0.49,
+      "turnover_oku": 149.2
+    },
+    {
+      "name": "化学",
+      "n": 100,
+      "up": 42,
+      "down": 56,
+      "flat": 2,
+      "w_pct": 0.22,
+      "mean_pct": -0.24,
+      "median_pct": -0.23,
+      "turnover_oku": 2522.1
+    },
+    {
+      "name": "その他製品",
+      "n": 35,
+      "up": 15,
+      "down": 19,
+      "flat": 1,
+      "w_pct": 0.2,
+      "mean_pct": -0.44,
+      "median_pct": -0.18,
+      "turnover_oku": 926.6
+    },
+    {
+      "name": "金属製品",
+      "n": 27,
+      "up": 12,
+      "down": 14,
+      "flat": 1,
+      "w_pct": 0.1,
+      "mean_pct": -0.65,
+      "median_pct": -0.11,
+      "turnover_oku": 853.0,
+      "flag": "⚠"
+    },
+    {
+      "name": "情報･通信業",
+      "n": 160,
+      "up": 61,
+      "down": 95,
+      "flat": 4,
+      "w_pct": 0.09,
+      "mean_pct": -0.3,
+      "median_pct": -0.32,
+      "turnover_oku": 4869.3
+    },
+    {
+      "name": "倉庫･運輸関連業",
+      "n": 7,
+      "up": 4,
+      "down": 3,
+      "flat": 0,
+      "w_pct": 0.05,
+      "mean_pct": 0.21,
+      "median_pct": 0.06,
+      "turnover_oku": 49.9
+    },
+    {
+      "name": "その他金融業",
+      "n": 22,
+      "up": 7,
+      "down": 15,
+      "flat": 0,
+      "w_pct": -0.13,
+      "mean_pct": -0.44,
+      "median_pct": -0.34,
+      "turnover_oku": 428.7
+    },
+    {
+      "name": "電気･ガス業",
+      "n": 22,
+      "up": 6,
+      "down": 14,
+      "flat": 2,
+      "w_pct": -0.19,
+      "mean_pct": -0.14,
+      "median_pct": -0.12,
+      "turnover_oku": 583.1
+    },
+    {
+      "name": "医薬品",
+      "n": 41,
+      "up": 15,
+      "down": 24,
+      "flat": 2,
+      "w_pct": -0.29,
+      "mean_pct": -0.18,
+      "median_pct": -0.21,
+      "turnover_oku": 1102.5
+    },
+    {
+      "name": "銀行業",
+      "n": 70,
+      "up": 8,
+      "down": 60,
+      "flat": 2,
+      "w_pct": -0.51,
+      "mean_pct": -1.13,
+      "median_pct": -1.05,
+      "turnover_oku": 3547.5
+    },
+    {
+      "name": "卸売業",
+      "n": 97,
+      "up": 52,
+      "down": 44,
+      "flat": 1,
+      "w_pct": -0.57,
+      "mean_pct": 0.31,
+      "median_pct": 0.11,
+      "turnover_oku": 1956.4,
+      "flag": "⚠"
+    },
+    {
+      "name": "建設業",
+      "n": 72,
+      "up": 21,
+      "down": 45,
+      "flat": 6,
+      "w_pct": -0.6,
+      "mean_pct": -0.39,
+      "median_pct": -0.22,
+      "turnover_oku": 1137.1
+    },
+    {
+      "name": "水産・農林業",
+      "n": 5,
+      "up": 3,
+      "down": 2,
+      "flat": 0,
+      "w_pct": -0.62,
+      "mean_pct": -0.04,
+      "median_pct": 0.22,
+      "turnover_oku": 29.2,
+      "flag": "⚠"
+    },
+    {
+      "name": "鉄鋼",
+      "n": 20,
+      "up": 3,
+      "down": 16,
+      "flat": 1,
+      "w_pct": -0.68,
+      "mean_pct": -0.6,
+      "median_pct": -0.56,
+      "turnover_oku": 283.5
+    },
+    {
+      "name": "食料品",
+      "n": 47,
+      "up": 8,
+      "down": 39,
+      "flat": 0,
+      "w_pct": -1.02,
+      "mean_pct": -1.06,
+      "median_pct": -1.15,
+      "turnover_oku": 1188.1
+    },
+    {
+      "name": "陸運業",
+      "n": 34,
+      "up": 3,
+      "down": 31,
+      "flat": 0,
+      "w_pct": -1.04,
+      "mean_pct": -0.7,
+      "median_pct": -0.64,
+      "turnover_oku": 829.3
+    },
+    {
+      "name": "証券･商品先物取引業",
+      "n": 21,
+      "up": 3,
+      "down": 17,
+      "flat": 1,
+      "w_pct": -1.06,
+      "mean_pct": -0.23,
+      "median_pct": -0.54,
+      "turnover_oku": 402.0
+    },
+    {
+      "name": "不動産業",
+      "n": 45,
+      "up": 15,
+      "down": 28,
+      "flat": 2,
+      "w_pct": -1.07,
+      "mean_pct": -0.38,
+      "median_pct": -0.46,
+      "turnover_oku": 770.3
+    },
+    {
+      "name": "繊維製品",
+      "n": 18,
+      "up": 5,
+      "down": 13,
+      "flat": 0,
+      "w_pct": -1.22,
+      "mean_pct": -0.37,
+      "median_pct": -1.13,
+      "turnover_oku": 130.1
+    },
+    {
+      "name": "小売業",
+      "n": 121,
+      "up": 38,
+      "down": 82,
+      "flat": 1,
+      "w_pct": -1.34,
+      "mean_pct": -0.4,
+      "median_pct": -0.58,
+      "turnover_oku": 3299.1
+    },
+    {
+      "name": "パルプ・紙",
+      "n": 9,
+      "up": 2,
+      "down": 7,
+      "flat": 0,
+      "w_pct": -1.81,
+      "mean_pct": -1.03,
+      "median_pct": -0.6,
+      "turnover_oku": 75.2
+    },
+    {
+      "name": "輸送用機器",
+      "n": 46,
+      "up": 11,
+      "down": 32,
+      "flat": 3,
+      "w_pct": -1.92,
+      "mean_pct": -1.05,
+      "median_pct": -1.02,
+      "turnover_oku": 2198.0
+    },
+    {
+      "name": "ゴム製品",
+      "n": 8,
+      "up": 4,
+      "down": 4,
+      "flat": 0,
+      "w_pct": -1.96,
+      "mean_pct": -0.69,
+      "median_pct": -0.29,
+      "turnover_oku": 270.4
+    },
+    {
+      "name": "空運業",
+      "n": 2,
+      "up": 0,
+      "down": 2,
+      "flat": 0,
+      "w_pct": -2.19,
+      "mean_pct": -2.21,
+      "median_pct": -2.21,
+      "turnover_oku": 147.0
+    }
+  ],
+  "sector_notes": [
+    {
+      "mark": "★",
+      "text": "電気機器：SOX+2.23%・Apple-Broadcom供給合意・H200中国向け緩和・SK Hynix ADR7倍超申込の4材料が重なった集中高。加重+5.96%はキオクシアHD（売買代金の56.9%）1銘柄が押し上げており、中央値は+0.87%・騰落100-35。"
+    },
+    {
+      "mark": "⚠",
+      "text": "精密機器：加重+3.28%に対し中央値+0.46%・騰落19-14。HOYAが売買代金の40.8%を占め加重を引き上げており、セクター全体は小幅上昇程度にとどまる。"
+    },
+    {
+      "mark": "⚠",
+      "text": "金属製品：加重+0.10%に対し中央値-0.11%・騰落12-14（下落優勢）。SUMCOが売買代金の77.4%を占め加重を引き上げており、実態はほぼ横ばいから小幅安。"
+    },
+    {
+      "mark": "⚠",
+      "text": "サービス業・保険業・卸売業・ガラス土石・水産農林業：騰落数（下落>上昇）と加重騰落率の方向が逆転（sign_divergence）。各セクターとも大型株1〜2銘柄が加重を引き上げており、中央値・騰落数の方がセクター実態を示す。"
+    }
+  ],
+  "bought": {
+    "table": [
+      {
+        "sector": "電気機器",
+        "w_pct": 5.96,
+        "median_pct": 0.87,
+        "up": 100,
+        "down": 35,
+        "note": "SOX+2.23%・Apple-Broadcom供給合意・H200中国向け緩和・SK Hynix ADR7倍超申込の4材料重複。[[KOKUSAI ELECTRIC]]+9.92%、[[キオクシアHD]]+8.33%、[[アドバンテスト]]+5.86%。売買代金5.5兆円で全セクター断トツ。",
+        "flag": "★"
+      },
+      {
+        "sector": "精密機器",
+        "w_pct": 3.28,
+        "median_pct": 0.46,
+        "up": 19,
+        "down": 14,
+        "note": "ドローン・光学銘柄への選別買い継続。中央値+0.46%・騰落19-14と実態は小幅上昇。⚠加重+3.28%はHOYA（売買代金40.8%）が押し上げ。"
+      },
+      {
+        "sector": "非鉄金属",
+        "w_pct": 2.16,
+        "median_pct": 0.48,
+        "up": 12,
+        "down": 8,
+        "note": "[[JX金属]]（5016）が証券会社のポジティブ評価レポートを受け急伸しセクターを牽引。銅製錬・半導体材料需要回復への評価が重なった。"
+      }
+    ],
+    "themes": []
+  },
+  "sold": {
+    "table": [
+      {
+        "sector": "空運業",
+        "w_pct": -2.19,
+        "median_pct": -2.21,
+        "up": 0,
+        "down": 2,
+        "note": "原油価格上昇基調が続き燃油コスト高懸念が重し。2銘柄とも下落。"
+      },
+      {
+        "sector": "ゴム製品",
+        "w_pct": -1.96,
+        "median_pct": -0.29,
+        "up": 4,
+        "down": 4,
+        "note": "輸送機器の軟調に連動した自動車向けゴム需要の先行き懸念継続。"
+      },
+      {
+        "sector": "輸送用機器",
+        "w_pct": -1.92,
+        "median_pct": -1.02,
+        "up": 11,
+        "down": 32,
+        "note": "自動車関連の為替・関税コスト懸念が引き続き重し。騰落11-32と広範な下落。"
+      }
+    ],
+    "themes": []
+  },
+  "movers": {
+    "gainers": [
+      {
+        "code": "285A",
+        "name": "キオクシアホールディングス",
+        "pct": 8.33,
+        "close": 77860.0,
+        "turnover_oku": 31136.7,
+        "sector33": "電気機器",
+        "note": "AI向けHBM生産能力拡大計画を示すSK Hynix ADR7倍超申込・SOX+2.23%を受けた半導体テーマの象徴銘柄。売買代金3.1兆円と全市場断トツ。",
+        "links": []
+      },
+      {
+        "code": "6525",
+        "name": "KOKUSAI ELECTRIC",
+        "pct": 9.92,
+        "close": 10810.0,
+        "turnover_oku": 925.0,
+        "sector33": "電気機器",
+        "note": "バッチ式ALD/CVD装置でHBM製造向け受注増期待。SOX上昇の恩恵を最も受けた装置株として+9.92%の急伸。",
+        "links": []
+      },
+      {
+        "code": "584A",
+        "name": "LiNKX",
+        "pct": 20.65,
+        "close": 4090.0,
+        "turnover_oku": 50.4,
+        "sector33": "情報･通信業",
+        "note": "小型IPO・IT運用自動化テーマ。流通株式数の少なさと連続上昇が重なり+20.65%で当日最大上昇率。",
+        "links": []
+      },
+      {
+        "code": "9348",
+        "name": "ispace",
+        "pct": 18.69,
+        "close": 508.0,
+        "turnover_oku": 3.1,
+        "sector33": "サービス業",
+        "note": "SpaceX「スターシップ」ペイロード搭載枠を活用した月輸送サービス開始をTDnet開示し市場評価。+18.69%の急伸。",
+        "links": [
+          {
+            "label": "ispace TDnet PDF — SpaceXスターシップ月輸送サービス開始（2026-07-08 15:50）",
+            "url": "https://www.release.tdnet.info/inbs/140120260702586839.pdf"
+          }
+        ],
+        "emph": true
+      },
+      {
+        "code": "8914",
+        "name": "エリアリンク",
+        "pct": 7.71,
+        "close": 866.0,
+        "turnover_oku": 6.2,
+        "sector33": "不動産業",
+        "note": "ストレージ王（2997）に対するTOB開始をTDnet開示。ストレージ事業の大幅拡大が評価された。+7.71%。",
+        "links": [
+          {
+            "label": "エリアリンク TDnet PDF — ストレージ王TOB開始（2026-07-08 18:30）",
+            "url": "https://www.release.tdnet.info/inbs/140120260707589028.pdf"
+          }
+        ],
+        "emph": true
+      }
+    ],
+    "gainers_footnote": "値上がり上位は電気機器（半導体関連）とグロース小型テーマ株の二極構造。キオクシアHDの売買代金は電気機器セクター全体の56.9%。",
+    "losers": [
+      {
+        "code": "6522",
+        "name": "アスタリスク",
+        "pct": -20.83,
+        "close": 1900.0,
+        "turnover_oku": 82.1,
+        "sector33": "電気機器",
+        "note": "前週高騰後の利益確定売りが集中。特段の悪材料なく短期資金の流出で-20.83%の急落。",
+        "links": []
+      },
+      {
+        "code": "2670",
+        "name": "エービーシー・マート",
+        "pct": -11.37,
+        "close": 2592.0,
+        "turnover_oku": 103.0,
+        "sector33": "小売業",
+        "note": "前日15:30 TDnet開示の2027年2月期1Q決算（3〜5月）が市場期待を下回り-11.37%の大幅安。当日売買代金103億円と比較的大きく機関投資家の失望売りが入ったとみられる。",
+        "links": []
+      },
+      {
+        "code": "5243",
+        "name": "note",
+        "pct": -12.19,
+        "close": 2010.0,
+        "turnover_oku": 31.3,
+        "sector33": "情報･通信業",
+        "note": "個人向けコンテンツ配信プラットフォーム。特段の悪材料なく短期資金の抜けによる需給悪化が-12.19%を招いたとみられる。",
+        "links": []
+      }
+    ],
+    "losers_footnote": "値下がり上位は前週高騰後の利食い・決算失望の2パターン。エービーシー・マート（2670）は1Q決算失望売りが特徴的。"
+  },
+  "theme_matrix": {
+    "rows": [
+      {
+        "side": "buy",
+        "theme": "半導体需要再評価",
+        "stocks": "キオクシアHD・KOKUSAI ELECTRIC・アドバンテスト・東京エレクトロン・SCREEN HD",
+        "background": "SOX+2.23%、Apple-BroadcomカスタムSoC供給合意$30B超、H200中国向け販売規制緩和報道、SK Hynix ADR上場（7/10）申込7倍超が重なり、HBM・装置・テスト関連に押し目買いが集中した。"
+      },
+      {
+        "side": "buy",
+        "theme": "小型ドローン・宇宙テーマ",
+        "stocks": "Liberaware・Terra Drone・ispace",
+        "background": "政府の国産防衛ドローン量産支援方針報道（時事7:04）、屋内点検パートナー開示継続、[[ispace]]がSpaceX月輸送サービス開始をTDnet開示とそれぞれ個別テーマを形成。"
+      },
+      {
+        "side": "buy",
+        "theme": "株主還元強化開示",
+        "stocks": "ユニソルHD・TAKARA & COMPANY",
+        "background": "[[ユニソルHD]]（7128）が新中計UNISOL2策定・記念増配を開示（[TDnet 2026-07-09 12:00](https://www.release.tdnet.info/inbs/140120260709590236.pdf)）、[[TAKARA & COMPANY]]（7921）は7/8開示の配当方針変更・優待再開・増配180円+新中計Vision2029への買いが翌日も継続。"
+      },
+      {
+        "side": "sell",
+        "theme": "決算失望売り",
+        "stocks": "ABC-マート",
+        "background": "[[エービーシー・マート]]（2670）が前日15:30 TDnet開示の2027年2月期1Q（3〜5月）決算で市場期待を下回る内容が嫌気された。"
+      }
+    ],
+    "character": "半導体テーマが売買代金・騰落率ともに市場全体を主導した一方、決算開示による個別選別圧力が強まる二極化相場。指数（TOPIX+0.35%）と騰落銘柄数（587-854）の乖離が顕著。"
+  },
+  "methodology": {
+    "lines": [
+      "**データ** ▶ [J-Quants API V2](https://jpx-jquants.com/)（Lightプラン）。エンドポイント= /equities/bars/daily（四本値）／/equities/master（業種・区分）／/indices/bars/daily/topix（TOPIX）。取得・集計は本リポジトリの build_market_stats.py（sector_analysis.py 移植版・決定的）。",
+      "**対象** ▶ 東証プライム/スタンダード/グロースの内国普通株（ProdCat=011・Mkt∈{0111,0112,0113}・コード末尾0）。",
+      "**流動性フィルタ** ▶ 当日売買代金1億円以上（薄商いの小型・低位株による騰落率上位の歪みを排除）＝ 1,480銘柄。",
+      "**騰落率** ▶ 調整済み終値(AdjC)ベースの前日比。セクター代表値は**売買代金加重平均**を主に、単純平均・中央値・騰落銘柄数を併記。"
+    ]
+  },
+  "news_sources": [
+    {
+      "topic": "ispace SpaceXスターシップ月輸送サービス開始TDnet開示（2026-07-08）",
+      "links": [
+        {
+          "label": "ispace TDnet PDF — SpaceXスターシップ月輸送サービス開始（2026-07-08 15:50）",
+          "url": "https://www.release.tdnet.info/inbs/140120260702586839.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "エリアリンク ストレージ王TOB開始開示（2026-07-08）",
+      "links": [
+        {
+          "label": "エリアリンク TDnet PDF — ストレージ王公開買付開始（2026-07-08 18:30）",
+          "url": "https://www.release.tdnet.info/inbs/140120260707589028.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "ユニソルHD 新中計UNISOL2策定・記念増配開示（2026-07-09）",
+      "links": [
+        {
+          "label": "ユニソルHD TDnet PDF — 新中計UNISOL2策定（2026-07-09 12:00）",
+          "url": "https://www.release.tdnet.info/inbs/140120260709590218.pdf"
+        },
+        {
+          "label": "ユニソルHD TDnet PDF — 配当予想の修正（記念配当による増配）（2026-07-09 12:00）",
+          "url": "https://www.release.tdnet.info/inbs/140120260709590236.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "MrMaxHD 2027年2月期1Q決算短信（経常利益前年同期比22%増）（2026-07-09）",
+      "links": [
+        {
+          "label": "MrMaxHD TDnet PDF — 2027年2月期第1四半期決算短信（2026-07-09 15:00）",
+          "url": "https://www.release.tdnet.info/inbs/140120260625580720.pdf"
+        }
+      ]
+    }
+  ],
+  "sources_accessed": "2026-07-09",
+  "disclaimer": [
+    "本レポートは J-Quants API のデータと公開情報に基づく市場分析であり、**投資勧誘・投資助言を目的としたものではありません**。",
+    "個別銘柄の騰落要因のうち、決算・開示以外（テーマ・需給・地合い）に帰属する部分は報道・状況からの**推定**を含みます。",
+    "売買代金1億円未満の薄商い銘柄は分析対象外です。数値は取得時点のデータに基づき、事後修正・再集計により変動する可能性があります。"
+  ]
+}
