@@ -250,6 +250,49 @@ def test_material_unconfirmed_fallback_no_warn(ranking_golden):
     assert not any("factor が空" in w for w in vrq.check_ranking_warnings(doc))
 
 
+# ── check3c [WARN]：自社決算の窓外帰属・連想の誤用（ローツェ〔6323〕型）─────
+def test_self_earnings_out_of_window_warns(ranking_golden):
+    # 自社決算を挙げるのに窓内に決算開示が無い＝決算が窓外（当日15:30以降＝翌日材料）で当日の
+    # 日中要因にできない。「連想」はヘッジ語なので既存 check3 を免除してしまう（＝すり抜けた経路）が、
+    # 本チェックはヘッジと独立に発火し、自社決算×連想買いの矛盾も同時に検出する。
+    broken = copy.deepcopy(ranking_golden)
+    broken["rows"][1]["factor"] = "第1四半期決算（経常+51%）への好感が連想買いを呼び急伸。"
+    broken["rows"][1]["disclosures"] = []
+    warns = vrq.check_ranking_warnings(broken)
+    assert any("自社決算を上昇要因に挙げる" in w for w in warns)
+    assert any("自社決算が要因の行に「連想（買い）」" in w for w in warns)
+    assert vrq.check_ranking(broken) == []   # WARN は非ブロッキング（exit code に影響しない）
+
+
+def test_self_earnings_in_window_no_warn(ranking_golden):
+    # 窓内に決算短信の開示が在れば（前営業日引け後∪当日15:30未満）自社決算帰属は正当＝無警告
+    doc = copy.deepcopy(ranking_golden)
+    doc["rows"][0]["factor"] = "前営業日引け後の第1四半期決算（経常+51%）を好感した買い。"
+    doc["rows"][0]["disclosures"] = [
+        {"time": "15:30", "code": "4596", "name": "テスト製薬",
+         "title": "2026年2月期 第1四半期決算短信〔日本基準〕（連結）",
+         "pdf_url": "https://www.release.tdnet.info/inbs/140120260709000000.pdf",
+         "origin": "prev", "date": "2026-07-02"}]
+    assert not any("自社決算を上昇要因に挙げる" in w for w in vrq.check_ranking_warnings(doc))
+
+
+def test_self_earnings_without_attribution_no_warn(ranking_golden):
+    # 決算系語があっても帰属語（好感・材料視 等）との共起が無ければ発火しない（誤爆抑制）
+    doc = copy.deepcopy(ranking_golden)
+    doc["rows"][1]["factor"] = "経常増益基調の半導体装置株。当日固有の材料は確認できず。"
+    assert not any("自社決算を上昇要因に挙げる" in w for w in vrq.check_ranking_warnings(doc))
+
+
+def test_earnings_next_day_with_distant_uke_marker_no_warn(ranking_golden):
+    # 「決算は引け後＝翌日材料」と正しく位置づけつつ、別文で「米株高を受け」等と書く正当な本文は
+    # 誤検知しない（決算語と帰属語が同一文で近接しないため）。実際の 6323 訂正 factor の型。
+    doc = copy.deepcopy(ranking_golden)
+    doc["rows"][1]["factor"] = (
+        "前日の米半導体株高を受けた買い戻しに連れ高したとみられる。"
+        "同社の第1四半期決算（経常+51%）は当日15:30の引け後開示＝翌営業日以降の材料である。")
+    assert not any("自社決算を上昇要因に挙げる" in w for w in vrq.check_ranking_warnings(doc))
+
+
 # ── 旧スキーマ（items）／構造破損 ─────────────────────────────────
 def test_items_variant_emits_warn(ranking_golden):
     doc = copy.deepcopy(ranking_golden)
