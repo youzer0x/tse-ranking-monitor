@@ -68,3 +68,42 @@ def test_email_renders_factor_markdown_link():
     data["rows"][0]["factor"] = "格上げ（[日経](https://www.nikkei.com/article/x)）。"
     html = hg.generate_email_html(data, "https://x/")
     assert '<a href="https://www.nikkei.com/article/x"' in html
+
+
+# ── generate_pages_html（SPA・2026-07-14 改修のレイアウト仕様）──────────
+# SPA は静的文字列1本なので、仕様が消えた/入ったことを文字列で検査する（番犬）。
+def test_pages_ranking_tab_has_no_market_strip():
+    # ランキングタブ冒頭の市況サマリー帯（mstrip）は全カット。ヘッダー直下は該当者数から。
+    html = hg.generate_pages_html()
+    assert "marketStrip" not in html
+    assert "mstrip" not in html
+    assert "renderStrip" not in html
+
+
+def test_pages_header_has_no_gray_hairline_under_rule():
+    # ヘッダー下部の青系ライン直下のグレー薄線（.header::after）は廃止。
+    html = hg.generate_pages_html()
+    assert ".header::after" not in html
+    assert "border-bottom:1px solid var(--rule)" in html   # 青系ラインは維持
+
+
+def test_pages_sector_table_single_metric_with_driver_column():
+    # セクター騰落率は加重のみ・「銘柄」（主導銘柄）カラムを33業種の右に新設。注釈・⚠タグは廃止。
+    html = hg.generate_pages_html()
+    assert "<th>33業種</th><th>銘柄</th>" in html
+    assert "単純平均" not in html
+    assert "中央値" not in html
+    assert "sector_notes" not in html
+    assert "mtag" not in html
+    assert "s.drivers" in html and "drvname" in html   # drivers 欠落（過去JSON）は「—」表示
+    assert "drvrow" in html   # 複数銘柄該当時は1銘柄=1行で併記
+    assert "text-overflow" not in html   # 銘柄名の省略（ellipsis）は厳禁＝常に全文表示
+
+
+def test_pages_has_no_bought_sold_sections():
+    # 「買われた/売られたセクター・テーマ」セクションは全カット（テーマ別資金フローは存続）。
+    html = hg.generate_pages_html()
+    assert "買われたセクター" not in html
+    assert "売られたセクター" not in html
+    assert "sideSection" not in html
+    assert "テーマ別の資金フロー" in html

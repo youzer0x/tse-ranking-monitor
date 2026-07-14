@@ -138,7 +138,6 @@ def generate_pages_html():
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;}
 .header{background:var(--card);color:var(--text);border-top:4px solid var(--primary);border-bottom:1px solid var(--rule);padding:20px 28px 0;position:relative;}
-.header::after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--hairline);}
 .header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;}
 .tabs{display:inline-flex;align-items:flex-end;flex-wrap:wrap;}
 .tabs .tab{margin:0 26px 0 0;padding:6px 2px 12px;border-bottom:3px solid transparent;font-size:15px;font-weight:500;line-height:1.35;text-decoration:none;color:var(--sub);white-space:nowrap;}
@@ -179,15 +178,6 @@ tbody tr:hover td{background:var(--hover);}
 .dropped summary{cursor:pointer;font-size:13px;color:var(--sub);padding:8px 4px;}
 .footer{max-width:1280px;margin:12px auto 0;text-align:center;padding:16px 16px 24px;font-size:11px;color:var(--sub);border-top:1px solid var(--hairline);letter-spacing:.02em;}
 .loading,.empty{text-align:center;padding:50px 20px;color:var(--sub);}
-/* ---- 市況サマリー帯（ランキング上部・紙面のデッキ帯） ---- */
-.mstrip{max-width:1280px;margin:18px auto 0;padding:0 16px;}
-.mstrip-inner{background:transparent;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:14px 2px;}
-.mstrip .thesis{font-family:var(--serif);font-size:14.5px;font-weight:600;color:var(--text);line-height:1.8;}
-.mstrip .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
-.mstrip .schip{font-size:12px;background:var(--card);border:1px solid var(--hairline);border-radius:2px;padding:3px 9px;font-family:var(--numfont);}
-.mstrip .schip.up{color:var(--accent);} .mstrip .schip.down{color:var(--down);}
-.mstrip a.more{margin-left:auto;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--primary);text-decoration:none;white-space:nowrap;}
-.mstrip a.more:hover{text-decoration:underline;}
 /* ---- 市場分析ビュー（金融紙エディトリアル） ---- */
 #viewMarket .container{max-width:1040px;}
 .msec{background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:22px 24px;margin-bottom:24px;}
@@ -198,18 +188,23 @@ tbody tr:hover td{background:var(--hover);}
 .mhead h2::after{display:none;}
 .msec .lead{font-size:11px;letter-spacing:.05em;color:var(--sub);margin-bottom:10px;}
 blockquote.mthesis{font-family:var(--serif);font-size:15.5px;font-weight:600;color:var(--text);background:transparent;border:0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);border-radius:0;padding:14px 4px;margin:10px 0 2px;line-height:1.9;}
-.msec ul,.msec ol{margin:0 0 6px 1.2em;} .msec li{font-size:13px;line-height:1.7;margin:4px 0;}
-.msec .flowc{font-size:13.5px;font-weight:700;color:var(--primary);margin-top:12px;background:var(--wash);border-left:3px solid var(--primary);border-radius:0;padding:12px 16px;line-height:1.7;}
+.msec ul,.msec ol{margin:0 0 6px 1.2em;} .msec li{font-size:14px;line-height:1.7;margin:4px 0;}
+.msec .flowc{font-size:14.5px;font-weight:700;color:var(--primary);margin-top:12px;background:var(--wash);border-left:3px solid var(--primary);border-radius:0;padding:12px 16px;line-height:1.7;}
 .stk{color:#0b7285;font-weight:700;}
-.msec .mfoot{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.55;}
-.msec .mnote{font-size:12px;color:var(--sub);line-height:1.55;margin-top:4px;}
+.msec .mfoot{font-size:13px;color:var(--sub);margin-top:8px;line-height:1.55;}
+.msec .mnote{font-size:13px;color:var(--sub);line-height:1.55;margin-top:4px;}
 .msec .thead-note{font-weight:700;color:var(--primary);}
 table.kv{width:100%;border-collapse:collapse;font-size:13px;border-top:1px solid var(--hairline);}
 table.kv td{padding:8px 10px;border-bottom:1px solid var(--hairline);vertical-align:top;}
-table.kv td.k{color:var(--sub);font-size:11.5px;letter-spacing:.06em;white-space:nowrap;width:1%;padding-top:10px;} table.kv td.v{font-weight:700;font-family:var(--numfont);color:var(--text);white-space:nowrap;} table.kv td.n{color:var(--sub);font-size:12px;}
+table.kv td.k{color:var(--sub);font-size:12px;letter-spacing:.06em;white-space:nowrap;width:1%;padding-top:10px;} table.kv td.v{font-weight:700;font-family:var(--numfont);color:var(--text);white-space:nowrap;} table.kv td.n{color:var(--sub);font-size:12.5px;}
 .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .pdown{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--down);font-weight:600;}
-.mtag{display:inline-block;font-size:10px;color:var(--sub);background:transparent;border:1px solid var(--hairline);border-radius:2px;padding:0 5px;margin-left:5px;}
+/* セクター騰落率の主導銘柄列（加重寄与の上位1〜2銘柄＝その日のセクター騰落のドライバー。
+   複数該当は .drvrow で1銘柄=1行に分ける。銘柄名の省略（ellipsis）は厳禁＝常に全文表示し、
+   列幅は騰落率を銘柄名の下段に置くことで抑える） */
+td.drv{white-space:nowrap;}
+td.drv .drvpct{display:block;font-size:11.5px;margin:1px 0 0;text-align:left;}
+td.drv .drvrow+.drvrow{margin-top:5px;}
 .barcell{min-width:150px;}
 .barwrap{position:relative;height:9px;background:transparent;border-radius:0;margin-top:4px;}
 .barwrap::before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#b8b09e;}
@@ -235,12 +230,15 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
 .mk{display:inline-block;width:9px;height:9px;border-radius:1px;margin-right:7px;}
 .mk-buy{background:var(--accent);} .mk-sell{background:var(--down);}
 .fnmark{color:var(--sub);font-weight:700;margin-right:2px;}
-.msum{cursor:pointer;color:var(--sub);font-size:11.5px;font-weight:500;letter-spacing:.08em;}
-/* 市場分析タブ内テーブル（ランキング表のグローバル規則とは分離したスコープ） */
-#viewMarket thead th{position:static;background:transparent;border-bottom:2px solid var(--rule);color:var(--sub);font-size:11px;letter-spacing:.06em;padding:6px 10px 8px;}
+.msum{cursor:pointer;color:var(--sub);font-size:12px;font-weight:500;letter-spacing:.08em;}
+/* 市場分析タブ内テーブル（ランキング表のグローバル規則とは分離したスコープ。
+   本文の可読性優先で基本サイズをランキング表より一段大きく取る） */
+#viewMarket table{font-size:14px;}
+#viewMarket .factor{font-size:13.5px;}
+#viewMarket thead th{position:static;background:transparent;border-bottom:2px solid var(--rule);color:var(--sub);font-size:12px;letter-spacing:.06em;padding:6px 10px 8px;}
 #viewMarket tbody td{border-bottom:1px solid var(--hairline);}
 #viewMarket tbody tr:hover td{background:#f7f3e8;}
-.num,.pct,.pdown,.rank,.code,.chip .num,.mstrip .schip,table.kv td.v,#dateSelect{font-variant-numeric:tabular-nums lining-nums;}
+.num,.pct,.pdown,.rank,.code,.chip .num,table.kv td.v,#dateSelect{font-variant-numeric:tabular-nums lining-nums;}
 @media(max-width:820px){
  .header{padding:14px 14px 0;} .header-inner{flex-direction:column;align-items:stretch;gap:0;}
  .tabs{width:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
@@ -262,21 +260,48 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
  #viewRanking td.pct,#viewRanking td.num{display:inline-block;width:49%;font-size:14px;margin-top:8px;text-align:left;vertical-align:top;}
  #viewRanking td.pct::before,#viewRanking td.num::before{content:attr(data-label)'\00a0';display:block;color:var(--sub);font-size:11px;font-weight:400;font-family:'Noto Sans JP';}
  #viewRanking td.factor{min-width:0;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)!important;}
- .msec{padding:16px 14px;} .mstrip .chips{gap:6px;} .mstrip a.more{margin-left:0;}
+ .msec{padding:16px 14px;}
  #viewMarket .container{padding:0 12px;}
  .mhead h2{font-size:18px;}
  blockquote.mthesis,blockquote.mthesis li{font-size:14.5px;}
- table.kv,table.kv tbody,table.kv tr,table.kv td{display:block;width:100%;}
- table.kv tr{border-bottom:1px solid var(--hairline);padding:8px 0;}
- table.kv td{border-bottom:0;padding:1px 4px;white-space:normal;}
- table.kv td.k{width:auto;padding-top:4px;}
- table.kv td.v{font-size:15px;white-space:normal;}
- table.kv td.n{font-size:11.5px;}
- table.sec33 th:nth-child(4),table.sec33 td:nth-child(4),table.sec33 th:nth-child(5),table.sec33 td:nth-child(5){display:none;}
- table.sec33 .barcell{min-width:90px;}
- table.mmatrix{min-width:640px;} .mmatrix td{padding:8px;}
- table.mvtbl th:nth-child(4),table.mvtbl td:nth-child(4){display:none;}
- table.mvtbl .factor{min-width:180px;}
+ /* 市場概況スナップショット：罫線を全廃し2列タイルに（ラベル小・数値太字・注記小） */
+ table.kv{border-top:0;}
+ table.kv,table.kv tr,table.kv td{display:block;width:100%;}
+ table.kv tbody{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+ table.kv tr{background:var(--wash);border-radius:8px;padding:10px 12px;}
+ #viewMarket table.kv td{border-bottom:0;padding:0;white-space:normal;}
+ table.kv td.k{width:auto;padding-top:0;font-size:11px;}
+ table.kv td.v{font-size:15px;white-space:normal;margin-top:2px;}
+ table.kv td.n{font-size:11.5px;margin-top:2px;}
+ /* セクター騰落率：上昇/下落・売買代金列を隠し 業種+銘柄+騰落率+バー を画面幅に収める。
+    銘柄名は省略せず、長い名前は折返しで全文表示する */
+ table.sec33 th:nth-child(5),table.sec33 td:nth-child(5),table.sec33 th:nth-child(6),table.sec33 td:nth-child(6){display:none;}
+ #viewMarket table.sec33 th{padding:7px 6px;}
+ #viewMarket table.sec33 td{padding:7px 6px;font-size:12.5px;}
+ table.sec33 .barcell{min-width:56px;}
+ table.sec33 td.drv{white-space:normal;}
+ /* テーマ別資金フロー：カード状に積み上げ（badge+テーマ → 銘柄 → 背景） */
+ table.mmatrix,table.mmatrix tbody,table.mmatrix tr,table.mmatrix td{display:block;width:100%;}
+ table.mmatrix thead{display:none;}
+ table.mmatrix tr{padding:10px 0;border-bottom:1px solid var(--hairline);}
+ table.mmatrix tr:last-child{border-bottom:0;}
+ #viewMarket table.mmatrix td{border-bottom:0;padding:2px 0;width:auto;}
+ .mmatrix td:first-child{display:inline;}
+ .mmatrix th.thmcol,.mmatrix td.thmcol{width:auto;min-width:0;}
+ .mmatrix td.thmcol{display:inline;margin-left:8px;}
+ .mmatrix th.bgcol,.mmatrix td.factor{width:auto;}
+ .mmatrix td.stkcol{min-width:0;}
+ /* 注目個別銘柄：カード状に積み上げ（コード+銘柄+前日比 → 材料） */
+ table.mvtbl,table.mvtbl tbody,table.mvtbl tr,table.mvtbl td{display:block;width:100%;}
+ table.mvtbl thead{display:none;}
+ table.mvtbl tr{padding:10px 0;border-bottom:1px solid var(--hairline);}
+ table.mvtbl tr:last-child{border-bottom:0;}
+ #viewMarket table.mvtbl td{border-bottom:0;padding:1px 0;}
+ table.mvtbl td.code,table.mvtbl td.name{display:inline;width:auto;font-size:14px;}
+ table.mvtbl td.name{font-weight:700;margin-left:6px;white-space:normal;}
+ table.mvtbl td.pct,table.mvtbl td.pdown{display:inline;width:auto;margin-left:8px;text-align:left;font-size:14px;}
+ table.mvtbl td.num{display:none;}
+ table.mvtbl .factor{min-width:0;margin-top:4px;}
 }
 </style></head>
 <body>
@@ -290,7 +315,6 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
   <select id="dateSelect" onchange="loadDate(this.value)"><option>読み込み中...</option></select></div>
 </div></div>
 <div id="viewRanking">
-<div class="mstrip" id="marketStrip" style="display:none"></div>
 <div class="summary" id="summary"></div>
 <div class="container">
   <div class="note" id="note"></div>
@@ -335,7 +359,7 @@ async function loadDate(d){
   try{data=await (await fetch('data/'+d+'.json?'+Date.now())).json();render();}
   catch(e){document.getElementById('tableArea').innerHTML='<div class="empty">この日付のデータを読み込めませんでした。</div>';}
   try{marketData=await marketReq;}catch(e){marketData=null;}
-  renderStrip();renderMarket();applyHash();
+  renderMarket();applyHash();
 }
 function render(){
   const rows=data.rows||data.items||[];   /* data.items は旧形式 JSON 後方互換 */
@@ -401,7 +425,7 @@ function mdInline(s){
   return s;
 }
 /* 配列でない値（オブジェクト等）が来ても .forEach で例外を投げず空配列に退避する防御ヘルパ。
-   フラグメントの型崩れ（例: sector_notes をオブジェクトにする）で市場分析タブ全体が
+   フラグメントの型崩れ（例: theme_matrix.rows をオブジェクトにする）で市場分析タブ全体が
    空になる事故を防ぐ（結合器 build_market_json.validate_market が本来は弾くが二重の安全網）。*/
 function asArr(x){return Array.isArray(x)?x:[];}
 function pctClass(v){return (Number(v)>=0)?'pct':'pdown';}
@@ -415,31 +439,21 @@ function applyHash(){
   if(tr)tr.classList.toggle('active',!market);
   if(tm)tm.classList.toggle('active',market);
 }
-function renderStrip(){
-  var el=document.getElementById('marketStrip');if(!el)return;
-  if(!marketData){el.style.display='none';el.innerHTML='';return;}
-  try{
-  var m=marketData.market||{},b=m.breadth||{},st=marketData.strip||{},chips='';
-  if(m.topix_pct!=null)chips+='<span class="schip '+pctClass(m.topix_pct)+'">TOPIX '+pctStr(m.topix_pct)+'</span>';
-  if(b.up!=null)chips+='<span class="schip">値上がり '+b.up+' / 値下がり '+b.down+'</span>';
-  asArr(st.sectors_up).forEach(function(s){chips+='<span class="schip up">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
-  asArr(st.sectors_down).forEach(function(s){chips+='<span class="schip down">'+esc(s.name)+' '+pctStr(s.pct)+'</span>';});
-  var th=marketData.thesis;var thTxt=Array.isArray(th)?asArr(th).map(mdInline).join('　'):mdInline(th||'');
-  el.innerHTML='<div class="mstrip-inner"><div class="thesis">'+thTxt+'</div><div class="chips">'+chips+'<a class="more" href="#market">市場分析を見る →</a></div></div>';
-  el.style.display='';
-  }catch(e){el.style.display='none';el.innerHTML='';}
-}
 function sectorBars(sectors){
   var maxAbs=1;asArr(sectors).forEach(function(s){var a=Math.abs(Number(s.w_pct)||0);if(a>maxAbs)maxAbs=a;});
-  var h='<div class="tscroll"><table class="sec33"><thead><tr><th>33業種</th><th class="r">加重騰落率</th><th class="barcell"></th><th class="r">単純平均</th><th class="r">中央値</th><th class="r">上昇/下落</th><th class="r">売買代金<br>(億円)</th></tr></thead><tbody>';
+  var h='<div class="tscroll"><table class="sec33"><thead><tr><th>33業種</th><th>銘柄</th><th class="r">騰落率</th><th class="barcell"></th><th class="r">上昇/下落</th><th class="r">売買代金<br>(億円)</th></tr></thead><tbody>';
   asArr(sectors).forEach(function(s){
     var w=Number(s.w_pct)||0,width=Math.abs(w)/maxAbs*50;
     var bar='<div class="barwrap">'+(w>=0?'<div class="barpos" style="width:'+width+'%"></div>':'<div class="barneg" style="width:'+width+'%"></div>')+'</div>';
-    h+='<tr><td>'+esc(s.name)+(s.flag?'<span class="mtag">'+esc(s.flag)+'</span>':'')+'</td>'+
+    /* 銘柄＝そのセクターの騰落を主導した銘柄（売買代金加重寄与の上位1〜2件。
+       build_market_stats.py sector_drivers）。複数該当時は1銘柄=1行で併記し、
+       drivers の無い過去データは「—」表示（後方互換）。 */
+    var ds=asArr(s.drivers);
+    var drv=ds.length?ds.map(function(d){return '<div class="drvrow"><a class="drvname" href="https://kabutan.jp/stock/?code='+esc(fmtCode(d.code))+'" target="_blank" rel="noopener">'+esc(d.name)+'</a><span class="drvpct '+pctClass(d.pct)+'">'+pctStr(d.pct)+'</span></div>';}).join(''):'—';
+    h+='<tr><td>'+esc(s.name)+'</td>'+
+      '<td class="drv">'+drv+'</td>'+
       '<td class="'+pctClass(w)+'">'+pctStr(w)+'</td>'+
       '<td class="barcell">'+bar+'</td>'+
-      '<td class="'+pctClass(s.mean_pct)+'">'+pctStr(s.mean_pct)+'</td>'+
-      '<td class="'+pctClass(s.median_pct)+'">'+pctStr(s.median_pct)+'</td>'+
       '<td class="num">'+s.up+' / '+s.down+'</td>'+
       '<td class="num">'+fmtTurnover(s.turnover_oku)+'</td></tr>';
   });
@@ -458,28 +472,6 @@ function moverRows(list){
       '<td class="factor">'+note+'</td></tr>';
   });
   return h+'</tbody></table></div>';
-}
-function sideSection(title,side,noteCol){
-  side=side||{};var tbl=asArr(side.table),themes=asArr(side.themes);
-  if(!tbl.length&&!themes.length)return '';
-  var h='<div class="msec"><h2>'+esc(title)+'</h2>';
-  if(tbl.length){
-    h+='<div class="tscroll"><table><thead><tr><th>セクター</th><th class="r">加重</th><th class="r">中央値</th><th class="r">上昇/下落</th><th>'+esc(noteCol)+'</th></tr></thead><tbody>';
-    tbl.forEach(function(r){
-      h+='<tr><td>'+esc(r.sector)+(r.flag?'<span class="mtag">'+esc(r.flag)+'</span>':'')+'</td>'+
-        '<td class="'+pctClass(r.w_pct)+'">'+pctStr(r.w_pct)+'</td>'+
-        '<td class="'+pctClass(r.median_pct)+'">'+pctStr(r.median_pct)+'</td>'+
-        '<td class="num">'+r.up+' / '+r.down+'</td>'+
-        '<td class="factor">'+mdInline(r.note||'')+'</td></tr>';
-    });
-    h+='</tbody></table></div>';
-  }
-  themes.forEach(function(t){
-    h+='<div class="thead-note" style="font-size:13px;margin:10px 0 2px">'+esc(t.title)+'</div><ul>';
-    asArr(t.bullets).forEach(function(b){h+='<li>'+mdInline(b)+'</li>';});
-    h+='</ul>';
-  });
-  return h+'</div>';
 }
 function themeSection(tm){
   tm=tm||{};
@@ -534,17 +526,13 @@ function renderMarket(){
   }
   h+=themeSection(d.theme_matrix);
   if(d.sectors33&&d.sectors33.length){
-    h+='<div class="msec"><h2>セクター騰落率（東証33業種・売買代金加重）</h2>'+sectorBars(d.sectors33);
-    asArr(d.sector_notes).forEach(function(n){h+='<div class="mnote"><span class="thead-note">'+esc(n.mark)+'</span> '+mdInline(n.text)+'</div>';});
-    h+='</div>';
+    h+='<div class="msec"><h2>セクター騰落率（東証33業種・売買代金加重）</h2>'+sectorBars(d.sectors33)+'</div>';
   }
-  h+=sideSection('買われたセクター/テーマ',d.bought,'位置づけ');
-  h+=sideSection('売られたセクター/テーマ',d.sold,'主因');
   var mv=d.movers||{};
   if((mv.gainers&&mv.gainers.length)||(mv.losers&&mv.losers.length)){
     h+='<div class="msec"><h2>注目個別銘柄と材料</h2>';
-    if(mv.gainers&&mv.gainers.length){h+='<div class="thead-note" style="font-size:13px;margin-bottom:4px"><span class="mk mk-buy"></span>買われた銘柄</div>'+moverRows(mv.gainers);if(mv.gainers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.gainers_footnote)+'</div>';}
-    if(mv.losers&&mv.losers.length){h+='<div class="thead-note" style="font-size:13px;margin:14px 0 4px"><span class="mk mk-sell"></span>売られた銘柄</div>'+moverRows(mv.losers);if(mv.losers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.losers_footnote)+'</div>';}
+    if(mv.gainers&&mv.gainers.length){h+='<div class="thead-note" style="font-size:14px;margin-bottom:4px"><span class="mk mk-buy"></span>買われた銘柄</div>'+moverRows(mv.gainers);if(mv.gainers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.gainers_footnote)+'</div>';}
+    if(mv.losers&&mv.losers.length){h+='<div class="thead-note" style="font-size:14px;margin:14px 0 4px"><span class="mk mk-sell"></span>売られた銘柄</div>'+moverRows(mv.losers);if(mv.losers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.losers_footnote)+'</div>';}
     h+='</div>';
   }
   h+='<div class="msec"><details><summary class="msum">データ・手法・出典</summary>';

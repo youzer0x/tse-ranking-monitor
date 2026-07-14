@@ -186,13 +186,30 @@ def top_stock_out(ts):
     return {"code": ts.get("code"), "name": ts.get("name"), "turnover_oku": ts.get("turnover_oku")}
 
 
+def join_drivers(sectors, stats):
+    """stats の sector_drivers を sectors33 の各行へ drivers（寄与順・1〜2銘柄）として付与する。
+
+    stats 無し・旧 stats（sector_drivers キー無し）では drivers を付けず、SPA 側が
+    「—」表示にフォールバックする（後方互換）。セクター名が CSV と一致しなければ die。
+    """
+    drivers = (stats or {}).get("sector_drivers") or {}
+    by_name = {s["name"]: s for s in sectors}
+    for nm, ds in drivers.items():
+        require(nm in by_name, "sector_drivers のセクター名が CSV に無い: %r" % nm)
+        by_name[nm]["drivers"] = [
+            {"code": d.get("code"), "name": d.get("name"), "pct": d.get("pct")}
+            for d in ds]
+
+
 # ── SPA スキーマ検証（html_generator.py renderMarket が前提する型の強制）─────────────
-# フラグメント由来のフィールド（sector_notes / theme_matrix / overview / bought・sold.themes /
-# news_sources 等）は結合器が形を強制しないため、SPA が .forEach 等で前提する型からずれると
-# 配信画面（📊市場分析タブ）が壊れる。例：sector_notes を配列でなくオブジェクトにすると
-# renderMarket が `d.sector_notes.forEach` で TypeError を投げ、el.innerHTML に到達せずタブが空になる。
+# フラグメント由来のフィールド（theme_matrix / overview / news_sources 等）は結合器が
+# 形を強制しないため、SPA が .forEach 等で前提する型からずれると配信画面（📊市場分析タブ）が
+# 壊れる。例：overview.points を配列でなく文字列にすると renderMarket が例外を投げ、
+# el.innerHTML に到達せずタブが空になる。
 # ここで die させておけば step3.5 の「バリデーション die はフラグメントを直して最大2回再実行」で
 # フラグメントが修正され、壊れた JSON を配信しない（＝自己修復）。
+# 旧スキーマの余剰キー（strip / sector_notes / bought / sold。2026-07 改修で廃止）は
+# 検査対象外として無視する（過去日の market.json も引き続き受理される）。
 def _shape(v):
     if isinstance(v, dict):
         return "オブジェクト(keys=%s)" % list(v)[:6]
@@ -254,10 +271,6 @@ def validate_market(out):
         if fc is not None and not (isinstance(fc, str) or (isinstance(fc, list) and all(isinstance(x, str) for x in fc))):
             bad("overview.flow_conclusion", "文字列 または 文字列の配列（箇条書き）", _shape(fc))
 
-    # sector_notes: 配列 [{mark,text}]（オブジェクトにすると renderMarket が例外→タブ空）
-    need_objs(out.get("sector_notes") or [], ["mark", "text"], "sector_notes",
-              str_keys=("mark", "text"))
-
     # theme_matrix: {} または {rows:[{side?,theme,stocks,background}], character?:str}（配列にしない）
     # side="buy"|"sell"（省略時=買い）。stocks=銘柄名（列＝買い赤/売り緑で配色）／background=背景説明。
     tm = out.get("theme_matrix")
@@ -278,15 +291,6 @@ def validate_market(out):
                         bad("theme_matrix.rows[%d].side" % i, "'buy'|'sell'（省略可）", repr(r.get("side")))
             if tm.get("character") is not None and not isinstance(tm["character"], str):
                 bad("theme_matrix.character", "文字列", _shape(tm["character"]))
-
-    # bought/sold themes: [{title, bullets:[str]}]（文字列配列にしない）
-    for side in ("bought", "sold"):
-        themes = (out.get(side) or {}).get("themes") or []
-        need_objs(themes, ["title", "bullets"], "%s.themes" % side, str_keys=("title",))
-        if isinstance(themes, list):
-            for i, t in enumerate(themes):
-                if isinstance(t, dict):
-                    need_strs(t.get("bullets") or [], "%s.themes[%d].bullets" % (side, i))
 
     # movers: note=str（links は check_links 済み）
     mv = out.get("movers") or {}
@@ -325,7 +329,6 @@ def main():
 
     sectors = read_sector_csv(sector_path)
     require(len(sectors) == 33, "sector CSV は33行であるべき（実際: %d 行）" % len(sectors))
-    sec_by_name = {s["name"]: s for s in sectors}
 
     movers = read_movers_csv(movers_path)
 
@@ -383,50 +386,9 @@ def main():
     if not sources_accessed and generated_at:
         sources_accessed = generated_at[:10]
 
-    # ── strip：フラグメントはセクター名のみ、pct を join
-    def strip_side(names):
-        out = []
-        for nm in (names or []):
-            require(nm in sec_by_name, "strip のセクター名が CSV に無い: %r" % nm)
-            out.append({"name": nm, "pct": sec_by_name[nm]["w_pct"]})
-        return out
-
-    strip = {
-        "sectors_up": strip_side((frag.get("strip") or {}).get("sectors_up")),
-        "sectors_down": strip_side((frag.get("strip") or {}).get("sectors_down")),
-    }
-
-    # ── sector_flags：フラグメントの {name: mark} を sectors33 に付与
-    flags = frag.get("sector_flags") or {}
-    for nm in flags:
-        require(nm in sec_by_name, "sector_flags のセクター名が CSV に無い: %r" % nm)
-    for s in sectors:
-        if s["name"] in flags:
-            s["flag"] = flags[s["name"]]
-
-    # ── bought / sold：フラグメント {sector, note, flag?} に数値を join
-    def build_side(side):
-        side = side or {}
-        table = []
-        for row in (side.get("table") or []):
-            nm = row.get("sector")
-            require(nm in sec_by_name, "bought/sold のセクター名が CSV に無い: %r" % nm)
-            s = sec_by_name[nm]
-            item = {
-                "sector": nm,
-                "w_pct": s["w_pct"],
-                "median_pct": s["median_pct"],
-                "up": s["up"],
-                "down": s["down"],
-                "note": row.get("note", ""),
-            }
-            if row.get("flag"):
-                item["flag"] = row["flag"]
-            table.append(item)
-        return {"table": table, "themes": side.get("themes") or []}
-
-    bought = build_side(frag.get("bought"))
-    sold = build_side(frag.get("sold"))
+    # ── sector_drivers：stats の代表銘柄を sectors33 の各行へ driver として join
+    #    （--stats 無し・旧 stats では付けず、SPA が「—」表示にフォールバック）
+    join_drivers(sectors, stats)
 
     # ── movers：フラグメント {code, note, links, emph} に CSV の数値を join
     def build_movers(items, side_key):
@@ -498,12 +460,8 @@ def main():
             "top_stock_by_turnover": top_stock_out(top_stock),
         },
         "thesis": frag.get("thesis", ""),
-        "strip": strip,
         "overview": overview,
         "sectors33": sectors,
-        "sector_notes": frag.get("sector_notes") or [],
-        "bought": bought,
-        "sold": sold,
         "movers": movers_out,
         "theme_matrix": frag.get("theme_matrix") or {},
         "methodology": methodology,

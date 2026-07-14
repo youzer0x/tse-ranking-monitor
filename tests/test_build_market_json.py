@@ -1,9 +1,11 @@
 """build_market_json.py の単体テスト（標準ライブラリのみ・ネット/APIキー不要）。
 
 中核は validate_market：配信画面(SPA renderMarket)が前提する型に JSON が合致するかを
-検証し、崩れていれば SystemExit で止める「番犬」。過去に sector_notes が配列でなく
-オブジェクトになり📊市場分析タブが空になった事故があり、その再発を凍結ゴールデンと
-改変コピーで検証する。
+検証し、崩れていれば SystemExit で止める「番犬」。過去にフラグメントの型崩れで
+📊市場分析タブが空になった事故があり、その再発を凍結ゴールデンと改変コピーで検証する。
+2026-07 改修で strip / sector_notes / bought / sold は廃止（余剰キーとして無視され、
+旧データのゴールデンは引き続き受理される）。sectors33 へのセクター代表銘柄の付与は
+join_drivers が担う。
 """
 import copy
 
@@ -94,16 +96,9 @@ def test_check_url_rejects_non_http(bad):
 
 # ── validate_market（本丸）──────────────────────────────────────
 def test_validate_market_accepts_golden(market_golden):
-    # 実運用の出力（凍結ゴールデン）はそのまま通過する
+    # 実運用の出力（凍結ゴールデン）はそのまま通過する。旧スキーマの余剰キー
+    # （strip / sector_notes / bought / sold。2026-07 改修で廃止）は無視される。
     bmj.validate_market(market_golden)
-
-
-def test_validate_market_rejects_object_sector_notes(market_golden):
-    # 実際に起きた事故：sector_notes を配列でなくオブジェクトにするとタブが空になる
-    broken = copy.deepcopy(market_golden)
-    broken["sector_notes"] = {"mark": "▲", "text": "x"}
-    with pytest.raises(SystemExit):
-        bmj.validate_market(broken)
 
 
 def test_validate_market_rejects_bad_thesis_type(market_golden):
@@ -124,20 +119,44 @@ def test_validate_market_rejects_legacy_theme_matrix(market_golden, capsys):
     assert "theme_matrix" in err and "旧" in err
 
 
-def test_validate_market_rejects_string_bullets(market_golden):
-    # bought.themes[].bullets は文字列配列であるべき（テーマ節を文字列で書くと崩れる）
-    broken = copy.deepcopy(market_golden)
-    broken["bought"] = {"themes": [{"title": "t", "bullets": "本来は配列"}]}
-    with pytest.raises(SystemExit):
-        bmj.validate_market(broken)
-
-
 def test_validate_market_aggregates_multiple_errors(market_golden, capsys):
     # step3.5 は最大2回しか再実行しないため、複数の型崩れは1度に全件報告される
     broken = copy.deepcopy(market_golden)
-    broken["sector_notes"] = {"mark": "x", "text": "y"}   # 崩れ1
-    broken["disclaimer"] = "本来は配列"                     # 崩れ2
+    broken["thesis"] = 123                # 崩れ1（文字列でも文字列配列でもない）
+    broken["disclaimer"] = "本来は配列"     # 崩れ2
     with pytest.raises(SystemExit):
         bmj.validate_market(broken)
     err = capsys.readouterr().err
-    assert "sector_notes" in err and "disclaimer" in err
+    assert "thesis" in err and "disclaimer" in err
+
+
+# ── join_drivers（stats の代表銘柄を sectors33 へ付与）─────────────────
+def _sectors_rows():
+    """read_sector_csv の返り値を模した最小の sectors33 行。"""
+    return [{"name": "電気機器", "w_pct": 6.55}, {"name": "銀行業", "w_pct": -1.2}]
+
+
+def test_join_drivers_attaches_drivers_in_contribution_order():
+    sectors = _sectors_rows()
+    stats = {"sector_drivers": {
+        "電気機器": [{"code": "6501", "name": "日立", "pct": 5.0, "share_pct": 40.0},
+                     {"code": "6702", "name": "富士通", "pct": 4.0, "share_pct": 30.0}]}}
+    bmj.join_drivers(sectors, stats)
+    # 各 driver は {code,name,pct} に固定（share_pct は SPA が使わないため落とす）。順序維持。
+    assert sectors[0]["drivers"] == [{"code": "6501", "name": "日立", "pct": 5.0},
+                                     {"code": "6702", "name": "富士通", "pct": 4.0}]
+    assert "drivers" not in sectors[1]   # sector_drivers に無いセクターへは付けない
+
+
+def test_join_drivers_unknown_sector_dies():
+    stats = {"sector_drivers": {"未知業種": [{"code": "0000", "name": "x", "pct": 0.0}]}}
+    with pytest.raises(SystemExit):
+        bmj.join_drivers(_sectors_rows(), stats)
+
+
+@pytest.mark.parametrize("stats", [None, {}, {"sector_drivers": None}])
+def test_join_drivers_noop_without_stats(stats):
+    # --stats 無し・旧 stats（sector_drivers 無し）では何も付けない（SPA が「—」表示）
+    sectors = _sectors_rows()
+    bmj.join_drivers(sectors, stats)
+    assert all("drivers" not in s for s in sectors)

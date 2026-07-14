@@ -104,8 +104,12 @@ def iter_text_units(doc):
 
     判定単位は「配列要素（文字列フィールド1本）」。文末の `（[出典](URL)）。` は
     「。」分割だとリンクだけが別文に落ちて誤検知するため、文分割はしない。
+    対象は thesis / overview（points・flow・flow_conclusion・snapshot[].note）/
+    movers（note・footnote）/ theme_matrix（rows・character）。
     title・universe・methodology・disclaimer・news_sources[].topic は定型・
     フィルタ条件の記述（「時価総額100億円以上」等）であり対象外。
+    旧スキーマの sector_notes / bought・sold は 2026-07 改修で廃止済み
+    （過去日の JSON に残っていても対象外として無視する）。
     """
     for i, t in enumerate(_strs(doc.get("thesis"))):
         yield ("thesis[%d]" % i, t, False)
@@ -119,24 +123,6 @@ def iter_text_units(doc):
     for i, r in enumerate(ov.get("snapshot") or []):
         if isinstance(r, dict) and isinstance(r.get("note"), str):
             yield ("overview.snapshot[%d](%s).note" % (i, r.get("label")), r["note"], False)
-
-    for i, n in enumerate(doc.get("sector_notes") or []):
-        if isinstance(n, dict) and isinstance(n.get("text"), str):
-            yield ("sector_notes[%d].text" % i, n["text"], False)
-
-    for side in ("bought", "sold"):
-        sd = doc.get(side) or {}
-        for i, r in enumerate(sd.get("table") or []):
-            if isinstance(r, dict) and isinstance(r.get("note"), str):
-                yield ("%s.table[%d](%s).note" % (side, i, r.get("sector")), r["note"], False)
-        for i, t in enumerate(sd.get("themes") or []):
-            if not isinstance(t, dict):
-                continue
-            if isinstance(t.get("title"), str):
-                yield ("%s.themes[%d].title" % (side, i), t["title"], False)
-            for j, b in enumerate(t.get("bullets") or []):
-                if isinstance(b, str):
-                    yield ("%s.themes[%d].bullets[%d]" % (side, i, j), b, False)
 
     mv = doc.get("movers") or {}
     for side in ("gainers", "losers"):

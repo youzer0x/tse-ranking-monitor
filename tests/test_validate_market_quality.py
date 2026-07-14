@@ -124,7 +124,6 @@ def test_fullwidth_trigger_normalized():
     doc = {
         "thesis": "ＴＯＢ観測で買われた。",
         "overview": {},
-        "sector_notes": [],
         "news_sources": [{"topic": "t", "links": [{"label": "l", "url": "https://example.com/news"}]}],
         "disclaimer": [],
     }
@@ -270,7 +269,7 @@ def test_causal_word_in_mover_with_links_no_warn(market_golden):
 def test_check_warnings_skips_broken_structure(market_golden, capsys):
     # 構造 NG はエラー側（check_doc）が報告するため warnings は出さない
     broken = copy.deepcopy(market_golden)
-    broken["sector_notes"] = {"mark": "x", "text": "y"}
+    broken["disclaimer"] = "本来は配列"
     assert vmq.check_warnings(broken) == []
     capsys.readouterr()
 
@@ -337,7 +336,7 @@ def test_errors_aggregated_across_checks(market_golden):
 def test_structure_failure_short_circuits(market_golden, capsys):
     # 構造が崩れていたら品質検査はせず「構造を先に直せ」の1件のみ返す
     broken = copy.deepcopy(market_golden)
-    broken["sector_notes"] = {"mark": "x", "text": "y"}
+    broken["disclaimer"] = "本来は配列"
     errs = vmq.check_doc(broken)
     capsys.readouterr()  # validate_market の die 出力を回収
     assert len(errs) == 1 and "構造検証" in errs[0]

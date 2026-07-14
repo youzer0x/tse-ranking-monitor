@@ -10,8 +10,9 @@ requirements.txt、それ以外は stdlib に整合）。認証は環境変数 `
 出力（--out-dir、既定 docs/tmp/market）:
   - sector_return_<date>.csv   : 33業種別の騰落率集計（sector_analysis.py とバイト互換）
   - movers_top_<date>.csv      : 値上がり/値下がり 上位30（同上）
-  - market_stats_<date>.json   : CSV 外の決定的数値（TOPIX 前日比・breadth・最大代金銘柄 等）と
-                                 執筆ヒント（⚠乖離フラグ候補・movers の TDnet 開示文脈）
+  - market_stats_<date>.json   : CSV 外の決定的数値（TOPIX 前日比・breadth・最大代金銘柄・
+                                 セクター代表銘柄 sector_drivers 等）と執筆ヒント
+                                 （⚠乖離フラグ候補・movers の TDnet 開示文脈）
 
 後段の `build_market_json.py` が sector_return / movers_top CSV を読み、
 market_stats JSON を `--stats` で受け取って `<date>_market.json` を組み立てる。
@@ -185,6 +186,49 @@ def aggregate_by_sector(records):
     return out
 
 
+DRIVER_MAX = 2            # 「銘柄」列に併記する主導銘柄の上限
+DRIVER_SECOND_MIN = 0.5   # 第2位を併記する下限（首位の同方向寄与に対する比率）
+
+
+def sector_drivers(records):
+    """33業種ごとに「売買代金加重騰落率を最も動かした代表銘柄」を選ぶ（純粋関数）。
+
+    セクターの加重平均 w = Σ(chg×va)/Σva の符号に方向を合わせ、同方向の寄与
+    chg_pct×turnover が大きい順に最大 DRIVER_MAX 銘柄を返す。第2位は寄与が首位の
+    DRIVER_SECOND_MIN 以上の場合のみ併記する（僅差の共同主導だけを2行表示し、
+    1強のセクターは1銘柄に保つ）。売買代金合計が 0 のセクターは方向が定義できない
+    ためスキップ（build_records の liquid は流動性フィルタ通過済みなので通常発生しない）。
+
+    返り値: {セクター名: [{"code", "name", "pct", "share_pct"}, …]}（寄与順・1〜2件。
+    share_pct＝各銘柄のセクター内売買代金構成比%）。
+    """
+    groups = {}
+    for r in records:
+        groups.setdefault(r["sector33"], []).append(r)
+    out = {}
+    for sector, rows in groups.items():
+        total_va = sum((r["turnover"] or 0) for r in rows)
+        if total_va <= 0:
+            continue
+        w = sum(r["chg_pct"] * (r["turnover"] or 0) for r in rows) / total_va
+        sign = 1.0 if w >= 0 else -1.0
+
+        def contrib(r):
+            return sign * r["chg_pct"] * (r["turnover"] or 0)
+
+        ranked = sorted(rows, key=contrib, reverse=True)
+        lead = contrib(ranked[0])
+        picks = ranked[:1] + [r for r in ranked[1:DRIVER_MAX]
+                              if lead > 0 and contrib(r) >= lead * DRIVER_SECOND_MIN]
+        out[sector] = [{
+            "code": r["code4"],
+            "name": nfkc(r["name"]),
+            "pct": round(r["chg_pct"], 2),
+            "share_pct": round((r["turnover"] or 0) / total_va * 100, 1),
+        } for r in picks]
+    return out
+
+
 def detect_divergence_flags(records, agg33):
     """⚠候補（大型株1銘柄によるセクター騰落の見かけ上の歪み）を機械検出する。"""
     groups = {}
@@ -275,7 +319,7 @@ def write_movers_csv(records, disclosed, out_dir, target_day):
 
 # ── market_stats JSON（CSV 外数値の決定的受け渡し）──
 def build_stats_json(target_day, prev_day, generated_at, topix_pct, topix_close,
-                     topix_prev_close, universe, liquid, agg33, flags, movers_ctx):
+                     topix_prev_close, universe, liquid, agg33, drivers, flags, movers_ctx):
     up, down, flat = _breadth(liquid)
     top_sector = max(agg33, key=lambda a: (a["total_va"] or 0)) if agg33 else None
     top_stock = max(liquid, key=lambda r: (r["turnover"] or 0)) if liquid else None
@@ -305,10 +349,7 @@ def build_stats_json(target_day, prev_day, generated_at, topix_pct, topix_close,
              "pct": round(top_stock["chg_pct"], 2),
              "turnover_oku": round((top_stock["turnover"] or 0) / 1e8, 1)}
             if top_stock else None),
-        "strip_default": {
-            "sectors_up": [a["sector"] for a in agg33[:3]],
-            "sectors_down": [a["sector"] for a in agg33[-3:][::-1]],
-        },
+        "sector_drivers": drivers,
         "divergence_flags": flags,
         "movers_context": movers_ctx,
     }
@@ -369,6 +410,7 @@ def main():
 
     disclosed = fetch_disclosed_codes(target_day)
     topix_pct, topix_close, topix_prev = fetch_topix(prev_day, target_day)
+    drivers = sector_drivers(liquid)
     flags = detect_divergence_flags(liquid, agg33)
     movers_ctx = build_movers_context(liquid, prev_day, target_day)
     generated_at = datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
@@ -378,7 +420,8 @@ def main():
     p_mov = write_movers_csv(liquid, disclosed, args.out_dir, target_day)
 
     stats = build_stats_json(target_day, prev_day, generated_at, topix_pct,
-                             topix_close, topix_prev, ustats, liquid, agg33, flags, movers_ctx)
+                             topix_close, topix_prev, ustats, liquid, agg33, drivers,
+                             flags, movers_ctx)
     p_stats = os.path.join(args.out_dir, "market_stats_%s.json" % target_day)
     with open(p_stats, "w", encoding="utf-8", newline="\n") as f:
         json.dump(stats, f, ensure_ascii=False, indent=2)
