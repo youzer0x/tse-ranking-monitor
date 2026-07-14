@@ -107,3 +107,15 @@ def test_pages_has_no_bought_sold_sections():
     assert "売られたセクター" not in html
     assert "sideSection" not in html
     assert "テーマ別の資金フロー" in html
+
+
+def test_pages_meta_moved_into_info_modal():
+    # 対象日時・生成日時・抽出条件はヘッダー直下から撤去し、該当社数横の「データ情報」
+    # ボタンからモーダル表示（2026-07-14 改修）。該当社数チップ（capped 分岐含む）は維持。
+    html = hg.generate_pages_html()
+    assert 'id="infoModal"' in html and 'id="infoBody"' in html
+    assert "openInfo" in html and "showModal" in html
+    assert 'id="note"' not in html               # 抽出条件の常時表示を廃止
+    assert 'chip">生成 ' not in html             # 生成日時チップを廃止
+    assert "session_window" in html              # モーダル側で継続表示
+    assert "社該当（上位 " in html               # capped チップの分岐が残っている

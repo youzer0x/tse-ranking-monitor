@@ -153,7 +153,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 .chip .num{font-family:var(--numfont);font-weight:700;font-size:16px;color:var(--primary);}
 .container{max-width:1280px;margin:14px auto 28px;padding:0 16px;}
 .card{background:var(--card);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden;}
-.note{padding:10px 8px 12px;font-size:12px;color:var(--sub);}
+.infobtn{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:8px 14px;font-size:13px;font-family:var(--sans);color:var(--sub);cursor:pointer;}
+.infobtn:hover{color:var(--primary);border-color:var(--primary);}
+.infobtn .i{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border:1px solid currentColor;border-radius:50%;font-family:var(--serif);font-style:italic;font-weight:700;font-size:10.5px;line-height:1;}
+dialog.info{border:1px solid var(--hairline);border-top:4px solid var(--primary);border-radius:3px;background:var(--card);color:var(--text);width:min(560px,calc(100vw - 32px));padding:0;}
+dialog.info::backdrop{background:rgba(38,36,32,.45);}
+.info-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--hairline);}
+.info-head h2{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--primary);}
+.info-close{border:0;background:none;font-size:20px;line-height:1;color:var(--sub);cursor:pointer;padding:2px 6px;}
+.info-close:hover{color:var(--primary);}
+.info-body{padding:6px 18px 18px;font-size:13px;}
+.info-body .k{color:var(--sub);font-size:11.5px;letter-spacing:.06em;margin-top:12px;}
+.info-body .v{margin-top:2px;line-height:1.75;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 thead th{padding:9px 10px;text-align:left;background:#f6f8fc;border-bottom:2px solid var(--primary);font-size:12px;color:var(--sub);white-space:nowrap;position:sticky;top:0;}
 thead th.r{text-align:right;}
@@ -317,7 +328,6 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
 <div id="viewRanking">
 <div class="summary" id="summary"></div>
 <div class="container">
-  <div class="note" id="note"></div>
   <div class="card">
   <div id="tableArea"><div class="loading">データを読み込んでいます…</div></div>
   </div>
@@ -326,6 +336,11 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
 </div>
 <div id="viewMarket" style="display:none"><div class="container" id="marketArea"></div></div>
 <div class="footer">東証 値上がりランキング・モニター｜Claude 定期実行で自動生成｜価格・売買代金・終値・時価総額＝J-Quants V2／開示＝TDnet｜市場分析＝J-Quants V2 集計（売買代金1億円以上）｜本情報は参考であり投資助言ではない</div>
+<dialog id="infoModal" class="info" onclick="closeInfoOnBackdrop(event)">
+  <div class="info-head"><h2>データ情報</h2>
+    <button class="info-close" onclick="document.getElementById('infoModal').close()" aria-label="閉じる">×</button></div>
+  <div class="info-body" id="infoBody"></div>
+</dialog>
 <script>
 let data=null;
 let marketData=null;
@@ -342,6 +357,8 @@ function changeYen(r){if(r==null||r.close==null||r.adj_close==null||r.prev_adj_c
 function fmtSigned(v){if(v==null)return '—';var n=Number(v);return (n>=0?'+':'')+n.toLocaleString('ja-JP');}
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 function kindBadge(k){k=(k||'').replace(/[\[\]]/g,'');if(!k)return '';return '<span class="kind k'+k+'">'+k+'</span>';}
+function openInfo(){var d=document.getElementById('infoModal');if(d&&d.showModal)d.showModal();}
+function closeInfoOnBackdrop(e){if(e.target===e.currentTarget)e.currentTarget.close();}
 async function init(){
   try{
     const m=await (await fetch('data/manifest.json?'+Date.now())).json();
@@ -371,11 +388,12 @@ function render(){
     : '<div class="chip"><span class="num">'+rows.length+'</span> 社該当</div>';
   document.getElementById('summary').innerHTML=
     cntChip+
-    '<div class="chip">'+esc(data.session_window||'')+'</div>'+
-    (data.generated_at?'<div class="chip">生成 '+esc(data.generated_at)+'</div>':'');
+    '<button type="button" class="infobtn" onclick="openInfo()"><span class="i">i</span>データ情報</button>';
   const c=data.criteria||{};
-  document.getElementById('note').textContent=
-    '抽出条件：値上がり率≥+'+(c.min_pct??5)+'% かつ 売買代金≥'+((c.min_turnover_yen??1e7)/1e6)+'百万円／東証個別株のみ・時価総額≥'+(c.min_mcap_oku??100)+'億円'+(c.max_rank?'・上昇率上位'+c.max_rank+'社':'')+'。時価総額は当日終値×発行済株式数（億円・四捨五入）。† は増資・自己株で株探最新株数と>1%乖離。';
+  document.getElementById('infoBody').innerHTML=
+    '<div class="k">データ対象日時</div><div class="v">'+esc(data.session_window||'—')+'</div>'+
+    '<div class="k">生成日時</div><div class="v">'+esc(data.generated_at||'—')+'</div>'+
+    '<div class="k">抽出条件</div><div class="v">'+esc('値上がり率≥+'+(c.min_pct??5)+'% かつ 売買代金≥'+((c.min_turnover_yen??1e7)/1e6)+'百万円／東証個別株のみ・時価総額≥'+(c.min_mcap_oku??100)+'億円'+(c.max_rank?'・上昇率上位'+c.max_rank+'社':'')+'。時価総額は当日終値×発行済株式数（億円・四捨五入）。† は増資・自己株で株探最新株数と>1%乖離。')+'</div>';
   let h='<table><thead><tr><th class="r">#</th><th>コード</th><th>銘柄</th><th>市場</th><th class="r">前日比%<br>(5営業日)</th><th class="r">前日比<br>(円)</th><th class="r">終値<br>(円)</th><th class="r">売買代金<br>(億円)</th><th>変動要因</th></tr></thead><tbody>';
   rows.forEach(r=>{
     let factor=mdInline(r.factor||'（材料未確認）');
