@@ -28,7 +28,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 .infobtn{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:8px 14px;font-size:13px;font-family:var(--sans);color:var(--sub);cursor:pointer;}
 .infobtn:hover{color:var(--primary);border-color:var(--primary);}
 .infobtn .i{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border:1px solid currentColor;border-radius:50%;font-family:var(--serif);font-style:italic;font-weight:700;font-size:10.5px;line-height:1;}
-dialog.info{border:1px solid var(--hairline);border-top:4px solid var(--primary);border-radius:3px;background:var(--card);color:var(--text);width:min(560px,calc(100vw - 32px));padding:0;}
+dialog.info{position:fixed;inset:0;margin:auto;height:fit-content;max-height:calc(100vh - 48px);overflow:auto;border:1px solid var(--hairline);border-top:4px solid var(--primary);border-radius:3px;background:var(--card);color:var(--text);width:min(560px,calc(100vw - 32px));padding:0;}
 dialog.info::backdrop{background:rgba(38,36,32,.45);}
 .info-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--hairline);}
 .info-head h2{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--primary);}

@@ -119,3 +119,5 @@ def test_pages_meta_moved_into_info_modal():
     assert 'chip">生成 ' not in html             # 生成日時チップを廃止
     assert "session_window" in html              # モーダル側で継続表示
     assert "社該当（上位 " in html               # capped チップの分岐が残っている
+    # 画面中央に表示（CSSリセット *{margin:0} が dialog の margin:auto を打ち消すため明示指定）
+    assert "dialog.info{position:fixed;inset:0;margin:auto;" in html
