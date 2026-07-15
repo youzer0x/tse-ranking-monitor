@@ -11,7 +11,7 @@ import copy
 
 import pytest
 
-import build_market_json as bmj
+from tse_ranking_monitor.market import assemble as bmj
 
 
 # ── parse_num ────────────────────────────────────────────────

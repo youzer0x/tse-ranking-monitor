@@ -1,4 +1,4 @@
-"""pytest 共通設定：scripts/ を import パスに載せ、凍結ゴールデンを供給する。
+"""pytest 共通設定：src/ と scripts/ を import パスに載せ、凍結ゴールデンを供給する。
 
 scripts/ はパッケージ（__init__.py 付き）ではなくフラットなスクリプト置き場なので、
 `import business_day` 等が通るよう scripts/ を sys.path 先頭に挿す。conftest.py は
@@ -8,7 +8,10 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "tools"))
 
 import pytest
 

@@ -1,0 +1,180 @@
+:root{--bg:#f5f2ea;--card:#fefcf7;--primary:#11243f;--accent:#ae2b23;--down:#186a3b;--text:#262420;--sub:#6b6558;--border:#e2e6ea;--hairline:#ddd6c7;--rule:#11243f;--hover:#f5f8ff;--wash:#f3efe4;--serif:'Noto Serif JP','Hiragino Mincho ProN','Yu Mincho',serif;--sans:'Noto Sans JP',sans-serif;--numfont:'Helvetica Neue',Arial,'Noto Sans JP',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;}
+.header{background:var(--card);color:var(--text);border-top:4px solid var(--primary);border-bottom:1px solid var(--rule);padding:20px 28px 0;position:relative;}
+.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.tabs{display:inline-flex;align-items:flex-end;flex-wrap:wrap;}
+.tabs .tab{margin:0 26px 0 0;padding:6px 2px 12px;border-bottom:3px solid transparent;font-size:15px;font-weight:500;line-height:1.35;text-decoration:none;color:var(--sub);white-space:nowrap;}
+.tabs h1.tab{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:.01em;color:var(--primary);cursor:pointer;}
+.tabs .tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+.tabs a.tab:hover{color:var(--primary);}
+.date-selector{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.date-selector label{font-size:12px;color:var(--sub);letter-spacing:.04em;}
+.date-selector select{padding:7px 30px 7px 12px;font-size:13.5px;font-family:var(--numfont);border:1px solid var(--hairline);border-radius:3px;background:var(--card);color:var(--primary);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2311243f' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
+.date-selector select option{background:var(--card);color:var(--text);}
+.summary{max-width:1280px;margin:16px auto 0;padding:0 16px;display:flex;gap:10px;flex-wrap:wrap;}
+.chip{background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:8px 14px;font-size:13px;}
+.chip .num{font-family:var(--numfont);font-weight:700;font-size:16px;color:var(--primary);}
+.container{max-width:1280px;margin:14px auto 28px;padding:0 16px;}
+.card{background:var(--card);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden;}
+.infobtn{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:8px 14px;font-size:13px;font-family:var(--sans);color:var(--sub);cursor:pointer;}
+.infobtn:hover{color:var(--primary);border-color:var(--primary);}
+.infobtn .i{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border:1px solid currentColor;border-radius:50%;font-family:var(--serif);font-style:italic;font-weight:700;font-size:10.5px;line-height:1;}
+dialog.info{position:fixed;inset:0;margin:auto;height:fit-content;max-height:calc(100vh - 48px);overflow:auto;border:1px solid var(--hairline);border-top:4px solid var(--primary);border-radius:3px;background:var(--card);color:var(--text);width:min(560px,calc(100vw - 32px));padding:0;}
+dialog.info::backdrop{background:rgba(38,36,32,.45);}
+.info-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--hairline);}
+.info-head h2{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--primary);}
+.info-close{border:0;background:none;font-size:20px;line-height:1;color:var(--sub);cursor:pointer;padding:2px 6px;}
+.info-close:hover{color:var(--primary);}
+.info-body{padding:6px 18px 18px;font-size:13px;}
+.info-body .k{color:var(--sub);font-size:11.5px;letter-spacing:.06em;margin-top:12px;}
+.info-body .v{margin-top:2px;line-height:1.75;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:9px 10px;text-align:left;background:#f6f8fc;border-bottom:2px solid var(--primary);font-size:12px;color:var(--sub);white-space:nowrap;position:sticky;top:0;}
+thead th.r{text-align:right;}
+tbody td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+tbody tr:hover td{background:var(--hover);}
+.rank{font-family:Arial,sans-serif;text-align:right;color:var(--sub);}
+.code{font-family:Arial,sans-serif;white-space:nowrap;}
+.code a{color:var(--primary);text-decoration:none;}
+.code a:hover{text-decoration:underline;}
+.name{white-space:nowrap;font-weight:500;}
+.name .mcap{display:block;font-family:Arial,'Noto Sans JP',sans-serif;font-size:11px;font-weight:400;color:#5b6573;margin-top:1px;letter-spacing:.2px;}
+.code-inline{display:none;}
+.mkt{white-space:nowrap;}
+.num{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;}
+.pct{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--accent);font-weight:600;}
+.pct5{display:block;font-weight:400;font-size:11.5px;color:var(--sub);margin-top:1px;}
+.factor{font-size:12.5px;line-height:1.55;min-width:240px;}
+.kind{display:inline-block;font-size:10px;color:#fff;border-radius:3px;padding:1px 6px;margin-right:5px;white-space:nowrap;}
+.kind.k開示{background:#1b7f3b;} .kind.k報道{background:#1a6fd0;} .kind.kテーマ{background:#8a6d00;}
+.factor a{color:#1a6fd0;text-decoration:none;} .factor a:hover{text-decoration:underline;}
+.dropped{margin-top:18px;}
+.dropped summary{cursor:pointer;font-size:13px;color:var(--sub);padding:8px 4px;}
+.footer{max-width:1280px;margin:12px auto 0;text-align:center;padding:16px 16px 24px;font-size:11px;color:var(--sub);border-top:1px solid var(--hairline);letter-spacing:.02em;}
+.loading,.empty{text-align:center;padding:50px 20px;color:var(--sub);}
+/* ---- 市場分析ビュー（金融紙エディトリアル） ---- */
+#viewMarket .container{max-width:1040px;}
+.msec{background:var(--card);border:1px solid var(--hairline);border-radius:3px;padding:22px 24px;margin-bottom:24px;}
+.msec h2{font-family:var(--serif);font-size:17px;color:var(--primary);font-weight:600;letter-spacing:.01em;border-bottom:1px solid var(--hairline);padding-bottom:8px;margin-bottom:14px;position:relative;}
+.msec h2::after{content:'';position:absolute;left:0;bottom:-2px;width:36px;height:3px;background:var(--primary);}
+.msec .kick{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--sub);margin-bottom:6px;}
+.mhead h2{font-size:20px;border-bottom:0;padding-bottom:2px;margin-bottom:6px;}
+.mhead h2::after{display:none;}
+.msec .lead{font-size:11px;letter-spacing:.05em;color:var(--sub);margin-bottom:10px;}
+blockquote.mthesis{font-family:var(--serif);font-size:15.5px;font-weight:600;color:var(--text);background:transparent;border:0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);border-radius:0;padding:14px 4px;margin:10px 0 2px;line-height:1.9;}
+.msec ul,.msec ol{margin:0 0 6px 1.2em;} .msec li{font-size:14px;line-height:1.7;margin:4px 0;}
+.msec .flowc{font-size:14.5px;font-weight:700;color:var(--primary);margin-top:12px;background:var(--wash);border-left:3px solid var(--primary);border-radius:0;padding:12px 16px;line-height:1.7;}
+.stk{color:#0b7285;font-weight:700;}
+.msec .mfoot{font-size:13px;color:var(--sub);margin-top:8px;line-height:1.55;}
+.msec .mnote{font-size:13px;color:var(--sub);line-height:1.55;margin-top:4px;}
+.msec .thead-note{font-weight:700;color:var(--primary);}
+table.kv{width:100%;border-collapse:collapse;font-size:13px;border-top:1px solid var(--hairline);}
+table.kv td{padding:8px 10px;border-bottom:1px solid var(--hairline);vertical-align:top;}
+table.kv td.k{color:var(--sub);font-size:12px;letter-spacing:.06em;white-space:nowrap;width:1%;padding-top:10px;} table.kv td.v{font-weight:700;font-family:var(--numfont);color:var(--text);white-space:nowrap;} table.kv td.n{color:var(--sub);font-size:12.5px;}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.pdown{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--down);font-weight:600;}
+/* セクター騰落率の主導銘柄列（加重寄与の上位1〜2銘柄＝その日のセクター騰落のドライバー。
+   複数該当は .drvrow で1銘柄=1行に分ける。銘柄名の省略（ellipsis）は厳禁＝常に全文表示し、
+   列幅は騰落率を銘柄名の下段に置くことで抑える） */
+td.drv{white-space:nowrap;}
+td.drv .drvpct{display:block;font-size:11.5px;margin:1px 0 0;text-align:left;}
+td.drv .drvrow+.drvrow{margin-top:5px;}
+.barcell{min-width:150px;}
+.barwrap{position:relative;height:9px;background:transparent;border-radius:0;margin-top:4px;}
+.barwrap::before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#b8b09e;}
+.barpos{position:absolute;left:50%;top:0;bottom:0;background:var(--accent);border-radius:0;}
+.barneg{position:absolute;right:50%;top:0;bottom:0;background:var(--down);border-radius:0;}
+.mmatrix td.mbuy{color:var(--accent);} .mmatrix td.msell{color:var(--down);}
+/* テーマ別資金フロー（買い/売り 行）：銘柄名のみ配色（背景説明の地の文は既定色のまま） */
+.sidebadge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.12em;color:#fff;border-radius:2px;padding:2px 8px;white-space:nowrap;}
+.sidebadge.buy{background:var(--accent);} .sidebadge.sell{background:var(--down);}
+.mmatrix td.stkcol{min-width:88px;font-weight:700;}
+/* テーマ列は広め・背景列は狭めに割り付け（テーマ名の折返しを抑える） */
+.mmatrix th.thmcol,.mmatrix td.thmcol{width:24%;min-width:170px;}
+.mmatrix th.bgcol,.mmatrix td.factor{width:44%;}
+.mmatrix tr.rbuy td.stkcol,.mmatrix tr.rbuy .stk{color:var(--accent);}
+.mmatrix tr.rsell td.stkcol,.mmatrix tr.rsell .stk{color:var(--down);}
+/* 箇条書き版テーゼ／まとめ（thesis・flow_conclusion が配列で渡された場合） */
+blockquote.mthesis ul{margin:0 0 0 1.15em;padding:0;list-style:none;}
+blockquote.mthesis li{font-size:15.5px;font-weight:600;color:var(--text);line-height:1.9;margin:4px 0;position:relative;}
+blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color:var(--primary);}
+.msec .flowc ul{margin:2px 0 0 1.15em;padding:0;} .msec .flowc li{font-size:13.5px;font-weight:700;color:var(--primary);line-height:1.7;margin:3px 0;}
+.msec a{color:#1a6fd0;text-decoration:none;} .msec a:hover{text-decoration:underline;}
+/* 絵文字に代わる活字マーカー（赤角=買い/緑角=売り・※脚注） */
+.mk{display:inline-block;width:9px;height:9px;border-radius:1px;margin-right:7px;}
+.mk-buy{background:var(--accent);} .mk-sell{background:var(--down);}
+.fnmark{color:var(--sub);font-weight:700;margin-right:2px;}
+.msum{cursor:pointer;color:var(--sub);font-size:12px;font-weight:500;letter-spacing:.08em;}
+/* 市場分析タブ内テーブル（ランキング表のグローバル規則とは分離したスコープ。
+   本文の可読性優先で基本サイズをランキング表より一段大きく取る） */
+#viewMarket table{font-size:14px;}
+#viewMarket .factor{font-size:13.5px;}
+#viewMarket thead th{position:static;background:transparent;border-bottom:2px solid var(--rule);color:var(--sub);font-size:12px;letter-spacing:.06em;padding:6px 10px 8px;}
+#viewMarket tbody td{border-bottom:1px solid var(--hairline);}
+#viewMarket tbody tr:hover td{background:#f7f3e8;}
+.num,.pct,.pdown,.rank,.code,.chip .num,table.kv td.v,#dateSelect{font-variant-numeric:tabular-nums lining-nums;}
+@media(max-width:820px){
+ .header{padding:14px 14px 0;} .header-inner{flex-direction:column;align-items:stretch;gap:0;}
+ .tabs{width:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+ .tabs .tab{margin-right:18px;padding-bottom:10px;}
+ .tabs h1.tab{font-size:17px;}
+ .date-selector{width:100%;margin:10px 0 12px;} .date-selector select{flex:1;}
+ #viewRanking table,#viewRanking thead,#viewRanking tbody,#viewRanking tr,#viewRanking td{display:block;width:100%;}
+ #viewRanking thead{display:none;}
+ #viewRanking .card{background:transparent;box-shadow:none;border-radius:0;overflow:visible;}
+ #viewRanking tbody tr{background:var(--card);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin:0 0 12px;padding:12px 14px;border:none;}
+ #viewRanking tbody td{padding:0;border:none;text-align:left!important;}
+ #tableArea td.rank{display:block;font-size:13px;color:var(--sub);font-family:Arial,sans-serif;}
+ #tableArea td.rank::before{content:'#';}
+ #tableArea td.code{display:none;}
+ #tableArea td.name{display:block;font-size:15px;font-weight:700;}
+ #tableArea td.name .code-inline{display:inline;font-weight:700;}
+ #tableArea td.name .mcap{font-size:12px;}
+ #tableArea td.mkt{display:block;font-size:12px;color:var(--sub);}
+ #viewRanking td.pct,#viewRanking td.num{display:inline-block;width:49%;font-size:14px;margin-top:8px;text-align:left;vertical-align:top;}
+ #viewRanking td.pct::before,#viewRanking td.num::before{content:attr(data-label)'\00a0';display:block;color:var(--sub);font-size:11px;font-weight:400;font-family:'Noto Sans JP';}
+ #viewRanking td.factor{min-width:0;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)!important;}
+ .msec{padding:16px 14px;}
+ #viewMarket .container{padding:0 12px;}
+ .mhead h2{font-size:18px;}
+ blockquote.mthesis,blockquote.mthesis li{font-size:14.5px;}
+ /* 市場概況スナップショット：罫線を全廃し2列タイルに（ラベル小・数値太字・注記小） */
+ table.kv{border-top:0;}
+ table.kv,table.kv tr,table.kv td{display:block;width:100%;}
+ table.kv tbody{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+ table.kv tr{background:var(--wash);border-radius:8px;padding:10px 12px;}
+ #viewMarket table.kv td{border-bottom:0;padding:0;white-space:normal;}
+ table.kv td.k{width:auto;padding-top:0;font-size:11px;}
+ table.kv td.v{font-size:15px;white-space:normal;margin-top:2px;}
+ table.kv td.n{font-size:11.5px;margin-top:2px;}
+ /* セクター騰落率：上昇/下落・売買代金列を隠し 業種+銘柄+騰落率+バー を画面幅に収める。
+    銘柄名は省略せず、長い名前は折返しで全文表示する */
+ table.sec33 th:nth-child(5),table.sec33 td:nth-child(5),table.sec33 th:nth-child(6),table.sec33 td:nth-child(6){display:none;}
+ #viewMarket table.sec33 th{padding:7px 6px;}
+ #viewMarket table.sec33 td{padding:7px 6px;font-size:12.5px;}
+ table.sec33 .barcell{min-width:56px;}
+ table.sec33 td.drv{white-space:normal;}
+ /* テーマ別資金フロー：カード状に積み上げ（badge+テーマ → 銘柄 → 背景） */
+ table.mmatrix,table.mmatrix tbody,table.mmatrix tr,table.mmatrix td{display:block;width:100%;}
+ table.mmatrix thead{display:none;}
+ table.mmatrix tr{padding:10px 0;border-bottom:1px solid var(--hairline);}
+ table.mmatrix tr:last-child{border-bottom:0;}
+ #viewMarket table.mmatrix td{border-bottom:0;padding:2px 0;width:auto;}
+ .mmatrix td:first-child{display:inline;}
+ .mmatrix th.thmcol,.mmatrix td.thmcol{width:auto;min-width:0;}
+ .mmatrix td.thmcol{display:inline;margin-left:8px;}
+ .mmatrix th.bgcol,.mmatrix td.factor{width:auto;}
+ .mmatrix td.stkcol{min-width:0;}
+ /* 注目個別銘柄：カード状に積み上げ（コード+銘柄+前日比 → 材料） */
+ table.mvtbl,table.mvtbl tbody,table.mvtbl tr,table.mvtbl td{display:block;width:100%;}
+ table.mvtbl thead{display:none;}
+ table.mvtbl tr{padding:10px 0;border-bottom:1px solid var(--hairline);}
+ table.mvtbl tr:last-child{border-bottom:0;}
+ #viewMarket table.mvtbl td{border-bottom:0;padding:1px 0;}
+ table.mvtbl td.code,table.mvtbl td.name{display:inline;width:auto;font-size:14px;}
+ table.mvtbl td.name{font-weight:700;margin-left:6px;white-space:normal;}
+ table.mvtbl td.pct,table.mvtbl td.pdown{display:inline;width:auto;margin-left:8px;text-align:left;font-size:14px;}
+ table.mvtbl td.num{display:none;}
+ table.mvtbl .factor{min-width:0;margin-top:4px;}
+}

@@ -1,45 +1,46 @@
-# CLAUDE.md — 開発時の規範（Claude Code 向け）
+# CLAUDE.md — 対話開発の規範
 
-このファイルは **Claude Code（対話的な開発）** が読む。日次の無人ルーチンが従う実行手順は
-`AGENTS.md` にある（役割が違うので混ぜない）。
+日次の無人運用は `AGENTS.md` が定めるhash検証済み `runbook/RUNTIME_CONTRACT.md` に従う。本ファイルは対話的なコード変更と検証の規範を定める。
 
-## テスト規範（pytest）
+## 構造
 
-- `scripts/` 配下の `.py` を変更したら、commit の前に必ず `python -m pytest` を実行する。
-- テストが1件でも失敗している状態で commit しない。
-- テストが失敗したら、**まず実装側のバグを疑う**。期待値を変える必要がある場合は「仕様が
-  変わったため」であることをユーザーに説明し、同意を得てからテストを更新する。
-  **テストの削除・skip 追加・assert の弱体化を黙って行うことを禁止する**（テストを通すために
-  テスト側を書き換えるのは、番犬の口を塞ぐのと同じ）。
-- 新しい関数・条件分岐を追加したら、対になるテストを `tests/` に追加する（純粋関数は必須。
-  I/O を伴う関数は `tmp_path` フィクスチャで可能な範囲）。
-- テストはネットワーク・認証情報・実行日時（`date.today()`）に依存させない。外部 API は
-  monkeypatch し、日付は固定値を渡す（`pytest-socket` が通信を機械的に遮断する）。
-- `tests/fixtures/` は特定日付の凍結スナップショットであり、更新しない。`docs/data/` の実データを
-  テストから直接読まない（publish.py が約30日で削除するため）。
+- `src/tse_ranking_monitor/`：本リポ固有の実装本体
+- `scripts/`：既存CLI互換ラッパーと `market-scripts-common` 由来の共有ベンダー
+- `vendor/tse-ranking-digest/`：ランキング方法論の版固定スナップショット
+- `tools/`：vendor整合性などの保守チェック
+- `runbook/`：日次手順、セットアップ、貼り付けプロンプト
+- `specs/`：市場分析固有のデータ・表示・執筆仕様
+- `docs/`：GitHub Pagesの公開成果物のみ
+- `.work/`：日次一時物。追跡・公開しない
 
-## SOT（単一の真実源）との同期
+## テスト規範
 
-データ取得系の共有スクリプト（`jquants.py` / `business_day.py` / `kabutan_pts.py` / `tdnet.py` /
-`market_cap_jquants.py` / `market_cap_yahoo.py` / `merge_factors.py`）と
-サブエージェント定義（`.claude/agents/stock-factor-researcher.md`）は、共有リポ
-**`market-scripts-common`** を単一の真実源とするベンダリング。各配布先の `vendor.lock.json` に
-バージョン・コミット・ファイル別 sha256 が刻印される（`.claude/agents/` 分は CI の check_vendor
-対象外で、SOT 側 `python sync.py --check` で検証する）。`build_day_ranking.py` /
-`build_market_stats.py` / `build_market_json.py` / `html_generator.py` / `publish.py` 等の
-配信インフラ・Stage1 は本リポ固有（ベンダリング対象外）。
+- `src/`、`scripts/`、`tools/` のコードを変更したら、commit前に `python -m pytest` を実行する。
+- テストが1件でも失敗した状態でcommitしない。まず実装側の不具合を疑い、テスト削除、skip追加、assert弱体化で通さない。
+- 仕様変更で期待値を変える場合は理由を説明し、対になるテストを更新する。新しい関数や分岐にはテストを追加する。
+- テストはネットワーク、認証情報、実行日に依存させない。外部APIをmonkeypatchし、固定日を渡す。
+- `tests/fixtures/` は凍結スナップショットである。`docs/data/` の実データをテストから直接読まない。
 
-- **ベンダリング済みファイルは本リポで直接編集しない**。CI の `python scripts/check_vendor.py`
-  が lock との不一致を検知して fail する。変更フロー：market-scripts-common 側の `src/` を修正
-  → 同リポでテスト → VERSION 更新・tag → `python sync.py` で全消費リポへ再配布 → 本リポでコミット。
-- 同期を取り込んだ直後は、必ず `python -m pytest` を実行して回帰が無いことを確認する。
+## SOTとベンダリング
 
-## テストの実行
+- `scripts/jquants.py`、`business_day.py`、`kabutan_pts.py`、`tdnet.py`、`market_cap_jquants.py`、`market_cap_yahoo.py`、`merge_factors.py` と `.claude/agents/stock-factor-researcher.md` は `market-scripts-common` が正本であり、このリポジトリでは直接編集しない。
+- ランキング方法論は `vendor/tse-ranking-digest/` が正本であり、同梱lockにない編集をしない。
+- 本体変更後は `python scripts/check_vendor.py`、`python tools/check_methodology_vendor.py`、`python -m pytest` を順に実行する。
+- vendor更新は正本側で変更・テスト・version更新後、同期ツールでlockとともに取り込む。同期直後も全テストを実行する。
+
+## 公開境界
+
+- `.work/`、`reports/`、認証情報をcommitしない。
+- `ranking.json` を手編集せず、`factors.json` と `scripts/merge_factors.py` を使う。
+- 構造整理を理由に過去の `docs/data/` を書き換えない。
+
+## 検証コマンド
 
 ```bash
-python -m pip install -r requirements-dev.txt   # 初回のみ
-python -m pytest                                 # 全テスト（数秒・オフラインで完結）
+python -m pip install -r requirements-dev.txt
+python scripts/check_vendor.py
+python tools/check_methodology_vendor.py
+python -m pytest
 ```
 
-CI: `.github/workflows/tests.yml` が push 時（`scripts/`・`tests/`・`requirements*` 変更時）に
-自動で `python -m pytest` を回す。docs/data/ への日次コミットでは走らない。
+CIは `.github/workflows/tests.yml` がコード、テスト、vendor、方法論、runbook/specの変更を検知して同じ検証を実行する。日次の `docs/data/` 更新だけでは起動しない。

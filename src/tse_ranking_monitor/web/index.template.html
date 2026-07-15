@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>東証 値上がり率ランキング</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700&display=swap" rel="stylesheet">
+<style>
+{{APP_CSS}}
+</style></head>
+<body>
+<div class="header"><div class="header-inner">
+  <nav class="tabs">
+    <h1 class="tab active" id="tabRanking" onclick="location.hash=''">東証 値上がり率ランキング</h1>
+    <a class="tab" id="tabMarket" href="#market">市場分析</a>
+    <a class="tab" href="https://youzer0x.github.io/pts-ranking-monitor/">PTS 夜間 値上がり率ランキング</a>
+  </nav>
+  <div class="date-selector"><label for="dateSelect">セッション日:</label>
+  <select id="dateSelect" onchange="loadDate(this.value)"><option>読み込み中...</option></select></div>
+</div></div>
+<div id="viewRanking">
+<div class="summary" id="summary"></div>
+<div class="container">
+  <div class="card">
+  <div id="tableArea"><div class="loading">データを読み込んでいます…</div></div>
+  </div>
+<div class="container" style="margin-top:0;"><div id="droppedArea"></div></div>
+</div>
+</div>
+<div id="viewMarket" style="display:none"><div class="container" id="marketArea"></div></div>
+<div class="footer">東証 値上がりランキング・モニター｜Claude 定期実行で自動生成｜価格・売買代金・終値・時価総額＝J-Quants V2／開示＝TDnet｜市場分析＝J-Quants V2 集計（売買代金1億円以上）｜本情報は参考であり投資助言ではない</div>
+<dialog id="infoModal" class="info" onclick="closeInfoOnBackdrop(event)">
+  <div class="info-head"><h2>データ情報</h2>
+    <button class="info-close" onclick="document.getElementById('infoModal').close()" aria-label="閉じる">×</button></div>
+  <div class="info-body" id="infoBody"></div>
+</dialog>
+<script>
+{{APP_JS}}
+</script>
+</body></html>

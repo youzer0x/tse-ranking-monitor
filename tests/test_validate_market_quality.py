@@ -9,7 +9,7 @@ import json
 
 import pytest
 
-import validate_market_quality as vmq
+from tse_ranking_monitor.quality import market as vmq
 
 
 # ── golden（修正後 2026-07-03 スナップショット）────────────────
@@ -112,10 +112,16 @@ def test_precise_claim_with_link_in_same_element_accepted(market_golden):
     assert vmq.check_doc(doc) == []
 
 
-def test_trigger_covered_by_earlier_linked_mention(market_golden):
-    # golden は thesis で TOB にリンク付きで言及済み → 以降の TOB 言及は再掲不要で通る
+def test_trigger_without_same_claim_entity_is_not_document_globally_covered(market_golden):
+    # 同じ TOB 語が文書内にあっても、entity を特定しない別 claim まで全体免除しない。
     doc = copy.deepcopy(market_golden)
     doc["overview"]["points"].append("電通総研のTOB観測を巡る物色が続いた。")
+    assert any("overview.points[5]" in e and "TOB" in e for e in vmq.check_doc(doc))
+
+
+def test_repeated_claim_with_same_entity_can_reuse_first_source(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("[[電通総研]]のTOB観測を巡る物色が続いた。")
     assert vmq.check_doc(doc) == []
 
 
@@ -357,3 +363,52 @@ def test_cli_exit_codes(market_golden, tmp_path, capsys):
 
     assert vmq.main([str(tmp_path / "missing.json")]) == 1
     capsys.readouterr()
+
+
+# ── machine findings / claim-scoped repair ───────────────────
+def test_precise_claim_is_scoped_to_each_mover(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["movers"]["losers"].extend([
+        {"code": "9001", "name": "銘柄A", "note": "証券会社が格下げ。",
+         "links": [{"label": "記事", "url": "https://example.com/a-rating"}]},
+        {"code": "9002", "name": "銘柄B", "note": "別の証券会社が格下げ。", "links": []},
+    ])
+    findings = vmq.audit_doc(doc)
+    assert any(item["rule_id"] == "MKT_PRECISE_CLAIM_SOURCE" and item["code"] == "9002"
+               for item in findings)
+    assert not any(item["rule_id"] == "MKT_PRECISE_CLAIM_SOURCE" and item["code"] == "9001"
+                   for item in findings)
+
+
+def test_machine_findings_have_stable_shape_and_repair_target(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["movers"]["gainers"][0]["links"] = []
+    findings = vmq.audit_doc(doc)
+    emph = next(item for item in findings if item["rule_id"] == "MKT_EMPH_LINK_REQUIRED")
+    assert set(emph) == {"code", "path", "rule_id", "severity", "message"}
+    assert emph["severity"] == "ERROR"
+    assert vmq.select_repair_targets([emph]) == [{
+        "code": emph["code"], "path": emph["path"],
+        "rule_ids": ["MKT_EMPH_LINK_REQUIRED"], "severities": ["ERROR"],
+    }]
+
+
+def test_cli_json_findings_and_repair_targets(market_golden, tmp_path, capsys):
+    doc = copy.deepcopy(market_golden)
+    doc["news_sources"][0]["links"] = []
+    path = tmp_path / "bad.json"
+    path.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+
+    assert vmq.main([str(path), "--format", "json"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["schema_version"] == "quality_findings.v1"
+    assert payload["files"][0]["findings"][0]["rule_id"] == "MKT_NEWS_SOURCE_LINK_REQUIRED"
+
+    assert vmq.main([str(path), "--repair-targets"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["files"][0]["targets"][0]["path"].startswith("news_sources[0]")
+
+    target_path = tmp_path / "repair" / "market_targets.json"
+    assert vmq.main([str(path), "--repair-targets", str(target_path)]) == 1
+    assert json.loads(target_path.read_text(encoding="utf-8"))["validator"] == "market"
+    assert capsys.readouterr().out == ""

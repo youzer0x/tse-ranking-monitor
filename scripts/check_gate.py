@@ -1,21 +1,20 @@
-"""営業日ゲート: 当日 D に生成すべき東証 日中（レギュラー）セッション日を判定して出力する。
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""互換CLI: 本体は :mod:`tse_ranking_monitor.maintenance.calendar_gate`。"""
+from pathlib import Path
+import sys
 
-  - 当日（D）が東証営業日 → `SESSION=YYYY-MM-DD`（=D）を出力し exit 0。
-  - 当日が休場（=新規日中セッション無し） → `SKIP` を出力し exit 0。
+_ROOT = Path(__file__).resolve().parents[1]
+_SRC = _ROOT / "src"
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
 
-ルーチンはこの出力を見て、SKIP のときは生成せず終了する。
-PTS 版（前営業日ゲート・朝 06:06）と異なり、当日が営業日かを見る（cron 16:35 JST）。
-※ルーチンの step1 は本ファイルを内包した scripts/wait_for_data.py（当日四本値の鮮度ガード付き）を使う。
-  本ファイルは純・ネット無しの営業日プローブとして手動確認/フォールバック用に残す。
-TZ=Asia/Tokyo を前提（クラウド環境変数で設定）。
-"""
-import os, sys
-from datetime import date
+from tse_ranking_monitor.maintenance import calendar_gate as _impl
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import business_day
+globals().update({name: getattr(_impl, name) for name in dir(_impl)
+                  if not name.startswith("__")})
 
 if __name__ == "__main__":
-    today = date.fromisoformat(sys.argv[1]) if len(sys.argv) > 1 else date.today()
-    s = business_day.tse_session_date_for(today)
-    print(f"SESSION={s.isoformat()}" if s else "SKIP")
+    sys.exit(_impl.main())

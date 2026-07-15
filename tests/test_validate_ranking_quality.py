@@ -1,6 +1,6 @@
 """validate_ranking_quality.py の単体テスト（標準ライブラリ＋vmq のみ・ネット/APIキー不要）。
 
-市場分析タブと同一基準を変動要因（factor）に適用する番犬。監査（reports/factor_audit_2026-07-05.md）
+市場分析タブと同一基準を変動要因（factor）に適用する番犬。監査（audits/2026-07-05-factor-quality.md）
 が検出した「開示タグなのに窓内開示なし」「材料日付のドリフト」「無出典の因果断定」を再発させない。
 趣旨は主張を削らせることではなく、再タグ・出典追加・推定表現化で正確性を担保させること。
 """
@@ -9,7 +9,7 @@ import json
 
 import pytest
 
-import validate_ranking_quality as vrq
+from tse_ranking_monitor.quality import ranking as vrq
 
 
 # ── golden（全チェックを通す合成サンプル）────────────────────────
@@ -346,3 +346,61 @@ def test_cli_warn_exit_zero(ranking_golden, tmp_path, capsys):
     p.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
     assert vrq.main([str(p)]) == 0
     assert "WARN" in capsys.readouterr().err
+
+
+# ── private evidence.v1 gate / machine repair ─────────────────
+def _not_found_evidence(checks):
+    return {
+        "schema_version": "evidence.v1", "session_date": "2026-07-03",
+        "items": [{"code": "3990", "status": "unresolved", "checks": checks}],
+    }
+
+
+def test_legacy_public_json_does_not_require_private_evidence(ranking_golden):
+    assert vrq.check_ranking(ranking_golden) == []
+
+
+def test_not_found_requires_all_five_passes_when_evidence_supplied(ranking_golden):
+    evidence = _not_found_evidence({
+        "disclosures": "done", "kabutan_news": "done", "web_search": "done",
+        "sector_cluster": "done",
+    })
+    findings = vrq.audit_ranking(ranking_golden, evidence=evidence)
+    item = next(f for f in findings if f["rule_id"] == "RANK_NOT_FOUND_FIVE_PASS_INCOMPLETE")
+    assert item["code"] == "3990"
+    assert item["severity"] == "ERROR"
+    assert "edinet" in item["message"]
+
+
+def test_not_found_accepts_done_na_or_unavailable_states(ranking_golden):
+    evidence = _not_found_evidence({
+        "disclosures": "done", "kabutan_news": {"status": "done"},
+        "web_search": "done", "sector_cluster": "na", "edinet": "unavailable",
+    })
+    assert vrq.check_ranking(ranking_golden, evidence=evidence) == []
+
+
+def test_ranking_machine_json_and_targeted_code(ranking_golden, tmp_path, capsys):
+    ranking_path = tmp_path / "ranking.json"
+    ranking_path.write_text(json.dumps(ranking_golden, ensure_ascii=False), encoding="utf-8")
+    evidence_path = tmp_path / "evidence.json"
+    evidence_path.write_text(json.dumps(_not_found_evidence({}), ensure_ascii=False), encoding="utf-8")
+
+    assert vrq.main([str(ranking_path), "--evidence", str(evidence_path),
+                     "--format", "json"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+    finding = next(item for item in payload["files"][0]["findings"]
+                   if item["rule_id"] == "RANK_NOT_FOUND_FIVE_PASS_INCOMPLETE")
+    assert set(finding) == {"code", "path", "rule_id", "severity", "message"}
+
+    assert vrq.main([str(ranking_path), "--evidence", str(evidence_path),
+                     "--repair-targets"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert any(target["code"] == "3990" for target in payload["files"][0]["targets"])
+
+    target_path = tmp_path / "repair" / "ranking_targets.json"
+    assert vrq.main([str(ranking_path), "--evidence", str(evidence_path),
+                     "--repair-targets", str(target_path)]) == 1
+    payload = json.loads(target_path.read_text(encoding="utf-8"))
+    assert any(target["code"] == "3990" for target in payload["files"][0]["targets"])
+    assert capsys.readouterr().out == ""

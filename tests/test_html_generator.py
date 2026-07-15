@@ -1,4 +1,6 @@
 """html_generator.py の書式関数とメール HTML 生成の単体テスト（純粋変換・ネット非接触）。"""
+from pathlib import Path
+
 import html_generator as hg
 
 
@@ -20,7 +22,7 @@ def _data(n_rows):
     return {
         "session_date": "2026-07-03",
         "session_window": "2026-07-03 09:00–15:30 JST",
-        "criteria": {"min_pct": 5, "min_turnover_yen": 10_000_000, "min_mcap_oku": 100, "max_rank": 50},
+        "criteria": {"min_pct": 5, "min_turnover_yen": 10_000_000, "min_mcap_oku": 100, "max_rank": 30},
         "counts": {"qualifying": n_rows},
         "rows": [
             {"rank": i + 1, "code": f"700{i}", "name": f"テスト銘柄{i}",
@@ -121,3 +123,21 @@ def test_pages_meta_moved_into_info_modal():
     assert "社該当（上位 " in html               # capped チップの分岐が残っている
     # 画面中央に表示（CSSリセット *{margin:0} が dialog の margin:auto を打ち消すため明示指定）
     assert "dialog.info{position:fixed;inset:0;margin:auto;" in html
+
+
+def test_pages_sources_are_split_but_output_remains_single_file():
+    root = Path(__file__).resolve().parents[1]
+    web = root / "src" / "tse_ranking_monitor" / "web"
+    template = (web / "index.template.html").read_text(encoding="utf-8")
+    html = hg.generate_pages_html()
+
+    assert "{{APP_CSS}}" in template and "{{APP_JS}}" in template
+    assert (web / "app.css").read_text(encoding="utf-8").strip()
+    assert (web / "app.js").read_text(encoding="utf-8").strip()
+    assert "{{APP_CSS}}" not in html and "{{APP_JS}}" not in html
+    assert "<style>" in html and "<script>" in html
+
+
+def test_generated_pages_matches_tracked_index():
+    tracked = Path(__file__).resolve().parents[1] / "docs" / "index.html"
+    assert hg.generate_pages_html() == tracked.read_text(encoding="utf-8")
