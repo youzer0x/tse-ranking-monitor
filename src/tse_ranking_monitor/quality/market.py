@@ -7,16 +7,14 @@ build_market_json.py の validate_market() が「SPA が描画できる形か」
 
   1. 構造検証       — build_market_json.validate_market()（不合格なら品質検査はスキップ）
   2. news_sources   — トピック一覧が空でなく、各トピックの links が空でないこと
-  3. emph movers    — 強調表示（emph:true）の銘柄は links 必須
-  4. 禁止 URL       — 銘柄ランディングページ（みんかぶ銘柄・株探銘柄・日経会社情報・
+  3. 禁止 URL       — 銘柄ランディングページ（みんかぶ銘柄・株探銘柄・日経会社情報・
                       Yahoo!quote）を出典に使わない（具体記事・TDnet/EDINET・会社 IR へ）
-  5. 精密主張リンク — 時価総額・目標株価・TOB 等のトリガー語は、同一 claim の最初の
-                      言及に Markdown リンクを持つこと。movers は行ごとの links を要求し、
-                      別銘柄の同じトリガー語で文書全体を免除しない
-  6. 重複URL禁止    — 同一出典URLの掲載は本文中（インラインリンク＋movers.links）に
-                      1箇所＋news_sources に1箇所の最大2箇所まで（URL単位。同一内容でも
-                      URLが異なる別ソースは別カウント）
-  7. 因果表現の監査 — 「点火」「波及」等の断定的因果語、および直接材料の帰属
+  4. 精密主張リンク — 時価総額・目標株価・TOB 等のトリガー語は、同一 claim の最初の
+                      言及に Markdown リンクを持つこと
+  5. 重複URL禁止    — 同一出典URLの掲載は本文中（インラインリンク）に1箇所＋news_sources
+                      に1箇所の最大2箇所まで（URL単位。同一内容でもURLが異なる別ソースは
+                      別カウント）
+  6. 因果表現の監査 — 「点火」「波及」等の断定的因果語、および直接材料の帰属
                       （「決算/報道/開示/発表を受け」「材料視」）に出典・推定マーカーが
                       無ければ WARN（終了コードには影響しない。check_warnings）
 
@@ -180,7 +178,7 @@ def iter_text_units(doc):
     判定単位は「配列要素（文字列フィールド1本）」。文末の `（[出典](URL)）。` は
     「。」分割だとリンクだけが別文に落ちて誤検知するため、文分割はしない。
     対象は thesis / overview（points・flow・flow_conclusion・snapshot[].note）/
-    movers（note・footnote）/ theme_matrix（rows・character）。
+    theme_matrix（rows・character）。
     title・universe・methodology・disclaimer・news_sources[].topic は定型・
     フィルタ条件の記述（「時価総額100億円以上」等）であり対象外。
     旧スキーマの sector_notes / bought・sold は 2026-07 改修で廃止済み
@@ -198,17 +196,6 @@ def iter_text_units(doc):
     for i, r in enumerate(ov.get("snapshot") or []):
         if isinstance(r, dict) and isinstance(r.get("note"), str):
             yield ("overview.snapshot[%d](%s).note" % (i, r.get("label")), r["note"], False)
-
-    mv = doc.get("movers") or {}
-    for side in ("gainers", "losers"):
-        for i, m in enumerate(mv.get(side) or []):
-            if isinstance(m, dict) and isinstance(m.get("note"), str):
-                # 材料列に links が併記描画されるため、行の links 非空なら精密主張リンクを免除
-                yield ("movers.%s[%d](%s).note" % (side, i, m.get("name") or m.get("code")),
-                       m["note"], bool(m.get("links")))
-        fn = mv.get("%s_footnote" % side)
-        if isinstance(fn, str):
-            yield ("movers.%s_footnote" % side, fn, False)
 
     tm = doc.get("theme_matrix") or {}
     if isinstance(tm, dict):
@@ -245,16 +232,6 @@ def audit_doc(doc):
                 "MKT_NEWS_SOURCE_LINK_REQUIRED", "ERROR",
                 "links が空。トピックの根拠となる具体記事・開示 URL を1本以上載せる"))
 
-    movers = doc.get("movers") or {}
-    for side in ("gainers", "losers"):
-        for i, mover in enumerate(movers.get(side) or []):
-            if mover.get("emph") and not (mover.get("links") or []):
-                findings.append(finding(
-                    "movers.%s[%d](%s).links" % (side, i, mover.get("name") or mover.get("code")),
-                    "MKT_EMPH_LINK_REQUIRED", "ERROR",
-                    "emph=true（強調表示）だが links が空。Stage2 の採用出典を再利用してリンクを付ける",
-                    mover.get("code")))
-
     def check_banned(url, path, code=None):
         for pattern, description in BANNED_URL_PATTERNS:
             if pattern.search(url or ""):
@@ -267,12 +244,6 @@ def audit_doc(doc):
         for j, link in enumerate(source.get("links") or []):
             check_banned(link.get("url"), "news_sources[%d](%s).links[%d]" % (
                 i, source.get("topic"), j))
-    for side in ("gainers", "losers"):
-        for i, mover in enumerate(movers.get(side) or []):
-            for j, link in enumerate(mover.get("links") or []):
-                check_banned(
-                    link.get("url"), "movers.%s[%d](%s).links[%d]" % (
-                        side, i, mover.get("name") or mover.get("code"), j), mover.get("code"))
 
     units = list(iter_text_units(doc))
     for path, text, _links in units:
@@ -281,8 +252,6 @@ def audit_doc(doc):
 
     # Precision coverage is claim-scoped, never trigger-scoped across the whole document.
     # A repeated narrative claim may reuse its first source when it names the same [[entity]].
-    # Movers are stricter: each mover row must carry its own adjacent links, preventing an
-    # unrelated stock's rating/TOB link from covering another mover with the same trigger.
     linked_claims = []
     for path, text, has_adjacent_links in units:
         norm = unicodedata.normalize("NFKC", text)
@@ -291,21 +260,10 @@ def audit_doc(doc):
             continue
         linked = bool(MD_LINK_RE.search(text)) or has_adjacent_links
         entities = _claim_entities(text)
-        is_mover = path.startswith("movers.gainers[") or path.startswith("movers.losers[")
-        mover_name = re.search(r"^movers\.(?:gainers|losers)\[\d+\]\(([^)]+)\)", path)
-        unit_code = None
-        if mover_name:
-            entities.add(mover_name.group(1))
-        mover_location = re.search(r"^movers\.(gainers|losers)\[(\d+)\]", path)
-        if mover_location:
-            side, index = mover_location.group(1), int(mover_location.group(2))
-            side_items = movers.get(side) or []
-            if index < len(side_items) and isinstance(side_items[index], dict):
-                unit_code = side_items[index].get("code")
         uncovered = []
         for trigger in triggers:
             same_claim_linked = linked or (
-                not is_mover and bool(entities) and any(
+                bool(entities) and any(
                     previous_trigger == trigger and bool(entities & previous_entities)
                     for previous_trigger, previous_entities in linked_claims))
             if not same_claim_linked:
@@ -313,9 +271,9 @@ def audit_doc(doc):
         if uncovered:
             findings.append(finding(
                 path, "MKT_PRECISE_CLAIM_SOURCE", "ERROR",
-                "精密主張（%s）にリンク付きの言及が1箇所も無い（同一claim/moverスコープ）。"
-                "最初の言及または当該 mover の links に出典を付ける"
-                % "・".join(uncovered), unit_code))
+                "精密主張（%s）にリンク付きの言及が1箇所も無い（同一claimスコープ）。"
+                "最初の言及に出典を付ける"
+                % "・".join(uncovered)))
         if linked:
             for trigger in triggers:
                 linked_claims.append((trigger, entities))
@@ -324,12 +282,6 @@ def audit_doc(doc):
     for path, text, _links in units:
         for _label, url in MD_LINK_RE.findall(text):
             body_urls.setdefault(url, []).append(path)
-    for side in ("gainers", "losers"):
-        for i, mover in enumerate(movers.get(side) or []):
-            for link in mover.get("links") or []:
-                if link.get("url"):
-                    body_urls.setdefault(link["url"], []).append(
-                        "movers.%s[%d](%s).links" % (side, i, mover.get("name") or mover.get("code")))
     for url, paths in body_urls.items():
         if len(paths) > 1:
             findings.append(finding(
@@ -427,10 +379,9 @@ def main(argv=None):
                 for item in warnings:
                     sys.stderr.write("[validate_market_quality] WARN: %s: %s\n" % (
                         name, _human_finding(item)))
-                sys.stderr.write("[validate_market_quality] OK: %s（news_sources %d / movers %d / 本文 %d 要素%s）\n"
+                sys.stderr.write("[validate_market_quality] OK: %s（news_sources %d / 本文 %d 要素%s）\n"
                                  % (name,
                                     len(doc.get("news_sources") or []),
-                                    sum(len((doc.get("movers") or {}).get(s) or []) for s in ("gainers", "losers")),
                                     len(list(iter_text_units(doc))),
                                     "・WARN %d件" % len(warnings) if warnings else ""))
 

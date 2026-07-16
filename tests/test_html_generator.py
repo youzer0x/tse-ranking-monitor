@@ -102,6 +102,22 @@ def test_pages_sector_table_single_metric_with_driver_column():
     assert "text-overflow" not in html   # 銘柄名の省略（ellipsis）は厳禁＝常に全文表示
 
 
+def test_pages_sector_driver_is_single_line_name_pct():
+    # 「銘柄」列は「銘柄名（騰落率）」を1行に集約し、複数銘柄のときだけ行を分ける（2026-07-16）。
+    html = hg.generate_pages_html()
+    assert "<span class=\"drvpct '+pctClass(d.pct)+'\">（'+pctStr(d.pct)+'）</span>" in html
+    assert "td.drv .drvpct{display:block" not in html
+    assert "table.sec33 td.drv{white-space:normal;}" not in html
+
+
+def test_pages_has_no_movers_section():
+    # 「注目個別銘柄と材料」は掲載・調査・データパイプラインとも廃止（2026-07-16）。
+    html = hg.generate_pages_html()
+    assert "注目個別銘柄と材料" not in html
+    assert "moverRows" not in html
+    assert "mvtbl" not in html
+
+
 def test_pages_has_no_bought_sold_sections():
     # 「買われた/売られたセクター・テーマ」セクションは全カット（テーマ別資金フローは存続）。
     html = hg.generate_pages_html()

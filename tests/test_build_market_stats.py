@@ -177,7 +177,7 @@ def test_sector_drivers_single_stock_sector():
 
 
 def test_sector_drivers_name_nfkc_normalized():
-    # 全角英数の銘柄名は NFKC 正規化で半角化される（movers/フラグと同じ規約）
+    # 全角英数の銘柄名は NFKC 正規化で半角化される（乖離フラグと同じ規約）
     records = [
         {"sector33": "サービス業", "chg_pct": 5.0, "turnover": 100_000_000,
          "code4": "9999", "name": "ＡＢＣホールディングス"},
@@ -196,31 +196,10 @@ def test_build_stats_json_has_sector_drivers_and_no_strip_default():
                 "min_turnover_yen": 100_000_000}
     stats = bms.build_stats_json(
         "2026-07-03", "2026-07-02", "2026-07-03 18:00 JST", 1.24, 4064.6, 4014.9,
-        universe, liquid, agg33, drivers, [], {})
+        universe, liquid, agg33, drivers, [])
     assert "strip_default" not in stats
     assert stats["sector_drivers"] == {
         "電気機器": [{"code": "6501", "name": "押し上げ役", "pct": 10.0, "share_pct": 100.0}]}
-    assert stats["selected_gainers"] == [{
-        "code": "6501", "name": "押し上げ役", "rank": 1, "pct": 10.0,
-        "turnover_oku": 3.0, "sector33": "電気機器"}]
-    assert stats["selected_losers"] == stats["selected_gainers"]
-
-
-def test_stats_market_brief_selection_is_top_five_per_side():
-    liquid = [{"sector33": "電気機器", "chg_pct": float(i),
-               "turnover": i * 100_000_000, "code4": str(6500 + i),
-               "code5": str(6500 + i) + "0", "name": "銘柄%d" % i}
-              for i in range(1, 8)]
-    agg33 = bms.aggregate_by_sector(liquid)
-    universe = {"n_target": 7, "n_priced": 7, "n_liquid": 7,
-                "min_turnover_yen": 100_000_000}
-    stats = bms.build_stats_json(
-        "2026-07-03", "2026-07-02", "2026-07-03 18:00 JST", None, None, None,
-        universe, liquid, agg33, {}, [], {})
-    assert [row["code"] for row in stats["selected_gainers"]] == [
-        "6507", "6506", "6505", "6504", "6503"]
-    assert [row["code"] for row in stats["selected_losers"]] == [
-        "6501", "6502", "6503", "6504", "6505"]
 
 
 def test_resolve_out_dir_defaults_to_session_worktree_and_honors_override():

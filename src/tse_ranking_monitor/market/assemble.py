@@ -3,7 +3,7 @@
 """市場分析（セクター/テーマ 騰落率分析）の Web 配信用 JSON を組み立てる。
 
 test-jquants の決定的スクリプト `sector_analysis.py` が出力した CSV
-（sector_return_<date>.csv / movers_top_<date>.csv）から**数値を機械転記**し、
+（sector_return_<date>.csv）から**数値を機械転記**し、
 Claude/人が執筆した**ナラティブ・フラグメント JSON**（テーゼ・背景・材料・出典）と
 結合して `docs/data/<date>_market.json`（スキーマ v1）を生成する。
 
@@ -76,33 +76,6 @@ def read_sector_csv(path):
                 "turnover_oku": parse_num(r.get("売買代金合計(億円)")),
             })
     return rows
-
-
-def read_movers_csv(path):
-    """movers_top_<date>.csv → {'値上がり': {code: row}, '値下がり': {code: row}}。
-
-    コードは英数字混在（例 429A/330A）があるため文字列で扱う。
-    銘柄名は NFKC 正規化で全角英数を半角化する。
-    """
-    if not os.path.exists(path):
-        die("movers CSV が見つからない: %s" % path)
-    idx = {"値上がり": {}, "値下がり": {}}
-    with open(path, "r", encoding="utf-8-sig", newline="") as f:
-        reader = csv.DictReader(f)
-        for r in reader:
-            side = (r.get("区分") or "").strip()
-            code = (r.get("証券コード") or "").strip()
-            if side not in idx or not code:
-                continue
-            idx[side][code] = {
-                "code": code,
-                "name": nfkc(r.get("銘柄名")),
-                "sector33": (r.get("33業種") or "").strip(),
-                "close": parse_num(r.get("当日終値")),
-                "pct": parse_num(r.get("前日比%")),
-                "turnover_oku": parse_num(r.get("売買代金(億円)")),
-            }
-    return idx
 
 
 def require(cond, msg):
@@ -292,13 +265,6 @@ def validate_market(out):
             if tm.get("character") is not None and not isinstance(tm["character"], str):
                 bad("theme_matrix.character", "文字列", _shape(tm["character"]))
 
-    # movers: note=str（links は check_links 済み）
-    mv = out.get("movers") or {}
-    for side in ("gainers", "losers"):
-        for i, m in enumerate(mv.get(side) or []):
-            if not isinstance(m.get("note", ""), str):
-                bad("movers.%s[%d].note" % (side, i), "文字列", _shape(m.get("note")))
-
     # news_sources: [{topic, links:[{label,url}]}]（links は check_links 済み）
     need_objs(out.get("news_sources") or [], ["topic"], "news_sources", str_keys=("topic",))
 
@@ -314,7 +280,7 @@ def validate_market(out):
 def main():
     ap = argparse.ArgumentParser(description="市場分析 Web 配信用 JSON を組み立てる")
     ap.add_argument("--date", required=True, help="セッション日 YYYY-MM-DD")
-    ap.add_argument("--csv-dir", required=True, help="sector_return/movers_top CSV のディレクトリ")
+    ap.add_argument("--csv-dir", required=True, help="sector_return CSV のディレクトリ")
     ap.add_argument("--narrative", required=True, help="ナラティブ・フラグメント JSON")
     ap.add_argument("--stats", default=None,
                     help="build_market_stats.py の market_stats JSON（CSV外の決定的数値）")
@@ -325,12 +291,9 @@ def main():
 
     date = args.date
     sector_path = os.path.join(args.csv_dir, "sector_return_%s.csv" % date)
-    movers_path = os.path.join(args.csv_dir, "movers_top_%s.csv" % date)
 
     sectors = read_sector_csv(sector_path)
     require(len(sectors) == 33, "sector CSV は33行であるべき（実際: %d 行）" % len(sectors))
-
-    movers = read_movers_csv(movers_path)
 
     frag = load_json(args.narrative)
     # 静的テンプレ（defaults）を土台に、フラグメントで上書き（浅いマージ）。
@@ -357,9 +320,8 @@ def main():
             "騰落数合計(%d) と 銘柄数合計(%d) が不一致" % (up + down + flat, n_liquid))
 
     top_sector = max(sectors, key=lambda s: (s["turnover_oku"] or 0))
-    # 最大売買代金銘柄は movers（値上がり＋値下がり）の中の最大で近似する（--stats 無しの手動範囲）。
-    all_movers = list(movers["値上がり"].values()) + list(movers["値下がり"].values())
-    top_stock = max(all_movers, key=lambda m: (m["turnover_oku"] or 0)) if all_movers else None
+    # 最大売買代金銘柄は --stats（全ユニバース真値）から採用する。--stats 無しの手動実行では None。
+    top_stock = None
 
     # ── stats（build_market_stats.py）との整合チェック＋決定的数値の採用
     topix_pct = frag.get("topix_pct")
@@ -374,7 +336,7 @@ def main():
         require(su is None or su == n_liquid,
                 "stats.universe.n_liquid(%s) が CSV 集計(%d) と不一致" % (su, n_liquid))
         if stats.get("top_stock_by_turnover"):
-            top_stock = stats["top_stock_by_turnover"]  # 全ユニバース真値（movers 近似より優先）
+            top_stock = stats["top_stock_by_turnover"]  # 全ユニバース真値
         s_topix = stats.get("topix_pct")
         if s_topix is not None and topix_pct is not None and abs(s_topix - topix_pct) > 0.01:
             die("topix_pct が stats(%.2f) と フラグメント(%.2f) で不一致（古いフラグメント？）"
@@ -389,38 +351,6 @@ def main():
     # ── sector_drivers：stats の代表銘柄を sectors33 の各行へ driver として join
     #    （--stats 無し・旧 stats では付けず、SPA が「—」表示にフォールバック）
     join_drivers(sectors, stats)
-
-    # ── movers：フラグメント {code, note, links, emph} に CSV の数値を join
-    def build_movers(items, side_key):
-        pool = movers[side_key]
-        out = []
-        for row in (items or []):
-            code = str(row.get("code", "")).strip()
-            require(code in pool, "movers(%s) の code が CSV に無い: %r" % (side_key, code))
-            m = pool[code]
-            check_links(row.get("links"), "movers %s %s" % (side_key, code))
-            item = {
-                "code": m["code"],
-                "name": m["name"],
-                "pct": m["pct"],
-                "close": m["close"],
-                "turnover_oku": m["turnover_oku"],
-                "sector33": m["sector33"],
-                "note": row.get("note", ""),
-                "links": row.get("links") or [],
-            }
-            if row.get("emph"):
-                item["emph"] = True
-            out.append(item)
-        return out
-
-    fm = frag.get("movers") or {}
-    movers_out = {
-        "gainers": build_movers(fm.get("gainers"), "値上がり"),
-        "gainers_footnote": fm.get("gainers_footnote", ""),
-        "losers": build_movers(fm.get("losers"), "値下がり"),
-        "losers_footnote": fm.get("losers_footnote", ""),
-    }
 
     # ── news_sources の URL 検査
     for ns in (frag.get("news_sources") or []):
@@ -462,7 +392,6 @@ def main():
         "thesis": frag.get("thesis", ""),
         "overview": overview,
         "sectors33": sectors,
-        "movers": movers_out,
         "theme_matrix": frag.get("theme_matrix") or {},
         "methodology": methodology,
         "news_sources": frag.get("news_sources") or [],
@@ -479,9 +408,8 @@ def main():
         f.write("\n")
 
     sys.stderr.write(
-        "[build_market_json] OK: %s（33業種 / breadth %d-%d-%d=%d / gainers %d / losers %d）\n"
-        % (args.out, up, down, flat, n_liquid,
-           len(movers_out["gainers"]), len(movers_out["losers"]))
+        "[build_market_json] OK: %s（33業種 / breadth %d-%d-%d=%d）\n"
+        % (args.out, up, down, flat, n_liquid)
     )
 
 

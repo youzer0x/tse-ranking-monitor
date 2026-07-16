@@ -123,27 +123,13 @@ function sectorBars(sectors){
        build_market_stats.py sector_drivers）。複数該当時は1銘柄=1行で併記し、
        drivers の無い過去データは「—」表示（後方互換）。 */
     var ds=asArr(s.drivers);
-    var drv=ds.length?ds.map(function(d){return '<div class="drvrow"><a class="drvname" href="https://kabutan.jp/stock/?code='+esc(fmtCode(d.code))+'" target="_blank" rel="noopener">'+esc(d.name)+'</a><span class="drvpct '+pctClass(d.pct)+'">'+pctStr(d.pct)+'</span></div>';}).join(''):'—';
+    var drv=ds.length?ds.map(function(d){return '<div class="drvrow"><a class="drvname" href="https://kabutan.jp/stock/?code='+esc(fmtCode(d.code))+'" target="_blank" rel="noopener">'+esc(d.name)+'</a><span class="drvpct '+pctClass(d.pct)+'">（'+pctStr(d.pct)+'）</span></div>';}).join(''):'—';
     h+='<tr><td>'+esc(s.name)+'</td>'+
       '<td class="drv">'+drv+'</td>'+
       '<td class="'+pctClass(w)+'">'+pctStr(w)+'</td>'+
       '<td class="barcell">'+bar+'</td>'+
       '<td class="num">'+s.up+' / '+s.down+'</td>'+
       '<td class="num">'+fmtTurnover(s.turnover_oku)+'</td></tr>';
-  });
-  return h+'</tbody></table></div>';
-}
-function moverRows(list){
-  var h='<div class="tscroll"><table class="mvtbl"><thead><tr><th>コード</th><th>銘柄</th><th class="r">前日比</th><th class="r">売買代金<br>(億円)</th><th>材料</th></tr></thead><tbody>';
-  asArr(list).forEach(function(m){
-    var code=fmtCode(m.code);
-    var links=asArr(m.links).map(function(l){return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>';}).join('　');
-    var note=mdInline(m.note||'')+(links?' <span style="color:var(--sub)">（'+links+'）</span>':'');
-    h+='<tr><td class="code"><a href="https://kabutan.jp/stock/?code='+esc(code)+'" target="_blank" rel="noopener">'+esc(code)+'</a></td>'+
-      '<td class="name">'+(m.emph?'<strong>'+esc(m.name)+'</strong>':esc(m.name))+'</td>'+
-      '<td class="'+pctClass(m.pct)+'">'+pctStr(m.pct)+'</td>'+
-      '<td class="num">'+fmtTurnover(m.turnover_oku)+'</td>'+
-      '<td class="factor">'+note+'</td></tr>';
   });
   return h+'</tbody></table></div>';
 }
@@ -201,13 +187,6 @@ function renderMarket(){
   h+=themeSection(d.theme_matrix);
   if(d.sectors33&&d.sectors33.length){
     h+='<div class="msec"><h2>セクター騰落率（東証33業種・売買代金加重）</h2>'+sectorBars(d.sectors33)+'</div>';
-  }
-  var mv=d.movers||{};
-  if((mv.gainers&&mv.gainers.length)||(mv.losers&&mv.losers.length)){
-    h+='<div class="msec"><h2>注目個別銘柄と材料</h2>';
-    if(mv.gainers&&mv.gainers.length){h+='<div class="thead-note" style="font-size:14px;margin-bottom:4px"><span class="mk mk-buy"></span>買われた銘柄</div>'+moverRows(mv.gainers);if(mv.gainers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.gainers_footnote)+'</div>';}
-    if(mv.losers&&mv.losers.length){h+='<div class="thead-note" style="font-size:14px;margin:14px 0 4px"><span class="mk mk-sell"></span>売られた銘柄</div>'+moverRows(mv.losers);if(mv.losers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.losers_footnote)+'</div>';}
-    h+='</div>';
   }
   h+='<div class="msec"><details><summary class="msum">データ・手法・出典</summary>';
   var me=d.methodology||{};

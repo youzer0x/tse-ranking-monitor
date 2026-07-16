@@ -3,10 +3,13 @@
 """Build the compact, deterministic input used to write the market narrative.
 
 The public ``*_market.json`` schema remains owned by :mod:`.assemble`.  This
-module creates a private ``market_brief.v1`` artifact under ``.work`` so the
+module creates a private ``market_brief.v2`` artifact under ``.work`` so the
 writer does not need to reread ranking rows, research transcripts, or raw
-market statistics.  In particular, overlapping gainers reuse completed Stage2
-evidence verbatim; this module never researches or rewrites a factor.
+market statistics: numeric market context, theme clusters, sector drivers,
+divergence flags, and compact code-scoped claim/source context from completed
+Stage2 findings are all it needs. Individual up/down mover selection and
+per-stock narrative reuse were removed in 2026-07-16 along with the
+"注目個別銘柄と材料" section (see specs/MARKET_ANALYSIS.md).
 """
 
 from __future__ import annotations
@@ -18,7 +21,7 @@ import os
 import sys
 
 
-SCHEMA_VERSION = "market_brief.v1"
+SCHEMA_VERSION = "market_brief.v2"
 COMPLETE_STATUSES = {"complete", "completed", "accepted", "done", "ok", "verified"}
 
 _MARKET_KEYS = (
@@ -31,9 +34,7 @@ _MARKET_KEYS = (
     "top_sector_by_turnover",
     "top_stock_by_turnover",
 )
-_MOVER_KEYS = ("code", "name", "rank", "pct", "turnover_m", "turnover_oku", "sector33")
 _SOURCE_KEYS = ("id", "label", "url", "source_type", "published_at", "window")
-_CONTEXT_KEYS = ("date", "time", "title")
 
 
 def die(message):
@@ -104,65 +105,79 @@ def _source_ids(item):
     return out
 
 
-def _source_registry(items, used_ids):
-    by_id = {}
-    for item in items:
+def _scoped_source_id(code, source_id):
+    """Namespace an item-local source ID for the flattened brief artifact."""
+    return "%s:%s" % (code, source_id)
+
+
+def _compact_claims(item, code, available_ids):
+    """Keep claim text and rewrite its source references to scoped IDs."""
+    claims = []
+    for claim in item.get("claims") or []:
+        if not isinstance(claim, dict):
+            continue
+        text = str(claim.get("text") or "").strip()
+        source_ids = []
+        for value in claim.get("source_ids") or []:
+            source_id = _code(value)
+            if source_id not in available_ids:
+                continue
+            scoped_id = _scoped_source_id(code, source_id)
+            if scoped_id not in source_ids:
+                source_ids.append(scoped_id)
+        if text or source_ids:
+            claims.append({"text": text, "source_ids": source_ids})
+    return claims
+
+
+def _accepted_evidence(evidence_items):
+    """Return compact, code-scoped context for cited completed findings.
+
+    Source IDs are local to one Stage2 item, so both the source metadata and
+    claim references are namespaced with the stock code before entering this
+    all-items artifact.  Only referenced source metadata is retained; article
+    bodies and other raw research fields never enter the brief.
+    """
+    accepted = []
+    for item in evidence_items:
+        if not _is_complete(item):
+            continue
+        code = _code(item.get("code"))
+        if not code:
+            continue
+
+        sources_by_id = {}
         for source in item.get("sources") or []:
             if not isinstance(source, dict):
                 continue
             source_id = _code(source.get("id"))
-            if not source_id or source_id not in used_ids or source_id in by_id:
+            if source_id and source_id not in sources_by_id:
+                sources_by_id[source_id] = source
+
+        sources = []
+        available_ids = set()
+        for source_id in _source_ids(item):
+            source = sources_by_id.get(source_id)
+            if source is None:
                 continue
-            by_id[source_id] = {
-                key: copy.deepcopy(source[key]) for key in _SOURCE_KEYS if source.get(key) is not None
+            compact = {
+                key: copy.deepcopy(source[key])
+                for key in _SOURCE_KEYS
+                if source.get(key) is not None
             }
-    return [by_id[source_id] for source_id in sorted(by_id)]
+            compact["id"] = _scoped_source_id(code, source_id)
+            sources.append(compact)
+            available_ids.add(source_id)
 
-
-def _explicit_movers(stats, side):
-    """Read deterministic mover selections when stats v1 (or later) supplies them."""
-    candidates = []
-    movers = stats.get("movers")
-    if isinstance(movers, dict):
-        candidates.append(movers.get(side))
-    candidates.extend((stats.get("selected_%s" % side), stats.get(side)))
-    for value in candidates:
-        if isinstance(value, list):
-            return value
-
-    # A compact stats producer may annotate movers_context entries with a side.
-    selected = []
-    for code, value in (stats.get("movers_context") or {}).items():
-        if not isinstance(value, dict):
+        if not sources:
             continue
-        marker = str(value.get("side") or value.get("区分") or "").lower()
-        wanted = ("loser", "値下がり") if side == "losers" else ("gainer", "値上がり")
-        if any(token in marker for token in wanted):
-            selected.append({"code": code, **value})
-    return selected
-
-
-def _selected_codes(items):
-    out = []
-    for item in items:
-        code = _code(item.get("code") if isinstance(item, dict) else item)
-        if code and code not in out:
-            out.append(code)
-    return out
-
-
-def _context_for(stats, code, selected=None):
-    raw = None
-    if isinstance(selected, dict):
-        raw = selected.get("context") or selected.get("disclosures")
-    if raw is None:
-        raw = (stats.get("movers_context") or {}).get(code)
-    if isinstance(raw, dict):
-        raw = raw.get("items") or raw.get("disclosures") or []
-    return [
-        {key: copy.deepcopy(entry[key]) for key in _CONTEXT_KEYS if entry.get(key) is not None}
-        for entry in (raw or []) if isinstance(entry, dict)
-    ]
+        accepted.append({
+            "code": code,
+            "market_note": str(item.get("market_note") or "").strip(),
+            "claims": _compact_claims(item, code, available_ids),
+            "sources": sources,
+        })
+    return accepted
 
 
 def _compact_clusters(ranking):
@@ -194,51 +209,7 @@ def build_market_brief(ranking, evidence, stats):
         if other and other != session:
             raise ValueError("%s.session_date(%s) != ranking.session_date(%s)" % (label, other, session))
 
-    ranking_rows = [row for row in ranking.get("rows") or [] if isinstance(row, dict)]
-    rows_by_code = {_code(row.get("code")): row for row in ranking_rows if _code(row.get("code"))}
     evidence_items = _evidence_items(evidence)
-    evidence_by_code = {
-        _code(item.get("code")): item for item in evidence_items if _code(item.get("code"))
-    }
-
-    explicit_gainers = _explicit_movers(stats, "gainers")
-    gainer_codes = _selected_codes(explicit_gainers) or list(rows_by_code)
-    gainers = []
-    used_source_ids = set()
-    for code in gainer_codes:
-        row = rows_by_code.get(code)
-        item = evidence_by_code.get(code)
-        if row is None or item is None or not _is_complete(item):
-            continue
-        source_ids = _source_ids(item)
-        used_source_ids.update(source_ids)
-        mover = {key: copy.deepcopy(row[key]) for key in _MOVER_KEYS if row.get(key) is not None}
-        mover["code"] = code
-        mover["factor"] = item.get("factor") or row.get("factor") or ""
-        mover["factor_kind"] = item.get("factor_kind") or row.get("factor_kind") or ""
-        mover["market_note"] = item.get("market_note") or mover["factor"]
-        mover["source_ids"] = source_ids
-        gainers.append(mover)
-
-    selected_losers = _explicit_movers(stats, "losers")
-    losers = []
-    for selected in selected_losers:
-        code = _code(selected.get("code") if isinstance(selected, dict) else selected)
-        if not code:
-            continue
-        loser = {"code": code}
-        if isinstance(selected, dict):
-            for key in _MOVER_KEYS:
-                if selected.get(key) is not None:
-                    loser[key] = copy.deepcopy(selected[key])
-            if selected.get("note") is not None:
-                loser["note"] = selected["note"]
-            ids = [_code(value) for value in selected.get("source_ids") or [] if _code(value)]
-            if ids:
-                loser["source_ids"] = ids
-                used_source_ids.update(ids)
-        loser["context"] = _context_for(stats, code, selected if isinstance(selected, dict) else None)
-        losers.append(loser)
 
     market = {key: copy.deepcopy(stats[key]) for key in _MARKET_KEYS if stats.get(key) is not None}
     return {
@@ -246,19 +217,18 @@ def build_market_brief(ranking, evidence, stats):
         "kind": "market_brief",
         "session_date": session,
         "market": market,
-        "movers": {"gainers": gainers, "losers": losers},
         "clusters": {
             "theme_clusters": _compact_clusters(ranking),
             "sector_drivers": copy.deepcopy(stats.get("sector_drivers") or {}),
         },
         "divergence_flags": copy.deepcopy(stats.get("divergence_flags") or []),
-        "sources": _source_registry(evidence_items, used_source_ids),
+        "accepted_evidence": _accepted_evidence(evidence_items),
     }
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="ランキング・evidence・市場statsから compact market_brief.v1 を生成する")
+        description="ランキング・evidence・市場statsから compact market_brief.v2 を生成する")
     parser.add_argument("--ranking", required=True, help="Stage2反映済み ranking.json")
     parser.add_argument("--evidence", required=True, help="research/evidence.json (evidence.v1)")
     parser.add_argument("--stats", required=True, help="market_stats_<date>.json")
@@ -276,9 +246,16 @@ def main(argv=None):
     with open(args.out, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(brief, handle, ensure_ascii=False, indent=2)
         handle.write("\n")
-    sys.stderr.write("[build_market_brief] OK: %s（gainers %d / losers %d / sources %d）\n" % (
-        args.out, len(brief["movers"]["gainers"]), len(brief["movers"]["losers"]),
-        len(brief["sources"])))
+    accepted_evidence = brief["accepted_evidence"]
+    source_count = sum(len(item["sources"]) for item in accepted_evidence)
+    sys.stderr.write(
+        "[build_market_brief] OK: %s（clusters %d / evidence %d / sources %d）\n" % (
+            args.out,
+            len(brief["clusters"]["theme_clusters"]),
+            len(accepted_evidence),
+            source_count,
+        )
+    )
     return 0
 
 

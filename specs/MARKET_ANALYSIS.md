@@ -5,10 +5,10 @@
 ## 市場分析タブ（日次自動生成・**step3.5**）
 
 - ランキング Pages（`docs/index.html`）は、値上がりランキングに加えて **「📊 市場分析」タブ**（`#market` ハッシュで開く）を持つ。データは**ランキング JSON とは別ファイル** `docs/data/<date>_market.json`（スキーマ v1）から fetch する（無い日付はタブ empty 表示に自然退避）。`manifest.json` には**載せない**（`update_manifest()` が `_market` を意図的に除外）。`cleanup_old()` は `<date>_market.json` も同じ30日保持で削除する（`base[:10]` 判定）。
-- **三層構成（数値・根拠・ナラティブの分離）**：数値は決定的スクリプトが作り、`market_brief.v1` がStage2のaccepted evidenceと市場文脈を小さく束ね、Claudeはbriefだけを根拠にナラティブを書く。結合器が公開schema v1へ機械ジョインする。
-  1. **決定的データ** `scripts/build_market_stats.py`（`test-jquants` の `sector_analysis.py` を本リポへ移植した無人版。`jquants.py`/`business_day.py`/`tdnet.py` を再利用・stdlib＋`JQUANTS_API_KEY` のみ）。`--out-dir .work/<SESSION>/market` に `sector_return_<date>.csv`・`movers_top_<date>.csv`（33業種加重/単純/中央値・値上/値下上位30）と `market_stats_<date>.json` を出力。stats には CSV 外の決定的数値（`topix_pct`／`prev_date`／`generated_at`／`breadth`／`top_sector_by_turnover`／`top_stock_by_turnover`〔全ユニバース真値〕／`sector_drivers`＝各33業種の騰落を最も主導した銘柄〔売買代金加重寄与 chg_pct×売買代金 の同方向上位。下落セクターは負の寄与順。第2位は寄与が首位の50%以上の場合のみ併記＝寄与順1〜2銘柄の配列。セクター騰落率表「銘柄」列に機械表示〕）と執筆ヒント（`divergence_flags`＝⚠乖離候補・`movers_context`＝movers の TDnet 開示）が入る。タブのセクター騰落率表の表示は**売買代金加重＋「銘柄」列のみ**（単純平均・中央値・騰落銘柄数は CSV に残り、執筆時の参照ヒントとして引き続き使える）。
-  2. **根拠パック** `scripts/build_market_brief.py`：ranking、`research/evidence.json`、market_statsを入力し、値上がりmoverのaccepted factor/source ID、選定した値下がりmover文脈、クラスタ、セクター寄与、乖離候補だけを `.work/<SESSION>/market/market_brief_<date>.json` に出力する。ランキングと重なる値上がり銘柄の再調査は禁止する。
-  3. **ナラティブ・フラグメント**（Claude 執筆・`.work/<SESSION>/market/narrative_<date>.json`・コミットしない）：`market_brief.v1` の範囲だけで執筆する。§「市場分析フラグメント執筆」参照。
+- **三層構成（数値・根拠・ナラティブの分離）**：数値は決定的スクリプトが作り、`market_brief.v2` がStage2のaccepted evidenceと市場文脈を小さく束ね、Claudeはbriefだけを根拠にナラティブを書く。結合器が公開schema v1へ機械ジョインする。
+  1. **決定的データ** `scripts/build_market_stats.py`（`test-jquants` の `sector_analysis.py` を本リポへ移植した無人版。`jquants.py`/`business_day.py` を再利用・stdlib＋`JQUANTS_API_KEY` のみ）。`--out-dir .work/<SESSION>/market` に `sector_return_<date>.csv`（33業種加重/単純/中央値）と `market_stats_<date>.json` を出力。stats には CSV 外の決定的数値（`topix_pct`／`prev_date`／`generated_at`／`breadth`／`top_sector_by_turnover`／`top_stock_by_turnover`〔全ユニバース真値〕／`sector_drivers`＝各33業種の騰落を最も主導した銘柄〔売買代金加重寄与 chg_pct×売買代金 の同方向上位。下落セクターは負の寄与順。第2位は寄与が首位の50%以上の場合のみ併記＝寄与順1〜2銘柄の配列。セクター騰落率表「銘柄」列に機械表示〕）と執筆ヒント（`divergence_flags`＝⚠乖離候補）が入る。タブのセクター騰落率表の表示は**売買代金加重＋「銘柄」列のみ**（単純平均・中央値・騰落銘柄数は CSV に残り、執筆時の参照ヒントとして引き続き使える）。
+  2. **根拠パック** `scripts/build_market_brief.py`：ranking、`research/evidence.json`、market_statsを入力し、クラスタ・セクター寄与・乖離候補とStage2 accepted evidenceの引用文脈を `.work/<SESSION>/market/market_brief_<date>.json` に出力する。引用文脈は `accepted_evidence[] = {code, market_note, claims:[{text,source_ids}], sources:[{id,label,url,source_type,published_at,window}]}` のコード単位とし、source IDは `<code>:<item-local-id>` に名前空間化する。参照されないsourceと記事本文は含めず、個別銘柄movers（値上がり/値下がり）の抽出も行わない。
+  3. **ナラティブ・フラグメント**（Claude 執筆・`.work/<SESSION>/market/narrative_<date>.json`・コミットしない）：`market_brief.v2` の範囲だけで執筆する。§「市場分析フラグメント執筆」参照。
   4. **結合** `scripts/build_market_json.py`（stdlib のみ・冪等）：`--csv-dir .work/<SESSION>/market --stats <market_stats>.json --defaults scripts/market_fragment_defaults.json --narrative <narrative>.json --out docs/data/<date>_market.json`。`--stats` から `topix_pct`/`prev_date`/`generated_at`/最大代金銘柄/`overview.snapshot` の auto 行を機械採用し、`sector_drivers` を `sectors33[].drivers` に機械joinする。
   5. **品質検証** `scripts/validate_market_quality.py`：既定の人間向け表示に加えて `--format json --repair-targets <path>` で `{path,rule_id,severity,message}` と限定再試行対象を出力する。
 - 生成は日次フロー **step3.5**（Publish の前）に組み込み済み。**best-effort**（失敗時はスキップして step4 へ・ランキング配信はブロックしない）。公開成果物は `docs/data/<date>_market.json` と再生成した `docs/index.html`。フラグメント・`.work/<SESSION>/` はコミットしない。
@@ -25,34 +25,28 @@
       "snapshot": [{"auto": "topix|breadth|top_sector|top_stock"}, {"label": "…", "value": "…", "note": "…"}],
       "points": ["…"], "flow": ["…"], "flow_conclusion": ["…（2〜3件の短文。文字列1本でも可）"]
     },
-    "movers": {"gainers": [{"code": "…", "note": "…", "links": [{"label": "…", "url": "https://…"}], "emph": true}],
-               "gainers_footnote": "…",
-               "losers":  [{"code": "…", "note": "…", "links": [{"label": "…", "url": "https://…"}]}],
-               "losers_footnote": "…"},
     "theme_matrix": {"rows": [{"side": "buy|sell", "theme": "…", "stocks": "銘柄名・銘柄名", "background": "…"}], "character": "…"},
     "news_sources": [{"topic": "…", "links": [{"label": "…", "url": "https://…"}]}]
   }
   ```
   特に落とし穴：**`theme_matrix` はオブジェクト `{rows:[{side?,theme,stocks,background}], character}`（テーマ配列にしない・旧 `bought/sold` キーは廃止）／`overview.points`・`overview.flow` は文字列配列／`thesis`・`overview.flow_conclusion` は文字列 or 文字列配列（配列なら箇条書きで描画）**。`theme_matrix` が無ければ省略（結合器が `{}` にし SPA はテーマ節を出さない）。
 
-- **編集レビュー由来の恒久規約（先回り適用・都度追記）**：市場分析タブはユーザーの編集レビューで書式・文体を確定してきた（2026-07-01/02＝内容・出典・数値の規律〔本節 各項〕、2026-07-03＝下記の表示・文体、2026-07-14＝市況サマリー帯・買われた/売られたセクター/テーマ・セクター注釈の廃止とセクター表の加重＋「銘柄」列化）。**日次自動生成はこれらを最初から適用**し、レビューで新たに確定した指摘は**その場限りにせず本節へ追記**して同じ指摘を繰り返させない（レビュー確定 → 本節へ恒久ルール化 → 次回以降 先回り適用、が運用規律）。表示・文体の具体規約：
-  - **銘柄名の強調**：地の文（`thesis`／`overview.points`・`flow`・`flow_conclusion`／`movers.note`／`theme_matrix.background`）の**個別銘柄名は `[[銘柄名]]` で囲む**（SPA が配色し目立たせる。テーマ別資金フロー行では買い=赤/売り=緑に自動配色）。**表の専用カラム**（`movers` の銘柄名・`theme_matrix.stocks`）は囲まない（列側で配色されるため）。
+- **編集レビュー由来の恒久規約（先回り適用・都度追記）**：市場分析タブはユーザーの編集レビューで書式・文体を確定してきた（2026-07-01/02＝内容・出典・数値の規律〔本節 各項〕、2026-07-03＝下記の表示・文体、2026-07-14＝市況サマリー帯・買われた/売られたセクター/テーマ・セクター注釈の廃止とセクター表の加重＋「銘柄」列化、2026-07-16＝「注目個別銘柄と材料」セクション廃止〔掲載・調査・データパイプラインとも中止〕とセクター表「銘柄」列の1行集約表示化）。**日次自動生成はこれらを最初から適用**し、レビューで新たに確定した指摘は**その場限りにせず本節へ追記**して同じ指摘を繰り返させない（レビュー確定 → 本節へ恒久ルール化 → 次回以降 先回り適用、が運用規律）。表示・文体の具体規約：
+  - **銘柄名の強調**：地の文（`thesis`／`overview.points`・`flow`・`flow_conclusion`／`theme_matrix.background`）の**個別銘柄名は `[[銘柄名]]` で囲む**（SPA が配色し目立たせる。テーマ別資金フロー行では買い=赤/売り=緑に自動配色）。**表の専用カラム**（`theme_matrix.stocks`）は囲まない（列側で配色されるため）。
   - **テーマ別資金フロー（`theme_matrix.rows`）**：1行＝1方向。`side`＝`"buy"`/`"sell"`、`theme`＝テーマ名、`stocks`＝主な銘柄（`・` 区切り・`[[…]]` で囲まない）、`background`＝背景説明（銘柄名は `[[…]]`）。**買い・売りが混在する1テーマは行を分ける**。別テーマ（例：個別の上方修正 と 原子力ルネサンス）は**別行**にする。
   - **`theme` はワンフレーズに集約する（2026-07-05 恒久化）**：「A→B」の因果連鎖表記（例「米雇用統計下振れ→FRB利上げ観測後退」）は視認性が悪いので避け、**因果・波及の説明は `background` 側に書く**（例：theme「米雇用統計下振れ」＋背景で「→FRB利上げ観測後退→…」）。どうしても `theme` に「→」が必要な場合のみ使用可（SPA が「→」の直前で改行し2行表示する）。
   - **箇条書き**：`thesis`・`overview.flow_conclusion` は論点ごとに配列要素へ分ける（各2〜3件目安）。
   - **数値・略語**：`snapshot` の TOPIX 等は「終値（±%）」の順（例 `"4,064.6（+1.24%）"`）。**英略語は日本語で**（例 NFP→「非農業部門雇用者数」「米雇用統計」）。
   - **まとめの整合**：`flow_conclusion` で触れる個別イベントは `points`/`flow` 等で**事前に言及**しておく（未言及なら `flow_conclusion` で触れない）。
 
-- **Claude が書く項目**：`thesis`（市況テーゼ＝市場分析タブ冒頭に表示。要点を配列で箇条書き可）／`overview`（`snapshot` は決定的4行を `{"auto":"topix"|"breadth"|"top_sector"|"top_stock","note":"…"}` で置き、日経平均・為替など J-Quants 外の行のみ `label`/`value` を手書き＋出典明記。`points`/`flow`/`flow_conclusion`）／`movers`（`gainers`/`losers` に `{code,note,links,emph?}`＋footnote）／`theme_matrix`（`{side,theme,stocks,background}` の行）／`news_sources`。`market_stats` の `divergence_flags`（⚠乖離候補）は**執筆ヒント**＝`thesis`/`overview` で言及するかの判断材料（セクター騰落率表の「銘柄」列が主導銘柄を機械表示するため注記義務なし）。
+- **Claude が書く項目**：`thesis`（市況テーゼ＝市場分析タブ冒頭に表示。要点を配列で箇条書き可）／`overview`（`snapshot` は決定的4行を `{"auto":"topix"|"breadth"|"top_sector"|"top_stock","note":"…"}` で置き、日経平均・為替など J-Quants 外の行のみ `label`/`value` を手書き＋出典明記。`points`/`flow`/`flow_conclusion`）／`theme_matrix`（`{side,theme,stocks,background}` の行）／`news_sources`。`market_stats` の `divergence_flags`（⚠乖離候補）は**執筆ヒント**＝`thesis`/`overview` で言及するかの判断材料（セクター騰落率表の「銘柄」列が主導銘柄を機械表示するため注記義務なし）。個別銘柄movers（値上がり/値下がり）は調査・執筆・出力しない（2026-07-16廃止）。
 - **書かない項目（defaults/stats が供給）**：`title`・`universe`・`methodology`・`disclaimer`・`topix_pct`・`prev_date`・`generated_at`・最大代金セクター/銘柄の数値・セクター騰落率表の「銘柄」列（stats の `sector_drivers` を結合器が `sectors33[].drivers` に機械 join）。
-- **Stage2 の再利用**：値上がり側 movers がランキング rows（step3）と重複する銘柄は、step3 の `factor`/`factor_kind`・採用出典を**そのまま転用**し再リサーチしない。
-- **値下がり側の追加リサーチ**：`movers_context`（TDnet）→ 株探 `https://kabutan.jp/stock/news?code=<4桁>`（ブラウザUA）→ Web検索「<コード> <銘柄名> 急落/ストップ安」の順。出典規律は step3 と同じ3層方針（`vendor/tse-ranking-digest/reference/sources.md §4`）・**ランディングページ出典禁止**・個人発信不使用を継承。
-- **数値規律**：`note`/`background` 等の地の文の数値は (a) CSV/stats に存在する値の言及、(b) 出典リンク付き記事からの引用、のみ。日経平均・為替など J-Quants 外の相場値は `snapshot` の手書き行に限り、①層出典（株探大引け・日経の東証大引け記事等）を `news_sources`「市場概況」に**必ず併記**したうえで記事内数値を転記する（創作禁止）。`links` は http(s) のみ（結合器が検証）。
+- **数値規律**：`background` 等の地の文の数値は (a) CSV/stats に存在する値の言及、(b) 出典リンク付き記事からの引用、のみ。日経平均・為替など J-Quants 外の相場値は `snapshot` の手書き行に限り、①層出典（株探大引け・日経の東証大引け記事等）を `news_sources`「市場概況」に**必ず併記**したうえで記事内数値を転記する（創作禁止）。`links` は http(s) のみ（結合器が検証）。
 - **出典規律（精密主張・2026-07-04 監査で恒久化）**：`scripts/validate_market_quality.py` が step3.5(e) で機械検査する。
-  - **精密な数値・固有イベント**（時価総額順位・国内/世界シェア・目標株価・値上げ率・TOB/公開買付・非公開化・大量保有・上方/下方修正・格上げ/格下げ 等）は、一次（TDnet/EDINET/会社IR）→準一次→良質報道の順で裏取りし、**最初の言及の文末に `（[出典名](URL)）` を付ける**（SPA の `mdInline` が本文の Markdown リンクを描画する。実装変更不要）。`movers` の `note` は行の `links` にリンクがあれば文中リンクは不要。
-  - **同一出典URLの重複掲載禁止（URL単位・2026-07-05 恒久化）**：同一URLの掲載は**本文中1箇所（インラインリンク・movers の `links` を含む）＋`news_sources` に1箇所の最大2箇所**まで。同一内容への2回目以降の言及には出典を再掲しない。同一内容を報じる**別ソースで URL が異なる場合は別カウント**（あくまで URL 単位のルール）。
+  - **精密な数値・固有イベント**（時価総額順位・国内/世界シェア・目標株価・値上げ率・TOB/公開買付・非公開化・大量保有・上方/下方修正・格上げ/格下げ 等）は、一次（TDnet/EDINET/会社IR）→準一次→良質報道の順で裏取りし、**最初の言及の文末に `（[出典名](URL)）` を付ける**（SPA の `mdInline` が本文の Markdown リンクを描画する。実装変更不要）。
+  - **同一出典URLの重複掲載禁止（URL単位・2026-07-05 恒久化）**：同一URLの掲載は**本文中1箇所（インラインリンク）＋`news_sources` に1箇所の最大2箇所**まで。同一内容への2回目以降の言及には出典を再掲しない。同一内容を報じる**別ソースで URL が異なる場合は別カウント**（あくまで URL 単位のルール）。
   - **一次ソース優先（2026-07-05 恒久化）**：出典リンクは一次情報を優先する — 会社開示・EDINET・**当該事実を最初に報じた媒体の記事**。二次配信記事（トレーダーズ・ウェブ／フィスコ／Yahoo!転載等）が「＝日経」のように**一次媒体を明示している場合は、一次媒体の記事URLを探して出典にする**。二次記事の使用は (a) 一次記事が特定できない、(b) 市場反応（買い気配・急伸等）自体を根拠にする場合の補助に限る。同一記事の転載ミラー（株探記事の Yahoo!転載等）は同一記事扱いで可。**本文に書く媒体名は実際にリンクする媒体と一致させる**（例：「日経報道（[トレーダーズ・ウェブ](…)）」は不可）。
-  - `news_sources` は**補助一覧であり本文中リンクの代替にしない**。`news_sources[].links` の空は禁止。`emph: true` の movers は `links` 必須。
+  - `news_sources` は**補助一覧であり本文中リンクの代替にしない**。`news_sources[].links` の空は禁止。
   - **ランディングページ出典禁止**（機械検査対象）：`minkabu.jp/stock/<code>`・`nikkei.com/nkd/company`・`finance.yahoo.co.jp/quote`・`kabutan.jp/stock/…`（銘柄トップ・finance・news 一覧）・`s.kabutan.jp/stocks/…`。具体記事（`kabutan.jp/news/…`・`s.kabutan.jp/news/n…`・`minkabu.jp/news/…`・`nikkei.com/article/…` 等）・TDnet/EDINET・会社 IR へ。TDnet の `release.tdnet.info` PDF は約1カ月で失効するため会社サイトの IR PDF を優先する。
   - **日次変動する順位は当日終値ベースで検証できない限り断定しない**（例：「時価総額国内トップ」は算出根拠が無ければ使わず、stats で検証済みの「売買代金全市場トップ」等で表現する）。
   - **品質ゲートに失敗しても本文を削って通さない**：第一手は Stage2 で収集済みの出典・`kabutan_news`・TDnet/EDINET の再利用によるリンク追加。削除・一般化は裏取り探索を尽くした後の最終手段とし、弱めた主張と理由を最終報告に列挙する（内容の充実度を落とさず正確性を担保するのが本規律の目的）。

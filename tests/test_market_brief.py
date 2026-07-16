@@ -38,47 +38,56 @@ def _inputs():
         "generated_at": "2026-07-15 17:00 JST", "topix_pct": 0.4,
         "breadth": {"up": 1000, "down": 500, "flat": 20},
         "universe": {"n_liquid": 1520},
-        "selected_gainers": [{"code": "1111"}, {"code": "2222"}],
-        "selected_losers": [{"code": "9999", "name": "下落C", "pct": -8.0,
-                              "sector33": "サービス業"}],
-        "movers_context": {"9999": [
-            {"date": "2026-07-15", "time": "10:00", "title": "業績予想修正",
-             "url": "raw URL is deliberately omitted"}]},
         "sector_drivers": {"電気機器": [{"code": "1111", "name": "上昇A", "pct": 12.3}]},
         "divergence_flags": [{"sector": "電気機器", "reasons": ["dominant_stock"]}],
     }
     return ranking, evidence, stats
 
 
-def test_build_market_brief_reuses_only_completed_stage2_evidence():
+def test_build_market_brief_keeps_completed_claim_source_context_only():
     ranking, evidence, stats = _inputs()
     out = brief.build_market_brief(ranking, evidence, stats)
 
-    assert out["schema_version"] == "market_brief.v1"
-    assert [item["code"] for item in out["movers"]["gainers"]] == ["1111"]
-    gainer = out["movers"]["gainers"][0]
-    assert gainer["factor"] == "検証済み要因"
-    assert gainer["factor_kind"] == "開示"
-    assert gainer["market_note"] == "市場向け短文"
-    assert gainer["source_ids"] == ["s1"]
-
-    assert out["movers"]["losers"] == [{
-        "code": "9999", "name": "下落C", "pct": -8.0, "sector33": "サービス業",
-        "context": [{"date": "2026-07-15", "time": "10:00", "title": "業績予想修正"}],
-    }]
+    assert out["schema_version"] == "market_brief.v2"
+    assert "movers" not in out
+    assert "sources" not in out
     assert out["clusters"]["theme_clusters"][0].get("raw") is None
+    assert out["clusters"]["sector_drivers"] == stats["sector_drivers"]
     assert out["divergence_flags"] == stats["divergence_flags"]
-    assert out["sources"] == [{
-        "id": "s1", "label": "会社IR", "url": "https://example.com/a.pdf",
-        "source_type": "company_ir", "published_at": "2026-07-15T09:00:00+09:00",
-        "window": "material",
+    # status=complete の claim が参照した source だけをコード単位の文脈付きで拾う。
+    # unresolved の 2222、未参照の "unused"、source.body は含めない。
+    assert out["accepted_evidence"] == [{
+        "code": "1111",
+        "market_note": "市場向け短文",
+        "claims": [{"text": "検証済み", "source_ids": ["1111:s1"]}],
+        "sources": [{
+            "id": "1111:s1", "label": "会社IR", "url": "https://example.com/a.pdf",
+            "source_type": "company_ir", "published_at": "2026-07-15T09:00:00+09:00",
+            "window": "material",
+        }],
     }]
 
 
-def test_market_brief_falls_back_to_ranking_gainers_when_stats_has_no_selection():
+def test_market_brief_namespaces_item_local_source_ids_by_code():
     ranking, evidence, stats = _inputs()
-    stats.pop("selected_gainers")
-    assert [item["code"] for item in brief.build_market_brief(ranking, evidence, stats)["movers"]["gainers"]] == ["1111"]
+    evidence["items"][1] = {
+        "code": "2222", "status": "complete", "factor": "別の検証済み要因",
+        "factor_kind": "報道", "market_note": "別銘柄の市場向け短文",
+        "claims": [{"text": "別の検証済み主張", "source_ids": ["s1"]}],
+        "sources": [{
+            "id": "s1", "label": "報道記事", "url": "https://example.com/b",
+            "source_type": "article", "published_at": "2026-07-15T10:00:00+09:00",
+            "window": "material",
+        }],
+    }
+
+    accepted = brief.build_market_brief(ranking, evidence, stats)["accepted_evidence"]
+
+    assert [item["code"] for item in accepted] == ["1111", "2222"]
+    assert accepted[0]["claims"][0]["source_ids"] == ["1111:s1"]
+    assert accepted[0]["sources"][0]["url"] == "https://example.com/a.pdf"
+    assert accepted[1]["claims"][0]["source_ids"] == ["2222:s1"]
+    assert accepted[1]["sources"][0]["url"] == "https://example.com/b"
 
 
 def test_market_brief_rejects_session_mismatch():

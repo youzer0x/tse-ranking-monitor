@@ -3,18 +3,17 @@
 """市場分析（セクター/テーマ別 騰落率）の決定的データを J-Quants から生成する。
 
 test-jquants の `script/sector_analysis.py` を本リポジトリへ移植した**無人実行版**。
-既存の `jquants.py`（urllib クライアント）・`business_day.py`・`tdnet.py` を再利用し、
+既存の `jquants.py`（urllib クライアント）を再利用し、
 httpx / python-dotenv / matplotlib への依存を持ち込まない（配信リポの方針＝Stage1 は
 requirements.txt、それ以外は stdlib に整合）。認証は環境変数 `JQUANTS_API_KEY`。
 
 出力（--out-dir、省略時は .work/<date>/market）:
   - sector_return_<date>.csv   : 33業種別の騰落率集計（sector_analysis.py とバイト互換）
-  - movers_top_<date>.csv      : 値上がり/値下がり 上位30（同上）
   - market_stats_<date>.json   : CSV 外の決定的数値（TOPIX 前日比・breadth・最大代金銘柄・
                                  セクター代表銘柄 sector_drivers 等）と執筆ヒント
-                                 （⚠乖離フラグ候補・movers の TDnet 開示文脈）
+                                 （⚠乖離フラグ候補）
 
-後段の `build_market_json.py` が sector_return / movers_top CSV を読み、
+後段の `build_market_json.py` が sector_return CSV を読み、
 market_stats JSON を `--stats` で受け取って `<date>_market.json` を組み立てる。
 
 対象銘柄・騰落率の定義は sector_analysis.py と同一:
@@ -39,10 +38,9 @@ from datetime import date, datetime, timedelta, timezone
 # 共有ベンダーは scripts/ に留める。パッケージ実行は namespace package 経由、
 # 旧CLIを別ディレクトリから実行した場合は従来どおり flat import へ退避する。
 try:
-    from scripts import jquants, tdnet
+    from scripts import jquants
 except ModuleNotFoundError:
     import jquants
-    import tdnet
 
 # Windows コンソール(cp932)対策: 標準出力を UTF-8 化。
 for _stream in (sys.stdout, sys.stderr):
@@ -58,8 +56,6 @@ WINDOW_DAYS = 12                          # 取引日を遡って探す暦日数
 TARGET_MKT = {"0111", "0112", "0113"}     # プライム / スタンダード / グロース
 TARGET_PROD = "011"                       # 内国株券
 MIN_TURNOVER = 100_000_000                # 流動性フィルタ既定（当日売買代金 1億円）
-TOP_N_MOVERS = 30                         # movers CSV に載せる上位件数（値上/値下 各）
-BRIEF_N_MOVERS = 5                        # LLM market_brief に渡す決定的上位件数（各側）
 JST = timezone(timedelta(hours=9))
 
 # ⚠乖離フラグ（大型株1銘柄がセクター騰落を歪めた候補）の検出閾値
@@ -106,16 +102,6 @@ def fetch_topix(prev_day, target_day):
     if ct is None or cp in (None, 0):
         return None, ct, cp
     return (ct - cp) / cp * 100.0, ct, cp
-
-
-def fetch_disclosed_codes(target_day):
-    """当日 fins/summary で決算開示のあった 5桁コード集合。取得不可は空集合。"""
-    try:
-        rows = jquants.get("/fins/summary", {"date": target_day})
-    except Exception as e:
-        sys.stderr.write("[build_market_stats] WARN fins/summary 取得不可: %s\n" % e)
-        return set()
-    return {r.get("Code", "") for r in rows}
 
 
 # ── 集計 ──────────────────────────────────────────────────
@@ -304,45 +290,12 @@ def write_sector_csv(agg, out_dir, target_day):
     return path
 
 
-def write_movers_csv(records, disclosed, out_dir, target_day):
-    gainers = sorted(records, key=lambda r: r["chg_pct"], reverse=True)[:TOP_N_MOVERS]
-    losers = sorted(records, key=lambda r: r["chg_pct"])[:TOP_N_MOVERS]
-    path = os.path.join(out_dir, "movers_top_%s.csv" % target_day)
-    with open(path, "w", encoding="utf-8-sig", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["区分", "順位", "証券コード", "銘柄名", "上場区分", "規模区分",
-                    "33業種", "当日終値", "前日比%", "売買代金(億円)", "当日決算開示"])
-        for label, group in (("値上がり", gainers), ("値下がり", losers)):
-            for i, r in enumerate(group, 1):
-                w.writerow([
-                    label, i, r["code4"], r["name"], r["market"], r["scale"],
-                    r["sector33"], _fmt(r["close"], ",.1f"), _fmt(r["chg_pct"], "+.2f"),
-                    _oku(r["turnover"]), "○" if r["code5"] in disclosed else "",
-                ])
-    return path
-
-
 # ── market_stats JSON（CSV 外数値の決定的受け渡し）──
 def build_stats_json(target_day, prev_day, generated_at, topix_pct, topix_close,
-                     topix_prev_close, universe, liquid, agg33, drivers, flags, movers_ctx):
+                     topix_prev_close, universe, liquid, agg33, drivers, flags):
     up, down, flat = _breadth(liquid)
     top_sector = max(agg33, key=lambda a: (a["total_va"] or 0)) if agg33 else None
     top_stock = max(liquid, key=lambda r: (r["turnover"] or 0)) if liquid else None
-
-    def selected(reverse):
-        if reverse:
-            order = lambda row: (-row["chg_pct"], -(row["turnover"] or 0), row["code4"])
-        else:
-            order = lambda row: (row["chg_pct"], -(row["turnover"] or 0), row["code4"])
-        ranked = sorted(liquid, key=order)[:BRIEF_N_MOVERS]
-        return [{
-            "code": row["code4"],
-            "name": nfkc(row["name"]),
-            "rank": index,
-            "pct": round(row["chg_pct"], 2),
-            "turnover_oku": round((row["turnover"] or 0) / 1e8, 1),
-            "sector33": row["sector33"],
-        } for index, row in enumerate(ranked, 1)]
 
     return {
         "schema_version": 1,
@@ -372,31 +325,7 @@ def build_stats_json(target_day, prev_day, generated_at, topix_pct, topix_close,
             if top_stock else None),
         "sector_drivers": drivers,
         "divergence_flags": flags,
-        # market_brief.v1 consumes only five deterministic movers per side.  The
-        # CSV remains top-30 for human inspection and public assembly.
-        "selected_gainers": selected(True),
-        "selected_losers": selected(False),
-        "movers_context": movers_ctx,
     }
-
-
-def build_movers_context(liquid, prev_day, target_day):
-    """movers 60銘柄（値上/値下 各30）について TDnet 開示文脈を best-effort で付す。"""
-    gainers = sorted(liquid, key=lambda r: r["chg_pct"], reverse=True)[:TOP_N_MOVERS]
-    losers = sorted(liquid, key=lambda r: r["chg_pct"])[:TOP_N_MOVERS]
-    codes = {r["code4"] for r in gainers} | {r["code4"] for r in losers}
-    try:
-        win = tdnet.disclosures_window(prev_day, target_day)
-    except Exception as e:
-        sys.stderr.write("[build_market_stats] WARN TDnet 取得不可: %s\n" % e)
-        return {}
-    ctx = {}
-    for c in sorted(codes):
-        items = win.get(c)
-        if items:
-            ctx[c] = [{"date": d.get("date"), "time": d.get("time"), "title": d.get("title")}
-                      for d in items]
-    return ctx
 
 
 def parse_args():
@@ -440,20 +369,17 @@ def main():
     if len(agg33) != 33:
         die("集計セクター数が33でない（実際: %d）" % len(agg33))
 
-    disclosed = fetch_disclosed_codes(target_day)
     topix_pct, topix_close, topix_prev = fetch_topix(prev_day, target_day)
     drivers = sector_drivers(liquid)
     flags = detect_divergence_flags(liquid, agg33)
-    movers_ctx = build_movers_context(liquid, prev_day, target_day)
     generated_at = datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
 
     os.makedirs(out_dir, exist_ok=True)
     p_sec = write_sector_csv(agg33, out_dir, target_day)
-    p_mov = write_movers_csv(liquid, disclosed, out_dir, target_day)
 
     stats = build_stats_json(target_day, prev_day, generated_at, topix_pct,
                              topix_close, topix_prev, ustats, liquid, agg33, drivers,
-                             flags, movers_ctx)
+                             flags)
     p_stats = os.path.join(out_dir, "market_stats_%s.json" % target_day)
     with open(p_stats, "w", encoding="utf-8", newline="\n") as f:
         json.dump(stats, f, ensure_ascii=False, indent=2)
@@ -461,9 +387,9 @@ def main():
 
     up, down, flat = stats["breadth"]["up"], stats["breadth"]["down"], stats["breadth"]["flat"]
     sys.stderr.write(
-        "[build_market_stats] OK: %s / %s / %s（33業種 / breadth %d-%d-%d / n_liquid %d / "
+        "[build_market_stats] OK: %s / %s（33業種 / breadth %d-%d-%d / n_liquid %d / "
         "TOPIX %s / flags %d）\n"
-        % (p_sec, p_mov, p_stats, up, down, flat, ustats["n_liquid"],
+        % (p_sec, p_stats, up, down, flat, ustats["n_liquid"],
            ("%+.2f%%" % topix_pct) if topix_pct is not None else "N/A", len(flags)))
 
 
