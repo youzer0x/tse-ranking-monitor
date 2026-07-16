@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 import time
@@ -292,7 +293,42 @@ def build(data, docs_dir):
     write_index(docs_dir)
 
 
+def _verify_pushed_head(repo_root=None):
+    """Require the local HEAD to be exactly the commit origin/main serves.
+
+    Binding the notification to a successfully pushed HEAD makes the losing
+    run of a push race (non-fast-forward reject) structurally unable to send
+    an email for content Pages will never serve.  A third-party commit landing
+    between push and notify also fails here — a safe unsent-nonzero exit
+    instead of notifying for state that is no longer what main serves.
+    """
+    cwd = str(repo_root) if repo_root else None
+    try:
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=cwd, capture_output=True, text=True, check=True, timeout=60,
+        ).stdout.strip()
+        remote = subprocess.run(
+            ["git", "ls-remote", "origin", "main"],
+            cwd=cwd, capture_output=True, text=True, check=True, timeout=60,
+        ).stdout.split()
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise PublishError(
+            f"cannot verify pushed HEAD before notify: {exc}"
+        ) from exc
+    remote_head = remote[0] if remote else ""
+    if not head or not remote_head:
+        raise PublishError("cannot verify pushed HEAD before notify: empty git output")
+    if head != remote_head:
+        raise PublishError(
+            "local HEAD %s is not what origin/main serves (%s); "
+            "the push must succeed before the notification email"
+            % (head[:12], remote_head[:12])
+        )
+
+
 def notify(input_path, docs_dir, pages_url, timeout=300, interval=10):
+    _verify_pushed_head()
     data, expected_digest = _load_notification_artifact(input_path, docs_dir)
     print(
         f"Notify {data['session_date']} ({len(data.get('rows', []))} rows): "

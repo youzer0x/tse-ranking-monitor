@@ -111,3 +111,40 @@ def send_gmail(html_body, session_date, count, total=None, capped=False):
         raise RuntimeError("Gmail send response did not contain a message id")
     print(f"  Email sent. id={message_id}")
     return True
+
+
+def send_plain_email(subject, text_body, recipient=None):
+    """Send one plain-text notification (failure alerts); failures are raised.
+
+    Same credential handling and transport as :func:`send_gmail`, but with an
+    explicit subject and a plain-text body so alerts need no HTML rendering.
+    """
+    _require_credentials()
+    sender = os.environ["GMAIL_ADDRESS"]
+    recipient = recipient or os.environ.get("NOTIFY_TO", sender)
+
+    msg = MIMEText(text_body, "plain", "utf-8")
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = recipient
+
+    print(f"  Sending plain email to {recipient} via Gmail API ...")
+    token = _access_token()
+    payload = json.dumps({
+        "raw": base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    }).encode()
+    req = urllib.request.Request(
+        SEND_URL,
+        data=payload,
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+    )
+    response = _urlopen_json(req, "Gmail send")
+    message_id = response.get("id")
+    if not message_id:
+        raise RuntimeError("Gmail send response did not contain a message id")
+    print(f"  Email sent. id={message_id}")
+    return True

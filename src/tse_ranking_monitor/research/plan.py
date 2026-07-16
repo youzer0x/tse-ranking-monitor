@@ -38,6 +38,12 @@ M_AND_A_TERMS = (
     "非公開化",
     "完全子会社",
 )
+# Dispatch budget: the batching rules bound a 30-row ranking to at most 12
+# batches, so exceeding INITIAL_DISPATCH_LIMIT pending batches means the
+# planner or ranking input is broken.  TOTAL/PER_BATCH limits cap retries.
+INITIAL_DISPATCH_LIMIT = 12
+TOTAL_DISPATCH_LIMIT = 18
+PER_BATCH_DISPATCH_LIMIT = 3
 
 
 def _canonical_digest(value: Any) -> str:
@@ -449,22 +455,25 @@ def build_research_plan(ranking: dict[str, Any]) -> tuple[dict[str, Any], list[d
             route = "cluster"
         else:
             route = "deep"
-        projected.append(
-            {
-                "code": code,
-                "name": str(row.get("name") or "").strip(),
-                "rank": row.get("rank"),
-                "pct": row.get("pct"),
-                "pct5": row.get("pct5"),
-                "turnover_m": row.get("turnover_m"),
-                "route": route,
-                "risk": "high" if reasons else "normal",
-                "risk_reasons": reasons,
-                "cluster_id": cluster_id,
-                "disclosures": disclosures,
-                "news": news,
-            }
-        )
+        item = {
+            "code": code,
+            "name": str(row.get("name") or "").strip(),
+            "rank": row.get("rank"),
+            "pct": row.get("pct"),
+            "pct5": row.get("pct5"),
+            "turnover_m": row.get("turnover_m"),
+            "route": route,
+            "risk": "high" if reasons else "normal",
+            "risk_reasons": reasons,
+            "cluster_id": cluster_id,
+            "disclosures": disclosures,
+            "news": news,
+        }
+        # Only-when-true keeps the digests of unaffected batches stable, so
+        # existing checkpoints are not invalidated by this schema addition.
+        if "m_and_a" in reasons:
+            item["requires_edinet"] = True
+        projected.append(item)
 
     batch_payloads: list[dict[str, Any]] = []
     cluster_index = {cluster["id"]: cluster for cluster in clusters}
@@ -508,27 +517,22 @@ def build_research_plan(ranking: dict[str, Any]) -> tuple[dict[str, Any], list[d
             item["code"],
         )
 
-    # M&A evidence warrants an isolated task.  High-risk rows are pooled into
-    # max-three batches across routes; normal deep-search rows also stay at
-    # max three.  Remaining routes share max-five batches, allowing a partial
-    # route tail to use the next route's spare capacity without duplicating
-    # context (the exact route remains on every item).
-    solo_items = sorted(
-        [item for item in projected if "m_and_a" in item["risk_reasons"]],
-        key=context_key,
-    )
-    remaining = [item for item in projected if "m_and_a" not in item["risk_reasons"]]
-    high = sorted([item for item in remaining if item["risk"] == "high"], key=context_key)
+    # High-risk rows (M&A included) are pooled into max-three batches across
+    # routes; normal deep-search rows also stay at max three.  Remaining
+    # routes share max-five batches, allowing a partial route tail to use the
+    # next route's spare capacity without duplicating context (the exact route
+    # remains on every item).  M&A rows previously got solo batches, but that
+    # rule had no spec backing and inflated dispatch counts; requires_edinet
+    # on the item now carries the extra-verification obligation instead.
+    high = sorted([item for item in projected if item["risk"] == "high"], key=context_key)
     normal_deep = sorted(
-        [item for item in remaining if item["risk"] == "normal" and item["route"] == "deep"],
+        [item for item in projected if item["risk"] == "normal" and item["route"] == "deep"],
         key=context_key,
     )
     normal_direct = sorted(
-        [item for item in remaining if item["risk"] == "normal" and item["route"] != "deep"],
+        [item for item in projected if item["risk"] == "normal" and item["route"] != "deep"],
         key=context_key,
     )
-    for item in solo_items:
-        append_batch([item])
     for items, limit in ((high, 3), (normal_direct, 5), (normal_deep, 3)):
         for offset in range(0, len(items), limit):
             append_batch(items[offset : offset + limit])
@@ -566,6 +570,14 @@ def build_research_plan(ranking: dict[str, Any]) -> tuple[dict[str, Any], list[d
         "ranking_codes": codes,
         "clusters": clusters,
         "batches": manifest_batches,
+        # initial_pending is filled by write_research_plan once checkpoint
+        # statuses are known; build_research_plan stays a pure projection.
+        "dispatch_budget": {
+            "initial_pending": None,
+            "initial_limit": INITIAL_DISPATCH_LIMIT,
+            "total_limit": TOTAL_DISPATCH_LIMIT,
+            "per_batch_limit": PER_BATCH_DISPATCH_LIMIT,
+        },
         "stats": {
             "rows": len(rows),
             "clusters": len(clusters),
@@ -579,10 +591,36 @@ def build_research_plan(ranking: dict[str, Any]) -> tuple[dict[str, Any], list[d
     return manifest, batch_payloads
 
 
+def _carry_over_ledger(manifest_path: Path) -> dict[str, Any]:
+    """Return the previous manifest's dispatch ledger, or a fresh zeroed one.
+
+    Conservative accounting: dispatches already spent stay counted across
+    replans even if the batch they were spent on no longer exists.
+    """
+    try:
+        with open(manifest_path, encoding="utf-8") as handle:
+            previous = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        previous = None
+    if isinstance(previous, dict) and "ledger" in previous:
+        return previous["ledger"]
+    return {"reservations": {}, "total_reserved": 0}
+
+
+def _quarantine_orphan_results(results_dir: Path, batch_ids: set[str]) -> None:
+    """Rename results whose stem is not a current batch id to ``*.stale``."""
+    if not results_dir.is_dir():
+        return
+    for path in sorted(results_dir.glob("*.json")):
+        if path.is_file() and path.stem not in batch_ids:
+            os.replace(path, path.with_name(path.name + ".stale"))
+
+
 def write_research_plan(ranking: dict[str, Any], out_dir: str | os.PathLike[str]) -> dict[str, Any]:
     """Atomically write batches and manifest, preserving result checkpoints."""
     destination = Path(out_dir)
     manifest, batches = build_research_plan(ranking)
+    ledger = _carry_over_ledger(destination / "manifest.json")
     for batch in batches:
         _atomic_write_json(
             destination / "batches" / f"{batch['batch_id']}.json",
@@ -590,11 +628,40 @@ def write_research_plan(ranking: dict[str, Any], out_dir: str | os.PathLike[str]
             compact=True,
         )
     batch_by_id = {batch["batch_id"]: batch for batch in batches}
+    _quarantine_orphan_results(destination / "results", set(batch_by_id))
     for entry in manifest["batches"]:
         result_path = destination / entry["result_path"]
-        entry["status"] = _checkpoint_status(result_path, batch_by_id[entry["batch_id"]])
+        status = _checkpoint_status(result_path, batch_by_id[entry["batch_id"]])
+        if status == "invalid":
+            # A stale or malformed checkpoint is quarantined and its batch is
+            # requeued, so no entry ever remains "invalid" on disk.
+            os.replace(result_path, result_path.with_name(result_path.name + ".stale"))
+            status = "pending"
+        entry["status"] = status
+    manifest["dispatch_budget"]["initial_pending"] = sum(
+        entry["status"] == "pending" for entry in manifest["batches"]
+    )
+    manifest["ledger"] = ledger
     _atomic_write_json(destination / "manifest.json", manifest)
     return manifest
+
+
+def _plan_has_repair_state(manifest_path: Path) -> bool:
+    """True when any existing manifest entry has consumed a repair attempt."""
+    try:
+        with open(manifest_path, encoding="utf-8") as handle:
+            manifest = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(manifest, dict):
+        return False
+    return any(
+        isinstance(entry, dict)
+        and isinstance(entry.get("repair_attempts"), int)
+        and not isinstance(entry.get("repair_attempts"), bool)
+        and entry["repair_attempts"] > 0
+        for entry in manifest.get("batches") or []
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -605,7 +672,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--out-dir", required=True, help="Research directory for manifest/batches/results"
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="repair適用済み（repair_attempts>0）の既存プランも作り直す（repair状態は破棄される）",
+    )
     args = parser.parse_args(argv)
+    if not args.force and _plan_has_repair_state(Path(args.out_dir) / "manifest.json"):
+        # A plain re-plan would rewrite batch files without repair_context and
+        # orphan repaired work, so refuse unless the caller opts in.
+        print(
+            "[build_research_plan] ERROR: repair適用済みプランを上書きしない（--force で作り直し）",
+            file=os.sys.stderr,
+        )
+        return 1
     try:
         with open(args.ranking, encoding="utf-8") as handle:
             ranking = json.load(handle)
@@ -615,7 +695,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     counts = {status: 0 for status in ("pending", "complete", "invalid")}
     for batch in manifest["batches"]:
-        counts[batch["status"]] += 1
+        if batch.get("status") in counts:
+            counts[batch["status"]] += 1
+    budget = manifest["dispatch_budget"]
+    if budget["initial_pending"] > budget["initial_limit"]:
+        # Exit 2 flags a broken plan; the written files stay for diagnosis.
+        print(
+            "[build_research_plan] ERROR: dispatch budget exceeded "
+            f"(pending={budget['initial_pending']} > limit={budget['initial_limit']})",
+            file=os.sys.stderr,
+        )
+        return 2
     print(
         "[build_research_plan] OK: "
         f"{manifest['stats']['rows']} rows / {manifest['stats']['batches']} batches "

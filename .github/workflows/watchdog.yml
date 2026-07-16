@@ -1,0 +1,102 @@
+name: Delivery watchdog
+
+# 日次配信の欠落検知（Layer A）。ルーチンが沈黙して失敗した営業日を 19:10 JST に検知し、
+# 常設の delivery-watchdog issue で通知する。22:50 JST の再確認で回復していれば自動クローズ。
+on:
+  schedule:
+    - cron: "10 10 * * 1-5"   # 19:10 JST main check
+    - cron: "50 13 * * 1-5"   # 22:50 JST recheck / auto-close
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PAGES_URL: https://youzer0x.github.io/tse-ranking-monitor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # jpholiday が無いと business_day が土日のみ判定に縮退し、日本の祝日を欠落と誤検知する。
+      - run: python -m pip install jpholiday
+      - name: Verify runtime contract lock
+        id: lock
+        run: |
+          set +e
+          python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - name: Fetch live Pages manifest
+        id: live
+        run: |
+          set +e
+          curl -fsSL "$PAGES_URL/data/manifest.json" -o /tmp/live-manifest.json
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - name: Run delivery check
+        id: check
+        env:
+          LIVE_CODE: ${{ steps.live.outputs.code }}
+        run: |
+          set +e
+          if [ "$LIVE_CODE" = "0" ]; then
+            token=$(python tools/watchdog_check.py --live-manifest /tmp/live-manifest.json)
+          else
+            token=$(python tools/watchdog_check.py)
+          fi
+          code=$?
+          echo "token=${token}" >> "$GITHUB_OUTPUT"
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+      - name: Manage watchdog issue
+        env:
+          TOKEN: ${{ steps.check.outputs.token }}
+          CHECK_CODE: ${{ steps.check.outputs.code }}
+          LIVE_CODE: ${{ steps.live.outputs.code }}
+          LOCK_CODE: ${{ steps.lock.outputs.code }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          now_jst=$(TZ=Asia/Tokyo date "+%Y-%m-%d %H:%M JST")
+          problems=()
+          case "$TOKEN" in
+            MISSING=*)     problems+=("delivery missing: ${TOKEN}") ;;
+            PAGES_STALE=*) problems+=("live Pages stale: ${TOKEN}") ;;
+          esac
+          if [ "$CHECK_CODE" != "0" ] && [ "$CHECK_CODE" != "1" ]; then
+            problems+=("checker error (exit ${CHECK_CODE})")
+          fi
+          if [ "$LIVE_CODE" != "0" ]; then
+            problems+=("pages manifest fetch failed (curl exit ${LIVE_CODE})")
+          fi
+          if [ "$LOCK_CODE" != "0" ]; then
+            problems+=("contract lock check failed (exit ${LOCK_CODE})")
+          fi
+
+          open_issue=$(gh issue list --label delivery-watchdog --state open \
+            --json number --jq '.[0].number')
+
+          if [ "${#problems[@]}" -gt 0 ]; then
+            gh label create delivery-watchdog \
+              --description "daily delivery watchdog alerts" --color D93F0B || true
+            body="Delivery watchdog detected a problem."$'\n\n'
+            for p in "${problems[@]}"; do
+              body="${body}- ${p}"$'\n'
+            done
+            body="${body}"$'\n'"- checked at: ${now_jst}"$'\n'"- run: ${RUN_URL}"
+            if [ -n "$open_issue" ]; then
+              gh issue comment "$open_issue" --body "$body"
+            else
+              gh issue create --title "Delivery watchdog: daily delivery failed" \
+                --label delivery-watchdog --body "$body"
+            fi
+            exit 1
+          fi
+
+          if [ -n "$open_issue" ]; then
+            gh issue close "$open_issue" \
+              --comment "Delivery watchdog: recovered (${TOKEN} at ${now_jst}). ${RUN_URL}" || true
+          fi
+          echo "watchdog OK (${TOKEN})"

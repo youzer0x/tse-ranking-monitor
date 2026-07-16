@@ -26,12 +26,12 @@
    - **掲載上限＝値上がり率上位30社**（該当が30社超なら上位30社のみ `rows` に入る。`--max-rank` 既定30）。`counts.qualifying`＝該当総数、`counts.ranked`＝掲載数。
    - 各 row に **`sector_cluster`**（同一33業種＝`S33` で当日ともに上昇した co-mover ＋ leader 候補）が付き、トップレベルに **`theme_clusters`**（クラスタ要約）が入る（Stage2 のセクター連動クロスチェックに使う）。
    - **`--kabutan-news`** を付けると各 row（上位30社）の **`kabutan_news[]`**（株探 材料・特集〔レーティング日報〕・5%ルール等の直近見出し＋時刻。テクニカル定型ノイズは除外）が事前充填され、Stage2 で「材料未確認」へ落とす前の確認材料になる。best-effort（失敗時は空配列）。
-3. **Stage2（計画→バッチ調査→evidence）**：`python scripts/build_research_plan.py --ranking .work/<SESSION>/ranking.json --out-dir .work/<SESSION>/research` を実行する。決定的前処理が材料窓外・引け後の見出しを分離し、TDnet重複を除き、クラスタを一度だけ正規化して最大5銘柄の `research_batch.v1` を作る。
-   - manifestで `pending` の各バッチを `.claude/agents/tse-factor-batch-researcher.md` に委譲する。タスク本文は `batch_id` と `batch_path` のみとし、rowやplan本文を貼らない。結果JSONをmanifestの `result_path` へ親が原子的に保存する。
+3. **Stage2（計画→バッチ調査→evidence）**：`python scripts/build_research_plan.py --ranking .work/<SESSION>/ranking.json --out-dir .work/<SESSION>/research` を実行する。決定的前処理が材料窓外・引け後の見出しを分離し、TDnet重複を除き、クラスタを一度だけ正規化して最大5銘柄の `research_batch.v1` を作る。M&A関連銘柄は単独ではなく高リスク枠（最大3件）でプールし、`requires_edinet` で銘柄単位のEDINET確認義務を明示する（strict compileが `edinet=na` を拒否）。manifestに `dispatch_budget`（初期上限12・総予算18・バッチ毎3）を記録し、初期pendingが12を超えると非ゼロ終了する＝調査を開始しない。
+   - manifestで `pending` の各バッチを `.claude/agents/tse-factor-batch-researcher.md` に委譲する。委譲直前に `python scripts/reserve_dispatch.py --research-dir .work/<SESSION>/research --batch <batch_id>` で予約し、exit 0以外なら委譲しない（バッチ毎3回・総量18回を機械管理）。タスク本文は `batch_id` と `batch_path` のみとし、rowやplan本文を貼らない。結果JSONをmanifestの `result_path` へ親が原子的に保存する。
    - 親は `python scripts/compile_research_results.py --research-dir .work/<SESSION>/research --strict` を実行する。欠落、重複、digest不一致、材料窓・出典・5パスの契約違反があれば出力せず、該当バッチだけ最大2回再調査する。成功時は `evidence.v1` と既存形式の `factors.json` を得る。
    - `python scripts/merge_factors.py --ranking .work/<SESSION>/ranking.json --factors .work/<SESSION>/research/factors.json` で反映する。`ranking.json` は手編集しない。
    - 親オーケストレーターが全行と `theme_clusters` を横断検証する。異質な33業種を機械的に同一テーマへ結ばず、開示内容、時系列、定量寄与、代替要因が揃う範囲だけを帰属する。修正はbatch resultまたはfactorsへ戻し、compile/mergeを再実行する。
-   - `python scripts/validate_ranking_quality.py .work/<SESSION>/ranking.json --evidence .work/<SESSION>/research/evidence.json --format json --repair-targets .work/<SESSION>/research/repair_targets.json` を実行し、findingが指すコードだけを修復する。空のfactor、ERROR、未対応WARNを残したまま公開しない。詳細な出典・因果規律は本書後半とvendor正本に従う。
+   - `python scripts/validate_ranking_quality.py .work/<SESSION>/ranking.json --evidence .work/<SESSION>/research/evidence.json --format json --repair-targets .work/<SESSION>/research/repair_targets.json` を実行し、findingが指すコードだけを修復する。再調査は `python scripts/repair_research_plan.py --research-dir .work/<SESSION>/research --repair-targets .work/<SESSION>/research/repair_targets.json` が `repair_context`（rule_ids・messages・旧結果の要点）を該当バッチへ注入して `pending` に戻す（digest更新で旧結果は自動失効。非対象銘柄は `carry_forward` として再掲され、改変はcompileが拒否する。バッチごと最大2回・exit 3は公開停止）。空のfactor、ERROR、未対応WARNを残したまま公開しない。詳細な出典・因果規律は本書後半とvendor正本に従う。
 3.5. **市場分析タブのデータ生成（best-effort・ランキング配信をブロックしない）**：ランキングと**同一の push** に載せるため Publish（step4）の前に生成する。16:35 起動では当日 `/fins/summary`（速報~18:00頃）は未反映だが、**市場分析タブに表示されるのは bars/master/topix 由来の要素のみ**（セクター騰落・breadth・TOPIX・movers 表）で、当日決算開示は配信物に出ないため影響しない。手順の詳細は `specs/MARKET_ANALYSIS.md` に従う。要点のみ：
    - **(a) 決定的データ**：`python scripts/build_market_stats.py --date <SESSION> --out-dir .work/<SESSION>/market`。`.work/<SESSION>/market/` に `sector_return_<SESSION>.csv`・`movers_top_<SESSION>.csv`（sector_analysis.py 移植版）と `market_stats_<SESSION>.json`（TOPIX 前日比・breadth・最大代金セクター/銘柄〔全ユニバース真値〕・セクター騰落率表「銘柄」列の主導銘柄 `sector_drivers`〔寄与順1〜2銘柄〕・**⚠乖離フラグ候補 `divergence_flags`**〔執筆ヒント〕・movers の TDnet 開示文脈 `movers_context`）を出力。
    - **(b) 根拠パック**：`python scripts/build_market_brief.py --ranking .work/<SESSION>/ranking.json --evidence .work/<SESSION>/research/evidence.json --stats .work/<SESSION>/market/market_stats_<SESSION>.json --out .work/<SESSION>/market/market_brief_<SESSION>.json`。ランキングと重なる値上がりmoverはaccepted evidenceをそのまま再利用し、再調査しない。値下がり側の追加調査はbriefの選定銘柄だけに限定する。
@@ -90,6 +90,13 @@
   （`html_generator.py` の SPA `mdInline`／メール `_factor_html`。`開示` の窓内開示は従来どおり `[開示PDF]` を自動付与）。
   これで「削らず出典を足す」修復が変動要因でも成立する。
 
+
+## 監視と失敗通知
+
+- **ルーチン内失敗メール**：契約ゲート成功後にSKIP以外で停止する場合、`python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"` が停止stage・理由・telemetry要約・validator残件をGmail平文で送る（best-effort。送信失敗でも当初の非ゼロ終了を維持する。`RUNTIME_CONTRACT.md` §6）。
+- **配信watchdog**：`.github/workflows/watchdog.yml` が毎営業日 19:10 JST（主検査）と 22:50 JST（再検査・回復auto-close）に `tools/watchdog_check.py` で公開manifest・**Pages実配信manifest**・契約lockを照合し、配信欠落（`MISSING`）・Pages未反映（`PAGES_STALE`）・lock不一致のいずれかで `delivery-watchdog` ラベルのissueを作成/追記する（GITHUB_TOKENのみ使用・常時open 1件・回復時自動close）。利用上限等でセッションが無言で死んだ場合もこの層が検知する。
+- **通知の冪等化**：`publish.py --notify` は送信前にローカルHEADと `origin/main` の一致を検証し、push未達（非fast-forward敗者を含む）なら未送信のまま非ゼロ終了する＝二重メールを構造的に防ぐ。
+- **明示的な残存リスク**：Gmail送達自体の外部検証は行わない（失敗通知と同一チャネルで循環するため。公開・Pages配信は完了済みで影響は通知メールのみ。ルーチンの非ゼロ終了とclaude.aiプッシュ通知で検知する）。
 
 ## 関連
 

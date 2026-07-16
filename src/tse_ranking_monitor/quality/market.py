@@ -111,20 +111,33 @@ def _human_finding(item):
     return ("%s: %s" % (path, message)) if path and path != "$" else message
 
 
+# repair_targets へ載せる指摘メッセージの上限（再調査バッチへ注入されるため肥大化を防ぐ）。
+REPAIR_TARGET_MESSAGE_MAX_CHARS = 500
+REPAIR_TARGET_MESSAGE_LIMIT = 5
+
+
 def select_repair_targets(findings, prefer_code=False):
-    """Group findings into the smallest paths (or ranking codes) to repair."""
+    """Group findings into the smallest paths (or ranking codes) to repair.
+
+    各 target は ``messages``（重複排除済みの指摘本文。1件500字まで・最大5件・
+    findings の出現順）を持ち、再調査側が「何が悪いか」を機械可読で受け取れる。
+    """
     grouped = {}
     for item in findings:
         code = item.get("code")
         key = ("code", code) if prefer_code and code else ("path", item.get("path") or "$")
         target = grouped.setdefault(key, {
             "code": code, "path": item.get("path") or "$",
-            "rule_ids": [], "severities": [],
+            "rule_ids": [], "severities": [], "messages": [],
         })
         if item.get("rule_id") not in target["rule_ids"]:
             target["rule_ids"].append(item.get("rule_id"))
         if item.get("severity") not in target["severities"]:
             target["severities"].append(item.get("severity"))
+        message = str(item.get("message") or "")[:REPAIR_TARGET_MESSAGE_MAX_CHARS]
+        if (message and message not in target["messages"]
+                and len(target["messages"]) < REPAIR_TARGET_MESSAGE_LIMIT):
+            target["messages"].append(message)
     return list(grouped.values())
 
 

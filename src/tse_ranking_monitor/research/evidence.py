@@ -17,6 +17,7 @@ from .plan import (
     RESULT_SCHEMA_VERSION,
     _atomic_write_json,
 )
+from .repair import trim_carry_item
 
 
 EVIDENCE_SCHEMA_VERSION = "evidence.v1"
@@ -195,6 +196,13 @@ def _validate_result_item(
                 f"{label}.checks.{name} must be one of {sorted(VALID_CHECK_STATES)}"
             )
         normalized_checks[name] = value
+    # requires_edinet items (M&A risk) may not skip the EDINET pass: "done"
+    # proves the check ran, "unavailable" records honest inaccessibility.
+    if input_item.get("requires_edinet") and normalized_checks["edinet"] == "na":
+        raise ValueError(
+            f"{label}: requires_edinet item must not report checks.edinet=na "
+            "(use done, or unavailable when EDINET is inaccessible)"
+        )
     if status == "unresolved" and factor_kind != "テーマ":
         raise ValueError(f"{label}: unresolved results must use factor_kind=テーマ")
 
@@ -355,6 +363,24 @@ def compile_research_results(
                 errors.append(f"compiled duplicate code: {code}")
                 continue
             compiled_by_code[code] = validated
+
+        # Repair discipline: carry-forward stocks must come back verbatim so a
+        # repair pass can never silently rewrite conclusions it was not asked
+        # to fix.  Raw items are compared raw-to-raw on the trimmed subset.
+        repair_context = batch.get("repair_context")
+        if isinstance(repair_context, dict):
+            for carry in repair_context.get("carry_forward") or []:
+                if not isinstance(carry, dict):
+                    continue
+                code = str(carry.get("code") or "").strip()
+                raw = raw_by_code.get(code)
+                if raw is None:
+                    continue  # missing-code errors are already reported above
+                if trim_carry_item(raw) != trim_carry_item(carry):
+                    errors.append(
+                        f"result {batch_id}.{code}: repair carry-forward drift "
+                        "(carry_forward items must be returned unchanged)"
+                    )
 
     if set(assigned_codes) != set(expected_codes):
         missing_assignments = sorted(set(expected_codes) - assigned_codes)

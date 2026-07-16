@@ -3,6 +3,7 @@
 import base64
 import json
 from email import message_from_bytes
+from email.header import decode_header, make_header
 
 import pytest
 
@@ -60,3 +61,54 @@ def test_send_gmail_requires_message_id(monkeypatch):
     )
     with pytest.raises(RuntimeError, match="message id"):
         gs.send_gmail("<b>x</b>", "2026-07-15", 1)
+
+
+def test_send_plain_email_rejects_missing_credentials(monkeypatch):
+    for name in gs.REQUIRED_CREDENTIALS:
+        monkeypatch.delenv(name, raising=False)
+    with pytest.raises(RuntimeError, match="missing Gmail credentials"):
+        gs.send_plain_email("subject", "body")
+
+
+def test_send_plain_email_posts_subject_and_plain_body(monkeypatch):
+    _credentials(monkeypatch)
+    requests = []
+    responses = iter([{"access_token": "token"}, {"id": "message-1"}])
+
+    def fake_urlopen_json(request, what):
+        requests.append((request, what))
+        return next(responses)
+
+    monkeypatch.setattr(gs._implementation, "_urlopen_json", fake_urlopen_json)
+    assert gs.send_plain_email(
+        "[tse-ranking-monitor] 配信失敗 2026-07-15｜stage2", "本文1行目\n2行目"
+    )
+
+    assert [what for _, what in requests] == ["Gmail token", "Gmail send"]
+    send_request = requests[1][0]
+    assert send_request.headers["Authorization"] == "Bearer token"
+    raw = json.loads(send_request.data)["raw"]
+    message = message_from_bytes(base64.urlsafe_b64decode(raw))
+    assert message.get_content_type() == "text/plain"
+    assert message["To"] == "reader@example.com"
+    subject = str(make_header(decode_header(message["Subject"])))
+    assert subject == "[tse-ranking-monitor] 配信失敗 2026-07-15｜stage2"
+    body = message.get_payload(decode=True).decode("utf-8")
+    assert "本文1行目" in body and "2行目" in body
+
+
+def test_send_plain_email_honors_explicit_recipient(monkeypatch):
+    _credentials(monkeypatch)
+    requests = []
+    responses = iter([{"access_token": "token"}, {"id": "message-1"}])
+
+    def fake_urlopen_json(request, what):
+        requests.append((request, what))
+        return next(responses)
+
+    monkeypatch.setattr(gs._implementation, "_urlopen_json", fake_urlopen_json)
+    assert gs.send_plain_email("subject", "body", recipient="ops@example.com")
+
+    raw = json.loads(requests[1][0].data)["raw"]
+    message = message_from_bytes(base64.urlsafe_b64decode(raw))
+    assert message["To"] == "ops@example.com"

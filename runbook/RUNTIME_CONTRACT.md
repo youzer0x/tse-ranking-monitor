@@ -23,7 +23,9 @@ python scripts/build_day_ranking.py --date <S> --kabutan-news --out .work/<S>/ra
 python scripts/build_research_plan.py --ranking .work/<S>/ranking.json --out-dir .work/<S>/research
 ```
 
-`research/manifest.json` の `pending` バッチだけを、`.claude/agents/tse-factor-batch-researcher.md` を使って並列調査する。1タスクには `batch_id` と `batch_path` だけを渡し、ranking row、plan、長文仕様を貼り付けない。各返却JSONをmanifestの `result_path` に保存する。30銘柄で8エージェントを超えたら公開へ進まず設計逸脱として報告する。
+`build_research_plan.py` が非ゼロ終了（dispatch予算超過等）なら調査を開始せず、設計逸脱として報告して停止する。エージェント上限はmanifestの `dispatch_budget` とreserve判定だけを正とする。
+
+`research/manifest.json` の `pending` バッチだけを、`.claude/agents/tse-factor-batch-researcher.md` を使って並列調査する。各バッチの委譲直前に `python scripts/reserve_dispatch.py --research-dir .work/<S>/research --batch <batch_id>` を実行し、exit 0以外なら委譲せず停止して報告する。1タスクには `batch_id` と `batch_path` だけを渡し、ranking row、plan、長文仕様を貼り付けない。各返却JSONをmanifestの `result_path` に保存する。
 
 全結果を次で検証・集約する。
 
@@ -33,7 +35,13 @@ python scripts/merge_factors.py --ranking .work/<S>/ranking.json --factors .work
 python scripts/validate_ranking_quality.py .work/<S>/ranking.json --evidence .work/<S>/research/evidence.json --format json --repair-targets .work/<S>/research/repair_targets.json
 ```
 
-親は全コードの一意性・充足、材料窓、出典、クラスタ横断因果を検証する。compileまたはvalidatorのfindingは対象コードを含むバッチだけ最大2回再調査し、完了バッチを再送しない。`ranking.json` を手編集しない。空のfactor、ERROR、未対応WARNが残れば公開しない。
+親は全コードの一意性・充足、材料窓、出典、クラスタ横断因果を検証する。compile失敗は該当バッチだけをreserve経由で再調査する。validatorのfindingは
+
+```text
+python scripts/repair_research_plan.py --research-dir .work/<S>/research --repair-targets .work/<S>/research/repair_targets.json
+```
+
+を実行し、`pending` に戻ったバッチだけをreserve経由で再調査してcompile/merge/validatorを再実行する。exit 3（再調査上限または総予算の超過）なら公開せず停止する。完了バッチを再送しない。`ranking.json` を手編集しない。空のfactor、ERROR、未対応WARNが残れば公開しない。
 
 ## 3. 市場分析（best-effort）
 
@@ -66,3 +74,13 @@ python scripts/publish.py --in .work/<S>/ranking.json --docs docs --pages-url "$
 ## 5. 最終報告
 
 `<S>`、該当総数/掲載数、主要要因、即確定/待機/catch-up、待機時間とWARN、市場分析の成功/スキップ理由、調査バッチ数・再試行数、validator残件、push/Pages digest/Gmailの結果を1段落で報告する。利用上限に達した場合は最後に完了したstageとtelemetryの保存先も記す。
+
+## 6. 失敗時の通知
+
+契約ゲート成功後にSKIP以外で停止する場合（TIMEOUT、Stage・検証・公開・通知の失敗）、終了前に次を実行し、送信可否に関わらず当初の非ゼロ終了と失敗報告を維持する。
+
+```text
+python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"
+```
+
+`<S>` 確定済みなら `--session <S>` を、validator残があれば `--repair-targets .work/<S>/research/repair_targets.json` を付ける。

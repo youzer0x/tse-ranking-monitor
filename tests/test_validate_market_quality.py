@@ -390,7 +390,20 @@ def test_machine_findings_have_stable_shape_and_repair_target(market_golden):
     assert vmq.select_repair_targets([emph]) == [{
         "code": emph["code"], "path": emph["path"],
         "rule_ids": ["MKT_EMPH_LINK_REQUIRED"], "severities": ["ERROR"],
+        "messages": [emph["message"]],
     }]
+
+
+def test_repair_target_messages_dedupe_truncate_and_cap():
+    long_message = "x" * 600
+    findings = [
+        vmq.finding("p", "R1", "ERROR", long_message),
+        vmq.finding("p", "R1", "ERROR", long_message),  # 切り詰め後に重複排除
+    ] + [vmq.finding("p", "R%d" % i, "ERROR", "msg-%d" % i) for i in range(2, 9)]
+    [target] = vmq.select_repair_targets(findings)
+    assert target["messages"][0] == "x" * 500
+    assert len(target["messages"]) == 5  # 上限5件
+    assert target["messages"][1:] == ["msg-2", "msg-3", "msg-4", "msg-5"]
 
 
 def test_cli_json_findings_and_repair_targets(market_golden, tmp_path, capsys):

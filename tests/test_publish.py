@@ -138,6 +138,7 @@ def test_notify_rejects_input_that_differs_from_published_json(tmp_path, monkeyp
         json.dumps(_ranking(factor="未公開の訂正"), ensure_ascii=False), encoding="utf-8"
     )
     sent = []
+    monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
     monkeypatch.setattr(pub._implementation, "send_email", lambda *_: sent.append(True))
 
     with pytest.raises(pub.PublishError, match="does not match"):
@@ -153,6 +154,7 @@ def test_missing_notification_environment_is_nonzero_and_unsent(tmp_path, monkey
     for name in pub.NOTIFY_ENV:
         monkeypatch.delenv(name, raising=False)
     live_calls = []
+    monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
     monkeypatch.setattr(
         pub._implementation, "wait_until_live", lambda *_a, **_k: live_calls.append(True)
     )
@@ -171,6 +173,7 @@ def test_live_timeout_is_nonzero_and_email_is_not_called(tmp_path, monkeypatch):
     input_path = _write_input(tmp_path)
     pub.build(_ranking(), docs)
     sent = []
+    monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
     monkeypatch.setattr(
         pub._implementation, "_required_notification_environment", lambda: None
     )
@@ -196,6 +199,7 @@ def test_gmail_api_failure_is_nonzero(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     input_path = _write_input(tmp_path)
     pub.build(_ranking(), docs)
+    monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
     monkeypatch.setattr(
         pub._implementation, "_required_notification_environment", lambda: None
     )
@@ -214,6 +218,110 @@ def test_gmail_api_failure_is_nonzero(tmp_path, monkeypatch):
         "--pages-url", "https://example.github.io/site",
         "--notify",
     ]) == 1
+
+
+def test_notify_sends_when_pushed_head_verification_passes(tmp_path, monkeypatch):
+    docs = tmp_path / "docs"
+    input_path = _write_input(tmp_path)
+    pub.build(_ranking(), docs)
+    sent = []
+    monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
+    monkeypatch.setattr(
+        pub._implementation, "_required_notification_environment", lambda: None
+    )
+    monkeypatch.setattr(
+        pub._implementation, "wait_until_live", lambda *_a, **_k: True
+    )
+    monkeypatch.setattr(
+        pub._implementation, "send_email", lambda *_a: sent.append(True)
+    )
+
+    assert pub.main([
+        "--in", str(input_path),
+        "--docs", str(docs),
+        "--pages-url", "https://example.github.io/site",
+        "--notify",
+    ]) == 0
+    assert sent == [True]
+
+
+def test_notify_refuses_when_head_is_not_pushed(tmp_path, monkeypatch):
+    docs = tmp_path / "docs"
+    input_path = _write_input(tmp_path)
+    pub.build(_ranking(), docs)
+    sent = []
+    live_calls = []
+    monkeypatch.setattr(
+        pub._implementation,
+        "_verify_pushed_head",
+        lambda *_a, **_k: (_ for _ in ()).throw(
+            pub.PublishError("local HEAD is not what origin/main serves")
+        ),
+    )
+    monkeypatch.setattr(
+        pub._implementation, "wait_until_live", lambda *_a, **_k: live_calls.append(True)
+    )
+    monkeypatch.setattr(
+        pub._implementation, "send_email", lambda *_a: sent.append(True)
+    )
+
+    assert pub.main([
+        "--in", str(input_path),
+        "--docs", str(docs),
+        "--pages-url", "https://example.github.io/site",
+        "--notify",
+    ]) == 1
+    assert not sent
+    assert not live_calls
+
+
+def _fake_git_run(outputs):
+    """subprocess.run のfake。コマンドtupleごとの stdout か例外を返す。"""
+
+    def run(args, **_kwargs):
+        result = outputs[tuple(args)]
+        if isinstance(result, Exception):
+            raise result
+
+        class _Completed:
+            stdout = result
+
+        return _Completed()
+
+    return run
+
+
+def test_verify_pushed_head_accepts_matching_remote(monkeypatch):
+    monkeypatch.setattr(pub._implementation.subprocess, "run", _fake_git_run({
+        ("git", "rev-parse", "HEAD"): "a" * 40 + "\n",
+        ("git", "ls-remote", "origin", "main"): "a" * 40 + "\trefs/heads/main\n",
+    }))
+
+    assert pub._verify_pushed_head() is None
+
+
+def test_verify_pushed_head_rejects_unpushed_or_raced_head(monkeypatch):
+    monkeypatch.setattr(pub._implementation.subprocess, "run", _fake_git_run({
+        ("git", "rev-parse", "HEAD"): "a" * 40 + "\n",
+        ("git", "ls-remote", "origin", "main"): "b" * 40 + "\trefs/heads/main\n",
+    }))
+
+    with pytest.raises(pub.PublishError, match="origin/main"):
+        pub._verify_pushed_head()
+
+
+def test_verify_pushed_head_fails_closed_on_git_error(monkeypatch):
+    import subprocess
+
+    monkeypatch.setattr(pub._implementation.subprocess, "run", _fake_git_run({
+        ("git", "rev-parse", "HEAD"): "a" * 40 + "\n",
+        ("git", "ls-remote", "origin", "main"): subprocess.CalledProcessError(
+            128, ["git", "ls-remote", "origin", "main"]
+        ),
+    }))
+
+    with pytest.raises(pub.PublishError, match="cannot verify pushed HEAD"):
+        pub._verify_pushed_head()
 
 
 def test_send_flag_is_safe_notify_alias(tmp_path, monkeypatch):
