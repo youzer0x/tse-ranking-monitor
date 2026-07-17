@@ -20,6 +20,8 @@ on:
       - "requirements*.txt"
       - "pytest.ini"
       - ".github/workflows/tests.yml"
+      - ".github/workflows/promote-routine-publication.yml"
+      - ".github/workflows/validate-routine-publication.yml"
   workflow_dispatch:
 
 jobs:

@@ -141,8 +141,9 @@ git push -u origin main
    - **モデル**：**Sonnet 4.6**／**effort**：**max**
    - **スケジュール（cron）**：毎日 **16:35 JST**（タイムゾーン欄があれば Asia/Tokyo で `35 16 * * *`。UTC 指定なら `35 7 * * *` ＝ 07:35 UTC）
    - **プロンプト**：`runbook/ROUTINE_PROMPT.md` の```で囲んだ本文をそのまま貼り付け。
-3. **Permissions タブ（フォーム最下部・リポジトリ追加後に出る）で「Allow unrestricted branch pushes」を ON**。これが無いとクラウドが `claude/` ブランチにしか push できず、Pages（main/docs）に反映されない。
-4. 保存。
+3. **Permissions タブ（フォーム最下部・リポジトリ追加後に出る）で「Allow unrestricted branch pushes」を ON推奨**。ONならmainへ直接pushする最短経路、OFFまたは制限時は `claude/*` branchからGitHub Actionsが安全検証してmainへ自動昇格する。
+4. GitHubの「Settings → Actions → General」でActionsを有効にし、組織ポリシーで書込みが制限されている場合はWorkflow permissionsをRead and writeへ設定する。Claude branch上の検証workflowは `contents: read`、main上の昇格workflowだけが `contents: write` と `pages: write` を要求し、Gmail認証情報は使用しない。
+5. 保存。
 
 > **16:35 JST の根拠**：核ランキングの唯一の必須依存は当日の四本値（J-Quants 公式反映「約16:30」・実際は前後）。銘柄マスタは当日分を日中取得可（約17:30 は"翌営業日"マスタの制約で非ボトルネック）、時価総額は前期末確定株数で足り財務速報（約18:00）は不使用。そこで 16:35 に起動し、`wait_for_data.py` が当日四本値の確定をポーリングで待ってから続行する（通常は16:30台に確定→即実行、遅延日のみ待機）。打ち切りは 18:10 JST 壁時計で、旧起動時刻より遅くならず「現行が配信できた日を取りこぼさない」ことを保証する。締切までに未到達なら配信せず障害報告。Stage1 自身も件数比・masterカバー率・日付整合を検証し、ゲート迂回時の部分データを拒否する。PTS 版は前営業日ゲート・朝06:06 で対象セッションが異なる。
 
@@ -169,7 +170,8 @@ python scripts/build_day_ranking.py --date "$SESSION" --out ".work/$SESSION/rank
 # factor/factor_kind は .work/$SESSION/factors.json に書き、ranking.json は手編集しない
 python scripts/merge_factors.py --ranking ".work/$SESSION/ranking.json" --factors ".work/$SESSION/factors.json"
 python scripts/publish.py --in ".work/$SESSION/ranking.json" --docs docs --pages-url "$PAGES_URL"          # 生成のみ
-git add docs/index.html docs/data && git commit -m "Update TSE ..." && git push origin HEAD:main             # Pages へ反映
+git add docs/index.html docs/data && git commit -m "Update TSE ..."
+git push origin HEAD:main || git push origin HEAD  # 直接push拒否時はActions fallback
 python scripts/publish.py --in ".work/$SESSION/ranking.json" --docs docs --pages-url "$PAGES_URL" --notify # digest一致後に送信
 ```
 
@@ -181,6 +183,6 @@ python scripts/publish.py --in ".work/$SESSION/ranking.json" --docs docs --pages
 | 当日データが空 / `TIMEOUT` | `wait_for_data.py` が当日四本値の確定を待つ（通常16:30台に確定・遅延日は待機）。`TIMEOUT`＝締切 18:10 JST までに四本値が未到達＝J-Quants の遅延/障害を疑う（この場合は生成・配信しない）。休場日は `SKIP` |
 | メール不達 | Gmail API の3変数（CLIENT_ID/SECRET/REFRESH_TOKEN）と `GMAIL_ADDRESS` を確認。**OAuth 同意画面を本番公開**したか（テストだと7日で失効） |
 | メールのリンク先が前営業日のまま | `--notify`（step6）を**必ず push の後**に実行しているか／ネット許可に `github.io` が入っているか確認。`--notify` が Pages 上のartifact digest一致を確認してから送る。確認タイムアウト時は未送信で失敗する |
-| Pages が `claude/...` に出て未反映 | ルーチンの「Allow unrestricted branch pushes」ON＋プロンプトの `git push origin HEAD:main` を確認 |
+| Pages が `claude/...` に出て未反映 | Actions「Validate routine publication」と「Promote routine publication」の順に実行結果を確認。候補がmain直系・docs限定・digest一致か、Workflow permissionsが書込み可かを確認。直接経路を使う場合は「Allow unrestricted branch pushes」も確認 |
 | Pages 未表示 | Settings → Pages の Branch=main / Folder=/docs を確認 |
 | pip が `externally-managed` で失敗 | setup script のフォールバック `|| pip install --break-system-packages ...` が入っているか |

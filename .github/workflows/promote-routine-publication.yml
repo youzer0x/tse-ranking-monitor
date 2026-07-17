@@ -1,0 +1,56 @@
+name: Promote routine publication
+
+# This privileged stage is loaded from the default branch after the read-only
+# validator succeeds. It revalidates the exact candidate before advancing main.
+# Gmail remains in the Claude routine: this workflow has no Gmail credentials
+# and only makes the exact Pages artifact deployable.
+on:
+  workflow_run:
+    workflows:
+      - "Validate routine publication"
+    types:
+      - completed
+    branches:
+      - "claude/**"
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: routine-publication-main
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch current main
+        run: git fetch --no-tags origin main:refs/remotes/origin/main
+      - name: Verify runtime contract
+        run: python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json
+      - name: Verify publication candidate
+        run: >-
+          python tools/verify_publish_candidate.py
+          --branch "${{ github.event.workflow_run.head_branch }}"
+          --head "${{ github.event.workflow_run.head_sha }}"
+          --base origin/main
+      - name: Fast-forward main to the exact candidate
+        run: >-
+          git push origin
+          "${{ github.event.workflow_run.head_sha }}:refs/heads/main"
+      - name: Request the legacy main/docs Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh api --method POST
+          "repos/$GITHUB_REPOSITORY/pages/builds"
+          --header "X-GitHub-Api-Version: 2022-11-28"

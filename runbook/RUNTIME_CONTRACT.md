@@ -69,7 +69,9 @@ git push origin HEAD:main
 python scripts/publish.py --in .work/<S>/ranking.json --docs docs --pages-url "$PAGES_URL" --notify
 ```
 
-`.work/`、reports、認証情報をcommitしない。push前に通知しない。`--notify` がPages上の当日artifact digestとローカル公開物の一致を確認できない場合、Gmail認証不足またはAPI失敗の場合は未送信のまま非ゼロ終了する。
+`git push origin HEAD:main` がクラウドのbranch制限を含む理由で失敗した場合、その失敗だけでは停止・失敗通知せず、`git push origin HEAD` で現在の `claude/*` branchへ同じcommitをpushする。読み取り専用の `.github/workflows/validate-routine-publication.yml` が候補を検証し、main上の信頼済み `.github/workflows/promote-routine-publication.yml` が同じ候補を再検証する。現行mainの直系・単一commit、公開パス限定、manifest digest一致の場合だけmainへfast-forwardしてPages buildを要求する。`--notify` はローカルHEADがorigin/mainへ到達するまで最大5分、その後Pages上の当日artifact digest一致まで最大5分待つ。
+
+`.work/`、reports、認証情報をcommitしない。push前に通知しない。直接pushとfallbackの両方が未達、Pages digest不一致、Gmail認証不足またはAPI失敗の場合は未送信のまま非ゼロ終了する。直接push拒否後にfallbackが成功した場合は正常配信として扱う。
 
 ## 5. 最終報告
 

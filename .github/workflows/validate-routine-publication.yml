@@ -1,0 +1,36 @@
+name: Validate routine publication
+
+# This first stage runs from the claude/* branch with read-only permissions.
+# The privileged promotion stage is a workflow_run workflow whose definition
+# comes from the default branch, so a branch cannot rewrite its own promotion
+# authority.
+on:
+  push:
+    branches:
+      - "claude/**"
+    paths:
+      - "docs/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch current main
+        run: git fetch --no-tags origin main:refs/remotes/origin/main
+      - name: Verify runtime contract
+        run: python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json
+      - name: Verify publication candidate
+        run: >-
+          python tools/verify_publish_candidate.py
+          --branch "$GITHUB_REF_NAME"
+          --head "$GITHUB_SHA"
+          --base origin/main

@@ -43,11 +43,15 @@
    - `docs/data/<date>.json` 保存（ランキング＋要因）／`docs/data/manifest.json` 更新／30日より古い JSON を削除。
    - `docs/index.html`（日付選択式 Pages）を更新（体裁は `html_generator.py`＝PTS 版と同一トンマナ・配色）。保存 JSON は rows に開示（pdf_url）を含むフルデータ。
    - メールは送信せず、再生成可能なメールHTMLも公開保存しない。通知時に公開済みランキングJSONから本文を生成する。
-5. **デプロイ（必ず main へ）**：`docs/index.html` と `docs/data/` を commit し、`git push origin HEAD:main`。
+5. **デプロイ（必ず main へ・二重経路）**：`docs/index.html` と `docs/data/` を commit し、まず `git push origin HEAD:main` を実行する。
    `docs/data/` には step4 のランキング JSON に加え、step3.5 が成功していれば `<SESSION>_market.json`（市場分析）も含まれ、**同一 push** で配信される（`git add docs/index.html docs/data` が両方を拾う）。
-   GitHub Pages は **main/docs** を配信するため、クラウドが `claude/` ブランチ上にいても **main へ直接 push**する（PR は作らない。リポジトリは unrestricted branch push 許可）。`.work/<SESSION>/` はコミットしない。
+   - 直接pushが成功すれば従来どおり次へ進む。失敗した場合、その時点では停止・失敗通知せず、`git push origin HEAD` で現在の `claude/*` branchへ同じcommitをpushする。
+   - fallbackは2段階とする。`validate-routine-publication.yml` はClaude branch上で読み取り専用検証を行い、成功時だけmain上の信頼済み `promote-routine-publication.yml` が同じ候補を再検証する。候補が現行mainの直系かつ単一commit、変更が `docs/index.html`／`docs/data/*.json` 限定、ランキングJSONとmanifest digestが一致する場合だけ、同じcommitをmainへfast-forwardする。force push・PR・別commitの生成は行わない。不合格またはmain競合は昇格しない。
+   - Actionsの `GITHUB_TOKEN` によるmain pushはPages buildを自動発火しないため、workflowがPages Build APIを明示的に要求する。Gmail認証情報はActionsへ渡さず、通知は引き続きClaude Routineだけが行う。
+   GitHub Pages は **main/docs** を配信する。`Allow unrestricted branch pushes` は高速な直接経路として推奨するが、無効でもfallbackで配信を完遂できる。`.work/<SESSION>/` はコミットしない。
 6. **メール通知（Pages 反映後に送信）**：`publish.py --in .work/<SESSION>/ranking.json --docs docs --pages-url "$PAGES_URL" --notify`
-   - **GitHub Pages 上の当日ランキングartifact digestがローカル公開物と一致する**まで、manifestとランキングJSONを
+   - まずローカルHEADと `origin/main` が一致するまでキャッシュなしで**最大5分ポーリング**する。直接push成功なら即一致し、fallback時はActionsの昇格を待つ。一致しなければ未送信で非ゼロ終了する。
+   - 続いて**GitHub Pages 上の当日ランキングartifact digestがローカル公開物と一致する**まで、manifestとランキングJSONを
      キャッシュ無効化付きで**最大5分ポーリング**し、一致確認後にメール HTML を **Gmail API（HTTPS）送信**（`gmail_sender.send_gmail`）。
      クラウド環境は SMTP(465) を通さないため **PTS 版と同じ Gmail API 方式**を用いる。必要な環境変数は
      `GMAIL_CLIENT_ID`／`GMAIL_CLIENT_SECRET`／`GMAIL_REFRESH_TOKEN`／`GMAIL_ADDRESS`／`NOTIFY_TO`
@@ -95,7 +99,7 @@
 
 - **ルーチン内失敗メール**：契約ゲート成功後にSKIP以外で停止する場合、`python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"` が停止stage・理由・telemetry要約・validator残件をGmail平文で送る（best-effort。送信失敗でも当初の非ゼロ終了を維持する。`RUNTIME_CONTRACT.md` §6）。
 - **配信watchdog**：`.github/workflows/watchdog.yml` が毎営業日 19:10 JST（主検査）と 22:50 JST（再検査・回復auto-close）に `tools/watchdog_check.py` で公開manifest・**Pages実配信manifest**・契約lockを照合し、配信欠落（`MISSING`）・Pages未反映（`PAGES_STALE`）・lock不一致のいずれかで `delivery-watchdog` ラベルのissueを作成/追記する（GITHUB_TOKENのみ使用・常時open 1件・回復時自動close）。利用上限等でセッションが無言で死んだ場合もこの層が検知する。
-- **通知の冪等化**：`publish.py --notify` は送信前にローカルHEADと `origin/main` の一致を検証し、push未達（非fast-forward敗者を含む）なら未送信のまま非ゼロ終了する＝二重メールを構造的に防ぐ。
+- **通知の冪等化**：`publish.py --notify` は送信前にローカルHEADと `origin/main` の一致を最大5分待って検証する。direct/fallbackの勝者だけが一致し、push未達・非fast-forward敗者・Actions拒否は未送信のまま非ゼロ終了する＝二重メールを構造的に防ぐ。
 - **明示的な残存リスク**：Gmail送達自体の外部検証は行わない（失敗通知と同一チャネルで循環するため。公開・Pages配信は完了済みで影響は通知メールのみ。ルーチンの非ゼロ終了とclaude.aiプッシュ通知で検知する）。
 
 ## 関連

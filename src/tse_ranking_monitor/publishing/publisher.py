@@ -293,14 +293,18 @@ def build(data, docs_dir):
     write_index(docs_dir)
 
 
-def _verify_pushed_head(repo_root=None):
-    """Require the local HEAD to be exactly the commit origin/main serves.
+def _verify_pushed_head(repo_root=None, timeout=0, interval=10):
+    """Wait for local HEAD to become exactly the commit origin/main serves.
 
     Binding the notification to a successfully pushed HEAD makes the losing
     run of a push race (non-fast-forward reject) structurally unable to send
     an email for content Pages will never serve.  A third-party commit landing
     between push and notify also fails here — a safe unsent-nonzero exit
     instead of notifying for state that is no longer what main serves.
+
+    A zero timeout preserves the former one-shot verifier for callers and
+    tests.  The notification CLI supplies a five-minute timeout so the
+    GitHub Actions fallback can validate and promote a ``claude/*`` branch.
     """
     cwd = str(repo_root) if repo_root else None
     try:
@@ -308,27 +312,61 @@ def _verify_pushed_head(repo_root=None):
             ["git", "rev-parse", "HEAD"],
             cwd=cwd, capture_output=True, text=True, check=True, timeout=60,
         ).stdout.strip()
-        remote = subprocess.run(
-            ["git", "ls-remote", "origin", "main"],
-            cwd=cwd, capture_output=True, text=True, check=True, timeout=60,
-        ).stdout.split()
     except (OSError, subprocess.SubprocessError) as exc:
         raise PublishError(
             f"cannot verify pushed HEAD before notify: {exc}"
         ) from exc
-    remote_head = remote[0] if remote else ""
-    if not head or not remote_head:
-        raise PublishError("cannot verify pushed HEAD before notify: empty git output")
-    if head != remote_head:
-        raise PublishError(
-            "local HEAD %s is not what origin/main serves (%s); "
-            "the push must succeed before the notification email"
-            % (head[:12], remote_head[:12])
+    if not head:
+        raise PublishError("cannot verify pushed HEAD before notify: empty local HEAD")
+
+    deadline = time.monotonic() + max(0, timeout)
+    checks = 0
+    last_detail = "origin/main has not been checked"
+    while True:
+        checks += 1
+        try:
+            remote = subprocess.run(
+                ["git", "ls-remote", "origin", "main"],
+                cwd=cwd, capture_output=True, text=True, check=True, timeout=60,
+            ).stdout.split()
+            remote_head = remote[0] if remote else ""
+            if not remote_head:
+                last_detail = "empty origin/main output"
+            elif head == remote_head:
+                print(
+                    "  main confirmed: origin/main=%s (checks=%d)"
+                    % (head[:12], checks)
+                )
+                return None
+            else:
+                last_detail = "origin/main=%s local=%s" % (
+                    remote_head[:12], head[:12]
+                )
+        except (OSError, subprocess.SubprocessError) as exc:
+            if timeout <= 0:
+                raise PublishError(
+                    f"cannot verify pushed HEAD before notify: {exc}"
+                ) from exc
+            last_detail = "%s: %s" % (type(exc).__name__, exc)
+
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        print(
+            "  main not promoted yet (%s); wait %ss"
+            % (last_detail, interval)
         )
+        time.sleep(min(max(0, interval), remaining))
+
+    raise PublishError(
+        "origin/main did not reach local HEAD within %ss; email was not sent (%s)"
+        % (timeout, last_detail)
+    )
 
 
-def notify(input_path, docs_dir, pages_url, timeout=300, interval=10):
-    _verify_pushed_head()
+def notify(input_path, docs_dir, pages_url, timeout=300, interval=10,
+           main_timeout=300, main_interval=10):
+    _verify_pushed_head(timeout=main_timeout, interval=main_interval)
     data, expected_digest = _load_notification_artifact(input_path, docs_dir)
     print(
         f"Notify {data['session_date']} ({len(data.get('rows', []))} rows): "
@@ -368,6 +406,14 @@ def make_parser():
     )
     parser.add_argument("--live-timeout", type=int, default=300)
     parser.add_argument("--live-interval", type=int, default=10)
+    parser.add_argument(
+        "--main-timeout", type=int, default=300,
+        help="origin/main がローカルHEADへ到達するまで待つ秒数",
+    )
+    parser.add_argument(
+        "--main-interval", type=int, default=10,
+        help="origin/main の確認間隔（秒）",
+    )
     return parser
 
 
@@ -385,6 +431,8 @@ def main(argv=None):
                 args.pages_url,
                 timeout=args.live_timeout,
                 interval=args.live_interval,
+                main_timeout=args.main_timeout,
+                main_interval=args.main_interval,
             )
         else:
             build(_load_json(args.inp), args.docs)
