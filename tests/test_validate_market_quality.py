@@ -32,23 +32,6 @@ def test_rejects_missing_news_sources(market_golden):
     assert any("news_sources が空" in e for e in errs)
 
 
-# ── emph movers ──────────────────────────────────────────────
-def test_rejects_emph_mover_without_links(market_golden):
-    broken = copy.deepcopy(market_golden)
-    broken["movers"]["gainers"].append(
-        {"code": "9998", "name": "テスト", "note": "需給で急伸。", "emph": True, "links": []})
-    errs = vmq.check_doc(broken)
-    assert any("movers.gainers" in e and "emph=true" in e for e in errs)
-
-
-def test_allows_plain_mover_without_links(market_golden):
-    # emph 無し・精密主張無しの mover は links 空でも通る（薄商い小型の需給說明など）
-    doc = copy.deepcopy(market_golden)
-    doc["movers"]["gainers"].append(
-        {"code": "9998", "name": "テスト", "note": "需給で急伸。", "links": []})
-    assert vmq.check_doc(doc) == []
-
-
 # ── 禁止 URL（ランディングページ）──────────────────────────────
 @pytest.mark.parametrize("url", [
     "https://minkabu.jp/stock/9956",
@@ -83,15 +66,6 @@ def test_banned_url_in_body_markdown_rejected(market_golden):
     broken["overview"]["points"].append("急落した（[みんかぶ](https://minkabu.jp/stock/5706)）。")
     errs = vmq.check_doc(broken)
     assert any("overview.points" in e and "ランディングページ" in e for e in errs)
-
-
-def test_banned_url_in_mover_links_rejected(market_golden):
-    broken = copy.deepcopy(market_golden)
-    broken["movers"]["losers"].append(
-        {"code": "9997", "name": "テスト", "note": "反落。",
-         "links": [{"label": "みんかぶ", "url": "https://minkabu.jp/stock/9997"}]})
-    errs = vmq.check_doc(broken)
-    assert any("movers.losers" in e and "ランディングページ" in e for e in errs)
 
 
 # ── 精密主張トリガー ──────────────────────────────────────────
@@ -137,23 +111,6 @@ def test_fullwidth_trigger_normalized():
     assert any("TOB" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
 
 
-def test_mover_note_precise_claim_relaxed_by_entry_links(market_golden):
-    # movers は材料列にリンクが併記描画されるため、行の links がリンク付き言及として数えられる
-    doc = copy.deepcopy(market_golden)
-    doc["movers"]["gainers"].append(
-        {"code": "9996", "name": "テスト", "note": "証券会社の格下げ観測を跳ね返し急伸。",
-         "links": [{"label": "会社IR", "url": "https://example.com/ir.pdf"}]})
-    assert vmq.check_doc(doc) == []
-
-
-def test_mover_note_precise_claim_without_any_link_rejected(market_golden):
-    broken = copy.deepcopy(market_golden)
-    broken["movers"]["gainers"].append(
-        {"code": "9996", "name": "テスト", "note": "米系証券が格下げし急落。", "links": []})
-    errs = vmq.check_doc(broken)
-    assert any("格下げ" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
-
-
 def test_theme_matrix_row_link_in_background_suffices(market_golden):
     # theme セルにトリガー語が入っても background 側の文末リンクで満たせる（行単位判定）
     doc = copy.deepcopy(market_golden)
@@ -179,16 +136,6 @@ def test_rejects_duplicate_url_in_body(market_golden):
     broken["overview"]["flow"].append("引き続き材料視（[記事](https://example.com/dup)）。")
     errs = vmq.check_doc(broken)
     assert any("同一URLが本文に2回掲載" in e and "example.com/dup" in e for e in errs)
-
-
-def test_rejects_duplicate_url_between_body_and_mover_links(market_golden):
-    broken = copy.deepcopy(market_golden)
-    broken["overview"]["points"].append("材料視された（[記事](https://example.com/dup2)）。")
-    broken["movers"]["gainers"].append(
-        {"code": "9995", "name": "テスト", "note": "急伸。",
-         "links": [{"label": "記事", "url": "https://example.com/dup2"}]})
-    errs = vmq.check_doc(broken)
-    assert any("同一URLが本文に2回掲載" in e and "example.com/dup2" in e for e in errs)
 
 
 def test_allows_same_url_in_body_and_news_sources(market_golden):
@@ -261,14 +208,6 @@ def test_causal_word_with_own_data_no_warn(market_golden):
     # 加重・中央値・売買代金など自データの定量文脈が同一要素にあれば検証可能として免除
     doc = copy.deepcopy(market_golden)
     doc["overview"]["points"].append("加重+9.86%は同社1銘柄が押し上げた歪み。")
-    assert vmq.check_warnings(doc) == []
-
-
-def test_causal_word_in_mover_with_links_no_warn(market_golden):
-    doc = copy.deepcopy(market_golden)
-    doc["movers"]["gainers"].append(
-        {"code": "9994", "name": "テスト", "note": "同業の物色を主導。",
-         "links": [{"label": "記事", "url": "https://example.com/lead"}]})
     assert vmq.check_warnings(doc) == []
 
 
@@ -366,31 +305,17 @@ def test_cli_exit_codes(market_golden, tmp_path, capsys):
 
 
 # ── machine findings / claim-scoped repair ───────────────────
-def test_precise_claim_is_scoped_to_each_mover(market_golden):
-    doc = copy.deepcopy(market_golden)
-    doc["movers"]["losers"].extend([
-        {"code": "9001", "name": "銘柄A", "note": "証券会社が格下げ。",
-         "links": [{"label": "記事", "url": "https://example.com/a-rating"}]},
-        {"code": "9002", "name": "銘柄B", "note": "別の証券会社が格下げ。", "links": []},
-    ])
-    findings = vmq.audit_doc(doc)
-    assert any(item["rule_id"] == "MKT_PRECISE_CLAIM_SOURCE" and item["code"] == "9002"
-               for item in findings)
-    assert not any(item["rule_id"] == "MKT_PRECISE_CLAIM_SOURCE" and item["code"] == "9001"
-                   for item in findings)
-
-
 def test_machine_findings_have_stable_shape_and_repair_target(market_golden):
-    doc = copy.deepcopy(market_golden)
-    doc["movers"]["gainers"][0]["links"] = []
-    findings = vmq.audit_doc(doc)
-    emph = next(item for item in findings if item["rule_id"] == "MKT_EMPH_LINK_REQUIRED")
-    assert set(emph) == {"code", "path", "rule_id", "severity", "message"}
-    assert emph["severity"] == "ERROR"
-    assert vmq.select_repair_targets([emph]) == [{
-        "code": emph["code"], "path": emph["path"],
-        "rule_ids": ["MKT_EMPH_LINK_REQUIRED"], "severities": ["ERROR"],
-        "messages": [emph["message"]],
+    broken = copy.deepcopy(market_golden)
+    broken["news_sources"][0]["links"] = []
+    findings = vmq.audit_doc(broken)
+    item = next(f for f in findings if f["rule_id"] == "MKT_NEWS_SOURCE_LINK_REQUIRED")
+    assert set(item) == {"code", "path", "rule_id", "severity", "message"}
+    assert item["severity"] == "ERROR"
+    assert vmq.select_repair_targets([item]) == [{
+        "code": item["code"], "path": item["path"],
+        "rule_ids": ["MKT_NEWS_SOURCE_LINK_REQUIRED"], "severities": ["ERROR"],
+        "messages": [item["message"]],
     }]
 
 

@@ -83,10 +83,10 @@ table.kv td.k{color:var(--sub);font-size:12px;letter-spacing:.06em;white-space:n
 .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .pdown{font-family:Arial,sans-serif;text-align:right;white-space:nowrap;color:var(--down);font-weight:600;}
 /* セクター騰落率の主導銘柄列（加重寄与の上位1〜2銘柄＝その日のセクター騰落のドライバー。
-   複数該当は .drvrow で1銘柄=1行に分ける。銘柄名の省略（ellipsis）は厳禁＝常に全文表示し、
-   列幅は騰落率を銘柄名の下段に置くことで抑える） */
+   「銘柄名（騰落率）」を1行に集約表示し、複数該当時のみ .drvrow で1銘柄=1行に分ける
+   （2026-07-16）。銘柄名の省略（ellipsis）は厳禁＝常に全文表示する。 */
 td.drv{white-space:nowrap;}
-td.drv .drvpct{display:block;font-size:11.5px;margin:1px 0 0;text-align:left;}
+td.drv .drvpct{font-size:11.5px;}
 td.drv .drvrow+.drvrow{margin-top:5px;}
 .barcell{min-width:150px;}
 .barwrap{position:relative;height:9px;background:transparent;border-radius:0;margin-top:4px;}
@@ -157,12 +157,12 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
  table.kv td.v{font-size:15px;white-space:normal;margin-top:2px;}
  table.kv td.n{font-size:11.5px;margin-top:2px;}
  /* セクター騰落率：上昇/下落・売買代金列を隠し 業種+銘柄+騰落率+バー を画面幅に収める。
-    銘柄名は省略せず、長い名前は折返しで全文表示する */
+    銘柄名は省略せず、PC/SPとも「銘柄名（騰落率）」を1行で表示する（2026-07-16。
+    はみ出す場合は .tscroll の横スクロールに委ねる） */
  table.sec33 th:nth-child(5),table.sec33 td:nth-child(5),table.sec33 th:nth-child(6),table.sec33 td:nth-child(6){display:none;}
  #viewMarket table.sec33 th{padding:7px 6px;}
  #viewMarket table.sec33 td{padding:7px 6px;font-size:12.5px;}
  table.sec33 .barcell{min-width:56px;}
- table.sec33 td.drv{white-space:normal;}
  /* テーマ別資金フロー：カード状に積み上げ（badge+テーマ → 銘柄 → 背景） */
  table.mmatrix,table.mmatrix tbody,table.mmatrix tr,table.mmatrix td{display:block;width:100%;}
  table.mmatrix thead{display:none;}
@@ -174,17 +174,6 @@ blockquote.mthesis li::before{content:'—';position:absolute;left:-1.15em;color
  .mmatrix td.thmcol{display:inline;margin-left:8px;}
  .mmatrix th.bgcol,.mmatrix td.factor{width:auto;}
  .mmatrix td.stkcol{min-width:0;}
- /* 注目個別銘柄：カード状に積み上げ（コード+銘柄+前日比 → 材料） */
- table.mvtbl,table.mvtbl tbody,table.mvtbl tr,table.mvtbl td{display:block;width:100%;}
- table.mvtbl thead{display:none;}
- table.mvtbl tr{padding:10px 0;border-bottom:1px solid var(--hairline);}
- table.mvtbl tr:last-child{border-bottom:0;}
- #viewMarket table.mvtbl td{border-bottom:0;padding:1px 0;}
- table.mvtbl td.code,table.mvtbl td.name{display:inline;width:auto;font-size:14px;}
- table.mvtbl td.name{font-weight:700;margin-left:6px;white-space:normal;}
- table.mvtbl td.pct,table.mvtbl td.pdown{display:inline;width:auto;margin-left:8px;text-align:left;font-size:14px;}
- table.mvtbl td.num{display:none;}
- table.mvtbl .factor{min-width:0;margin-top:4px;}
 }
 </style></head>
 <body>
@@ -339,27 +328,13 @@ function sectorBars(sectors){
        build_market_stats.py sector_drivers）。複数該当時は1銘柄=1行で併記し、
        drivers の無い過去データは「—」表示（後方互換）。 */
     var ds=asArr(s.drivers);
-    var drv=ds.length?ds.map(function(d){return '<div class="drvrow"><a class="drvname" href="https://kabutan.jp/stock/?code='+esc(fmtCode(d.code))+'" target="_blank" rel="noopener">'+esc(d.name)+'</a><span class="drvpct '+pctClass(d.pct)+'">'+pctStr(d.pct)+'</span></div>';}).join(''):'—';
+    var drv=ds.length?ds.map(function(d){return '<div class="drvrow"><a class="drvname" href="https://kabutan.jp/stock/?code='+esc(fmtCode(d.code))+'" target="_blank" rel="noopener">'+esc(d.name)+'</a><span class="drvpct '+pctClass(d.pct)+'">（'+pctStr(d.pct)+'）</span></div>';}).join(''):'—';
     h+='<tr><td>'+esc(s.name)+'</td>'+
       '<td class="drv">'+drv+'</td>'+
       '<td class="'+pctClass(w)+'">'+pctStr(w)+'</td>'+
       '<td class="barcell">'+bar+'</td>'+
       '<td class="num">'+s.up+' / '+s.down+'</td>'+
       '<td class="num">'+fmtTurnover(s.turnover_oku)+'</td></tr>';
-  });
-  return h+'</tbody></table></div>';
-}
-function moverRows(list){
-  var h='<div class="tscroll"><table class="mvtbl"><thead><tr><th>コード</th><th>銘柄</th><th class="r">前日比</th><th class="r">売買代金<br>(億円)</th><th>材料</th></tr></thead><tbody>';
-  asArr(list).forEach(function(m){
-    var code=fmtCode(m.code);
-    var links=asArr(m.links).map(function(l){return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.label)+'</a>';}).join('　');
-    var note=mdInline(m.note||'')+(links?' <span style="color:var(--sub)">（'+links+'）</span>':'');
-    h+='<tr><td class="code"><a href="https://kabutan.jp/stock/?code='+esc(code)+'" target="_blank" rel="noopener">'+esc(code)+'</a></td>'+
-      '<td class="name">'+(m.emph?'<strong>'+esc(m.name)+'</strong>':esc(m.name))+'</td>'+
-      '<td class="'+pctClass(m.pct)+'">'+pctStr(m.pct)+'</td>'+
-      '<td class="num">'+fmtTurnover(m.turnover_oku)+'</td>'+
-      '<td class="factor">'+note+'</td></tr>';
   });
   return h+'</tbody></table></div>';
 }
@@ -417,13 +392,6 @@ function renderMarket(){
   h+=themeSection(d.theme_matrix);
   if(d.sectors33&&d.sectors33.length){
     h+='<div class="msec"><h2>セクター騰落率（東証33業種・売買代金加重）</h2>'+sectorBars(d.sectors33)+'</div>';
-  }
-  var mv=d.movers||{};
-  if((mv.gainers&&mv.gainers.length)||(mv.losers&&mv.losers.length)){
-    h+='<div class="msec"><h2>注目個別銘柄と材料</h2>';
-    if(mv.gainers&&mv.gainers.length){h+='<div class="thead-note" style="font-size:14px;margin-bottom:4px"><span class="mk mk-buy"></span>買われた銘柄</div>'+moverRows(mv.gainers);if(mv.gainers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.gainers_footnote)+'</div>';}
-    if(mv.losers&&mv.losers.length){h+='<div class="thead-note" style="font-size:14px;margin:14px 0 4px"><span class="mk mk-sell"></span>売られた銘柄</div>'+moverRows(mv.losers);if(mv.losers_footnote)h+='<div class="mfoot"><span class="fnmark">※</span> '+mdInline(mv.losers_footnote)+'</div>';}
-    h+='</div>';
   }
   h+='<div class="msec"><details><summary class="msum">データ・手法・出典</summary>';
   var me=d.methodology||{};

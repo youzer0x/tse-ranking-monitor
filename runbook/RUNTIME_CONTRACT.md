@@ -50,7 +50,7 @@ python scripts/build_market_stats.py --date <S> --out-dir .work/<S>/market
 python scripts/build_market_brief.py --ranking .work/<S>/ranking.json --evidence .work/<S>/research/evidence.json --stats .work/<S>/market/market_stats_<S>.json --out .work/<S>/market/market_brief_<S>.json
 ```
 
-`market_brief_<S>.json` だけを根拠パックとして `.work/<S>/market/narrative_<S>.json` をである調で執筆する。値上がり側moverはbrief内のaccepted evidenceを再利用し、再調査しない。値下がり側だけを `movers_context → 株探の具体記事 → Web一次記事` の順で必要最小限に調べる。個人発信、検索要約、銘柄トップ等のlanding pageは出典にしない。当日15:30以降の材料を日中要因にしない。
+`market_brief_<S>.json` だけを根拠パックとして `.work/<S>/market/narrative_<S>.json` をである調で執筆する。`accepted_evidence[]` は `code` ごとの `market_note`・claim・参照先sourceの対応であり、claimの `source_ids` が指す同一要素内のsourceだけを根拠に使う（コードをまたいで出典を推測しない）。個別銘柄movers（値上がり/値下がり）は調査・執筆・出力しない（2026-07-16廃止）。個人発信、検索要約、銘柄トップ等のlanding pageは出典にしない。当日15:30以降の材料を日中要因にしない。
 
 ```text
 python scripts/build_market_json.py --date <S> --csv-dir .work/<S>/market --stats .work/<S>/market/market_stats_<S>.json --defaults scripts/market_fragment_defaults.json --narrative .work/<S>/market/narrative_<S>.json --out docs/data/<S>_market.json
@@ -69,7 +69,9 @@ git push origin HEAD:main
 python scripts/publish.py --in .work/<S>/ranking.json --docs docs --pages-url "$PAGES_URL" --notify
 ```
 
-`.work/`、reports、認証情報をcommitしない。push前に通知しない。`--notify` がPages上の当日artifact digestとローカル公開物の一致を確認できない場合、Gmail認証不足またはAPI失敗の場合は未送信のまま非ゼロ終了する。
+`git push origin HEAD:main` がクラウドのbranch制限を含む理由で失敗した場合、その失敗だけでは停止・失敗通知せず、`git push origin HEAD` で現在の `claude/*` branchへ同じcommitをpushする。読み取り専用の `.github/workflows/validate-routine-publication.yml` が候補を検証し、main上の信頼済み `.github/workflows/promote-routine-publication.yml` が同じ候補を再検証する。現行mainの直系・単一commit、公開パス限定、manifest digest一致の場合だけmainへfast-forwardしてPages buildを要求する。`--notify` はローカルHEADがorigin/mainへ到達するまで最大5分、その後Pages上の当日artifact digest一致まで最大5分待つ。
+
+`.work/`、reports、認証情報をcommitしない。push前に通知しない。直接pushとfallbackの両方が未達、Pages digest不一致、Gmail認証不足またはAPI失敗の場合は未送信のまま非ゼロ終了する。直接push拒否後にfallbackが成功した場合は正常配信として扱う。
 
 ## 5. 最終報告
 

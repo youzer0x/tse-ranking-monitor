@@ -310,6 +310,27 @@ def test_verify_pushed_head_rejects_unpushed_or_raced_head(monkeypatch):
         pub._verify_pushed_head()
 
 
+def test_verify_pushed_head_waits_for_actions_promotion(monkeypatch):
+    remote = iter([
+        "b" * 40 + "\trefs/heads/main\n",
+        "a" * 40 + "\trefs/heads/main\n",
+    ])
+
+    def run(args, **_kwargs):
+        class _Completed:
+            stdout = (
+                "a" * 40 + "\n"
+                if tuple(args) == ("git", "rev-parse", "HEAD")
+                else next(remote)
+            )
+        return _Completed()
+
+    monkeypatch.setattr(pub._implementation.subprocess, "run", run)
+    monkeypatch.setattr(pub._implementation.time, "sleep", lambda _seconds: None)
+
+    assert pub._verify_pushed_head(timeout=1, interval=0) is None
+
+
 def test_verify_pushed_head_fails_closed_on_git_error(monkeypatch):
     import subprocess
 
