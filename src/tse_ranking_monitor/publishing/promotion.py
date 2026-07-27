@@ -25,6 +25,12 @@ MARKET_PATH_RE = re.compile(r"^docs/data/(\d{4}-\d{2}-\d{2})_market\.json$")
 MANIFEST_PATH = "docs/data/manifest.json"
 INDEX_PATH = "docs/index.html"
 
+# ``publisher.cleanup_old`` prunes artifacts older than 30 days, so a healthy
+# candidate drops one business day at a time.  A generous ceiling still lets a
+# multi-week publication outage drain in one commit while refusing the mass
+# deletion that a mis-set ``keep_days`` or a broken prune loop would produce.
+MAX_PRUNED_SESSIONS = 15
+
 
 class PromotionError(RuntimeError):
     """A fail-closed reason why a routine commit must not reach ``main``."""
@@ -39,6 +45,7 @@ class PromotionCandidate:
     session: str
     status: str
     changed_paths: tuple[str, ...]
+    deleted_paths: tuple[str, ...] = ()
 
 
 def _git(repo_root, args, *, binary=False):
@@ -88,7 +95,9 @@ def _changed_files(repo_root, parent_sha, head_sha):
     entries = []
     for line in output.splitlines():
         fields = line.split("\t")
-        if len(fields) != 2 or fields[0] not in {"A", "M"}:
+        # Two fields only: rename/copy records carry a third path and must stay
+        # rejected, because promotion reasons about a fixed set of literal paths.
+        if len(fields) != 2 or fields[0] not in {"A", "M", "D"}:
             raise PromotionError("unsupported changed-path record: %r" % line)
         entries.append((fields[0], fields[1]))
     if not entries:
@@ -113,6 +122,81 @@ def _manifest_dates(manifest, label):
     if len(dates) != len(set(dates)) or dates != sorted(dates, reverse=True):
         raise PromotionError("%s manifest dates must be unique and descending" % label)
     return dates
+
+
+def _pruned_sessions(deleted_paths):
+    """Return the session dates whose artifacts a candidate deletes.
+
+    Retention pruning (``publisher.cleanup_old``) is the only deletion a
+    publication commit may carry, so every deleted path must be a dated
+    artifact -- deleting ``docs/index.html`` or the manifest is never pruning --
+    and a market sidecar may only go with its own ranking.
+    """
+    ranking_dates = set()
+    market_dates = set()
+    for path in sorted(deleted_paths):
+        ranking = RANKING_PATH_RE.fullmatch(path)
+        if ranking:
+            ranking_dates.add(ranking.group(1))
+            continue
+        market = MARKET_PATH_RE.fullmatch(path)
+        if market:
+            market_dates.add(market.group(1))
+            continue
+        raise PromotionError("candidate deletes a non-artifact path: %s" % path)
+
+    orphaned = sorted(market_dates - ranking_dates)
+    if orphaned:
+        raise PromotionError(
+            "candidate deletes market sidecars whose ranking survives: %s" % ", ".join(orphaned)
+        )
+    if len(ranking_dates) > MAX_PRUNED_SESSIONS:
+        raise PromotionError(
+            "candidate prunes %d sessions, above the %d limit"
+            % (len(ranking_dates), MAX_PRUNED_SESSIONS)
+        )
+    return ranking_dates
+
+
+def _check_pruning(pruned, session, dates, parent_dates, manifest):
+    """Prove the candidate manifest is exactly the parent plus the new session
+    minus the pruned tail.
+
+    ``update_manifest`` rebuilds ``dates``/``artifacts`` from the files left on
+    disk, so a healthy publication satisfies this by construction.  Enforcing it
+    keeps an untrusted branch from silently dropping a session it still lists,
+    from punching a hole in the middle of the retained window, or from smuggling
+    manifest edits past the per-path checks.
+    """
+    if pruned:
+        unknown = sorted(pruned - set(parent_dates))
+        if unknown:
+            raise PromotionError(
+                "candidate prunes sessions the parent manifest never listed: %s" % ", ".join(unknown)
+            )
+        still_listed = sorted(pruned & set(dates))
+        if still_listed:
+            raise PromotionError(
+                "candidate manifest still lists pruned sessions: %s" % ", ".join(still_listed)
+            )
+        artifacts = manifest.get("artifacts")
+        if isinstance(artifacts, dict):
+            stale = sorted(pruned & set(artifacts))
+            if stale:
+                raise PromotionError(
+                    "candidate manifest still holds artifacts for pruned sessions: %s"
+                    % ", ".join(stale)
+                )
+        if pruned != set(parent_dates[-len(pruned):]):
+            raise PromotionError(
+                "candidate may prune only the oldest sessions: %s" % ", ".join(sorted(pruned))
+            )
+
+    expected = sorted((set(parent_dates) | {session}) - pruned, reverse=True)
+    if dates != expected:
+        raise PromotionError(
+            "candidate manifest dates do not reconcile with the parent manifest and pruning"
+        )
 
 
 def verify_candidate(repo_root, branch, head, base="origin/main"):
@@ -146,6 +230,8 @@ def verify_candidate(repo_root, branch, head, base="origin/main"):
     changed = {path: change for change, path in entries}
     if changed.get(MANIFEST_PATH) != "M":
         raise PromotionError("candidate must modify docs/data/manifest.json")
+    deleted = {path for path, change in changed.items() if change == "D"}
+    pruned = _pruned_sessions(deleted)
 
     message = _git(repo_root, ["show", "-s", "--format=%s", head_sha]).strip()
     match = re.fullmatch(r"Update TSE day gainers (\d{4}-\d{2}-\d{2})", message)
@@ -157,7 +243,10 @@ def verify_candidate(repo_root, branch, head, base="origin/main"):
         raise PromotionError("candidate must add or update %s" % ranking_path)
     market_path = "docs/data/%s_market.json" % session
     session_paths = {INDEX_PATH, MANIFEST_PATH, ranking_path, market_path}
-    other_sessions = [path for path in changed if path not in session_paths]
+    # Pruned artifacts are validated as a set by _pruned_sessions/_check_pruning.
+    # Every other path must belong to the session named by the commit message, so
+    # rewriting a historical publication stays rejected.
+    other_sessions = [path for path in changed if path not in session_paths and path not in deleted]
     if other_sessions:
         raise PromotionError(
             "candidate changes files outside the named session: %s"
@@ -173,6 +262,7 @@ def verify_candidate(repo_root, branch, head, base="origin/main"):
     parent_dates = _manifest_dates(parent_manifest, "parent")
     if session in parent_dates or session <= parent_dates[0]:
         raise PromotionError("candidate session must be newer than the parent manifest")
+    _check_pruning(pruned, session, dates, parent_dates, manifest)
 
     ranking, ranking_bytes = _json_at(repo_root, head_sha, ranking_path)
     try:
@@ -207,4 +297,5 @@ def verify_candidate(repo_root, branch, head, base="origin/main"):
         session=session,
         status=status,
         changed_paths=tuple(path for _change, path in entries),
+        deleted_paths=tuple(sorted(deleted)),
     )

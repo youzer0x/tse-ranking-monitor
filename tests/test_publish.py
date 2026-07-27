@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -55,6 +56,52 @@ def test_build_writes_versioned_digest_manifest_and_no_email_html(tmp_path):
     )
     assert (docs / "index.html").read_text(encoding="utf-8") == pub.render.generate_pages_html()
     assert not list((docs / "data").glob("*_email.html"))
+
+
+def test_cleanup_old_prunes_ranking_and_market_sidecar_past_retention(tmp_path):
+    """The `D` records the promotion verifier must accept originate here.
+
+    ``today`` is passed explicitly so the assertion never depends on the day the
+    suite runs.
+    """
+    docs = tmp_path / "docs"
+    data_dir = docs / "data"
+    data_dir.mkdir(parents=True)
+    for name in (
+        "2026-06-20.json",
+        "2026-06-20_market.json",
+        "2026-06-27.json",
+        "2026-07-15.json",
+        "2026-07-15_market.json",
+        "manifest.json",
+        "notes.txt",
+    ):
+        (data_dir / name).write_text("{}", encoding="utf-8")
+
+    pub.cleanup_old(docs, keep_days=30, today=date(2026, 7, 20))
+
+    remaining = sorted(path.name for path in data_dir.iterdir())
+    # cutoff is 2026-06-20, and the comparison is strict, so that date survives.
+    assert remaining == [
+        "2026-06-20.json",
+        "2026-06-20_market.json",
+        "2026-06-27.json",
+        "2026-07-15.json",
+        "2026-07-15_market.json",
+        "manifest.json",
+        "notes.txt",
+    ]
+
+    pub.cleanup_old(docs, keep_days=30, today=date(2026, 7, 21))
+
+    remaining = sorted(path.name for path in data_dir.iterdir())
+    assert remaining == [
+        "2026-06-27.json",
+        "2026-07-15.json",
+        "2026-07-15_market.json",
+        "manifest.json",
+        "notes.txt",
+    ]
 
 
 def test_manifest_excludes_market_sidecar(tmp_path):
