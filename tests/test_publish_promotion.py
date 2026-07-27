@@ -63,20 +63,35 @@ def _manifest(data_dir, dates):
     return {"schema_version": 1, "dates": dates, "artifacts": artifacts}
 
 
-def _repo_with_candidate(tmp_path):
+def _repo_with_candidate(tmp_path, history=("2026-07-16",), market_history=()):
+    """Build a repo whose claude/* branch holds one publication commit.
+
+    ``history`` seeds the parent manifest newest-first so retention-pruning
+    cases have an older tail to drop; ``market_history`` additionally seeds
+    market sidecars for those dates.
+    """
+    history = list(history)
     repo = tmp_path / "repo"
     repo.mkdir()
     _run(repo, "init", "-b", "main")
     _run(repo, "config", "user.name", "Test")
     _run(repo, "config", "user.email", "test@example.com")
     data_dir = repo / "docs" / "data"
-    _write_json(data_dir / "2026-07-16.json", _ranking("2026-07-16"))
-    _write_json(data_dir / "manifest.json", _manifest(data_dir, ["2026-07-16"]))
+    for session in history:
+        _write_json(data_dir / (session + ".json"), _ranking(session))
+    for session in market_history:
+        _write_json(data_dir / (session + "_market.json"), {
+            "schema_version": 1,
+            "session_date": session,
+        })
+    _write_json(data_dir / "manifest.json", _manifest(data_dir, history))
+    (repo / "docs" / "index.html").write_text("<html>base</html>\n", encoding="utf-8")
     _run(repo, "add", "docs")
     _run(repo, "commit", "-m", "base")
     base = _run(repo, "rev-parse", "HEAD")
 
     _run(repo, "switch", "-c", "claude/test-session")
+    (repo / "docs" / "index.html").write_text("<html>2026-07-17</html>\n", encoding="utf-8")
     _write_json(data_dir / "2026-07-17.json", _ranking("2026-07-17"))
     _write_json(data_dir / "2026-07-17_market.json", {
         "schema_version": 1,
@@ -84,12 +99,30 @@ def _repo_with_candidate(tmp_path):
     })
     _write_json(
         data_dir / "manifest.json",
-        _manifest(data_dir, ["2026-07-17", "2026-07-16"]),
+        _manifest(data_dir, ["2026-07-17"] + history),
     )
     _run(repo, "add", "docs")
     _run(repo, "commit", "-m", "Update TSE day gainers 2026-07-17")
     head = _run(repo, "rev-parse", "HEAD")
     return repo, base, head
+
+
+def _prune(repo, sessions, remaining):
+    """Delete the given sessions' artifacts and re-commit the amended candidate.
+
+    Mirrors ``publisher.cleanup_old`` + ``update_manifest``: the files go, then
+    the manifest is rebuilt from what is left on disk.
+    """
+    data_dir = repo / "docs" / "data"
+    for session in sessions:
+        (data_dir / (session + ".json")).unlink()
+        sidecar = data_dir / (session + "_market.json")
+        if sidecar.exists():
+            sidecar.unlink()
+    _write_json(data_dir / "manifest.json", _manifest(data_dir, remaining))
+    _run(repo, "add", "-A", "docs")
+    _run(repo, "commit", "--amend", "--no-edit")
+    return _run(repo, "rev-parse", "HEAD")
 
 
 def test_accepts_direct_child_docs_only_publication(tmp_path):
@@ -166,6 +199,101 @@ def test_rejects_rewriting_a_historical_publication(tmp_path):
     head = _run(repo, "rev-parse", "HEAD")
 
     with pytest.raises(promotion.PromotionError, match="outside the named session"):
+        promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+
+# --- retention pruning (publisher.cleanup_old emits `D` records) ---------------
+
+HISTORY = ["2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13"]
+
+
+def test_accepts_retention_pruning_of_the_oldest_sessions(tmp_path):
+    repo, base, _head = _repo_with_candidate(tmp_path, history=HISTORY)
+    head = _prune(repo, ["2026-07-13"], ["2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14"])
+
+    candidate = promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+    assert candidate.status == "ready"
+    assert candidate.session == "2026-07-17"
+    assert candidate.deleted_paths == ("docs/data/2026-07-13.json",)
+
+
+def test_accepts_pruning_ranking_and_market_sidecar_together(tmp_path):
+    repo, base, _head = _repo_with_candidate(
+        tmp_path, history=HISTORY, market_history=["2026-07-13"]
+    )
+    head = _prune(repo, ["2026-07-13"], ["2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14"])
+
+    candidate = promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+    assert candidate.deleted_paths == (
+        "docs/data/2026-07-13.json",
+        "docs/data/2026-07-13_market.json",
+    )
+
+
+def test_rejects_deleting_the_index_page(tmp_path):
+    repo, base, _head = _repo_with_candidate(tmp_path, history=HISTORY)
+    (repo / "docs" / "index.html").unlink()
+    _run(repo, "add", "-A", "docs")
+    _run(repo, "commit", "--amend", "--no-edit")
+    head = _run(repo, "rev-parse", "HEAD")
+
+    with pytest.raises(promotion.PromotionError, match="non-artifact path"):
+        promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+
+def test_rejects_pruning_a_session_still_inside_the_window(tmp_path):
+    repo, base, _head = _repo_with_candidate(tmp_path, history=HISTORY)
+    head = _prune(repo, ["2026-07-16"], ["2026-07-17", "2026-07-15", "2026-07-14", "2026-07-13"])
+
+    with pytest.raises(promotion.PromotionError, match="only the oldest sessions"):
+        promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+
+def test_rejects_pruning_that_punches_a_hole_in_the_window(tmp_path):
+    repo, base, _head = _repo_with_candidate(tmp_path, history=HISTORY)
+    head = _prune(repo, ["2026-07-15"], ["2026-07-17", "2026-07-16", "2026-07-14", "2026-07-13"])
+
+    with pytest.raises(promotion.PromotionError, match="only the oldest sessions"):
+        promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+
+def test_rejects_deleted_file_that_the_manifest_still_lists(tmp_path):
+    repo, base, _head = _repo_with_candidate(tmp_path, history=HISTORY)
+    data_dir = repo / "docs" / "data"
+    stale = json.loads((data_dir / "manifest.json").read_text(encoding="utf-8"))
+    (data_dir / "2026-07-13.json").unlink()
+    _write_json(data_dir / "manifest.json", stale)  # manifest keeps the pruned date
+    _run(repo, "add", "-A", "docs")
+    _run(repo, "commit", "--amend", "--no-edit")
+    head = _run(repo, "rev-parse", "HEAD")
+
+    with pytest.raises(promotion.PromotionError, match="still lists pruned sessions"):
+        promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+
+def test_rejects_deleting_a_market_sidecar_whose_ranking_survives(tmp_path):
+    repo, base, _head = _repo_with_candidate(
+        tmp_path, history=HISTORY, market_history=["2026-07-13"]
+    )
+    (repo / "docs" / "data" / "2026-07-13_market.json").unlink()
+    _run(repo, "add", "-A", "docs")
+    _run(repo, "commit", "--amend", "--no-edit")
+    head = _run(repo, "rev-parse", "HEAD")
+
+    with pytest.raises(promotion.PromotionError, match="ranking survives"):
+        promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+
+def test_rejects_pruning_more_sessions_than_the_limit(tmp_path):
+    history = ["2026-07-16"] + [
+        "2026-06-%02d" % day for day in range(30, 30 - promotion.MAX_PRUNED_SESSIONS - 1, -1)
+    ]
+    repo, base, _head = _repo_with_candidate(tmp_path, history=history)
+    head = _prune(repo, history[1:], ["2026-07-17", "2026-07-16"])
+
+    with pytest.raises(promotion.PromotionError, match="above the .* limit"):
         promotion.verify_candidate(repo, "claude/test-session", head, base)
 
 

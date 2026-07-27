@@ -32,15 +32,18 @@ def main(argv=None):
         print("NG: %s" % exc, file=sys.stderr)
         return 1
     print(
-        "OK: status=%s session=%s head=%s base=%s files=%d"
+        "OK: status=%s session=%s head=%s base=%s files=%d pruned=%d"
         % (
             candidate.status,
             candidate.session,
             candidate.head_sha,
             candidate.base_sha,
             len(candidate.changed_paths),
+            len(candidate.deleted_paths),
         )
     )
+    if candidate.deleted_paths:
+        print("   pruned paths: %s" % ", ".join(candidate.deleted_paths))
     return 0
 
 
