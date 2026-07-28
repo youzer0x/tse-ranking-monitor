@@ -22,7 +22,10 @@ from ..contracts import (
     RANKING_SCHEMA_VERSION,
     validate_ranking_document,
 )
+from ..runtime import status as run_status
 from . import gmail, render
+
+ROOT = Path(__file__).resolve().parents[3]
 
 JST = timezone(timedelta(hours=9), name="JST")
 RANKING_FILE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
@@ -382,6 +385,29 @@ def notify(input_path, docs_dir, pages_url, timeout=300, interval=10,
     )
     email_html = render.generate_email_html(data, pages_url)
     send_email(data, email_html)
+    mark_delivered(data["session_date"])
+
+
+def mark_delivered(session, root=None):
+    """Record that the session was delivered end to end.
+
+    This sentinel is the only machine-checked evidence of a completed delivery.
+    Stage names are chosen freely by the routine, so completion cannot be
+    inferred from them -- the end-of-session guard keys on this file to decide
+    whether silence means success or a dead run.  Best-effort: a failure here
+    must not undo a delivery that already happened.
+    """
+    root = Path(root) if root else ROOT
+    try:
+        path = root / ".work" / str(session) / "telemetry" / ".delivered"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _atomic_write_text(path, run_status.utc_now() + "\n")
+    except OSError as exc:
+        print(f"[publish] WARN could not record delivery sentinel: {exc}", file=sys.stderr)
+        return None
+    run_status.publish_status_quietly(
+        root, run_status.collect_status(root, session, delivered=True))
+    return path
 
 
 def make_parser():

@@ -42,6 +42,8 @@ if str(SCRIPTS_DIR) not in sys.path:
 import business_day
 import jquants
 
+from tse_ranking_monitor.runtime import telemetry
+
 JST = timezone(timedelta(hours=9))
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = ROOT / "docs" / "data" / "manifest.json"
@@ -130,6 +132,14 @@ def _ratio_str(info):
 def emit_session_and_exit(session_iso, warn=None):
     if warn:
         elog("[wait_for_data] WARN %s" % warn)
+    # Committing to a session is the one place every successful run passes
+    # through, so record it here.  Everything downstream (hook telemetry, the
+    # end-of-session guard, the durable status) resolves the session from this
+    # pointer instead of relying on the routine exporting an env var.
+    try:
+        telemetry.write_session_pointer(ROOT, session_iso)
+    except (OSError, ValueError) as exc:
+        elog("[wait_for_data] WARN セッションポインタの書き込みに失敗: %s" % exc)
     print("SESSION=%s" % session_iso)   # ← stdout（1トークン）
     return 0
 

@@ -18,6 +18,11 @@
             "type": "command",
             "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/runtime_telemetry.py\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/routine_guard.py\"",
+            "timeout": 60
           }
         ]
       }
@@ -74,6 +79,11 @@
             "type": "command",
             "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/runtime_telemetry.py\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/routine_guard.py\"",
+            "timeout": 60
           }
         ]
       }

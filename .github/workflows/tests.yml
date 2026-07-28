@@ -12,7 +12,9 @@ on:
       - "runbook/**"
       - "specs/**"
       - ".claude/agents/tse-factor-batch-researcher.md"
-      - ".claude/hooks/runtime_telemetry.py"
+      # Glob rather than per-file: the session-end guard lives here, and a new
+      # hook script must not be able to land without running the suite.
+      - ".claude/hooks/**"
       - ".claude/settings.json"
       - "docs/data/*_email.html"
       - "AGENTS.md"

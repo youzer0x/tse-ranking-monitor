@@ -31,6 +31,54 @@ def utc_now():
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
+def session_pointer_path(root):
+    """Return the path of the "which session is in flight" pointer.
+
+    Hook payloads carry the Claude session id, never the trading session, and
+    nothing exports ``TSE_SESSION``.  The gate therefore records the session it
+    selected so hook-driven telemetry can be attributed without depending on the
+    routine remembering to export anything.
+    """
+    return Path(root).resolve() / ".work" / "_runtime" / "current_session.json"
+
+
+def write_session_pointer(root, session, run_id=None, started_at=None):
+    """Record the in-flight session.  Returns the written path."""
+    if not _SESSION_DATE_RE.fullmatch(str(session)):
+        raise ValueError("session must be YYYY-MM-DD")
+    path = session_pointer_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": TELEMETRY_SCHEMA_VERSION,
+        "session": str(session),
+        "started_at": started_at or utc_now(),
+    }
+    if run_id:
+        payload["run_id"] = _safe_text(run_id, 128)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    os.replace(tmp, path)
+    return path
+
+
+def read_session_pointer(root):
+    """Return the in-flight session pointer, or ``None`` when unreadable.
+
+    Fails soft: a missing or corrupt pointer must never break telemetry or the
+    pipeline, it only costs session attribution.
+    """
+    try:
+        payload = json.loads(session_pointer_path(root).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    session = payload.get("session")
+    if not isinstance(session, str) or not _SESSION_DATE_RE.fullmatch(session):
+        return None
+    return payload
+
+
 def _json_size(value):
     if value is None:
         return 0
@@ -130,6 +178,14 @@ class TelemetryWriter:
         payload.setdefault("schema_version", TELEMETRY_SCHEMA_VERSION)
         payload.setdefault("timestamp", utc_now())
         selected_session = session_date or payload.get("session_date")
+        if not selected_session:
+            # Hook events never carry the trading session, so fall back to the
+            # pointer the gate wrote.  Stamping it keeps the line self-describing
+            # instead of stranding it in the session-less bucket.
+            pointer = read_session_pointer(self.root)
+            if pointer:
+                selected_session = pointer["session"]
+                payload["session_date"] = selected_session
         path = self.event_path(selected_session)
         path.parent.mkdir(parents=True, exist_ok=True)
         encoded = (
@@ -168,6 +224,38 @@ class TelemetryWriter:
             self.root / ".work" / str(session_date) / "telemetry"
             / (".%s.stage.json" % safe_stage)
         )
+
+    def unfinished_stages(self, session_date):
+        """Return ``[(stage, started_ns)]`` for stages started but never ended.
+
+        ``summarize_events`` can only report stages that finished, because
+        ``stages_ms`` is built from ``stage_end`` durations.  The start sentinel
+        is the only record of the stage a dead session was inside, since
+        ``record_stage(..., "end")`` is what deletes it.
+        """
+        directory = self.root / ".work" / str(session_date) / "telemetry"
+        found = []
+        try:
+            entries = sorted(directory.glob(".*.stage.json"))
+        except OSError:
+            return found
+        for path in entries:
+            stage = path.name[1:-len(".stage.json")]
+            started_ns = None
+            try:
+                started_ns = int(json.loads(path.read_text(encoding="utf-8"))["started_ns"])
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
+            found.append((stage, started_ns))
+        # Deepest-in-progress first: the most recently started stage is where the
+        # session actually was when it stopped.
+        found.sort(key=lambda item: (item[1] is None, -(item[1] or 0)))
+        return found
+
+    def last_unfinished_stage(self, session_date):
+        """Return the stage a session was inside, or ``None`` if all finished."""
+        stages = self.unfinished_stages(session_date)
+        return stages[0][0] if stages else None
 
     def record_stage(self, session_date, stage, phase, status=None):
         """Record a deterministic stage start/end and end-to-end duration."""

@@ -25,19 +25,16 @@ from . import gmail
 JST = timezone(timedelta(hours=9), name="JST")
 
 
-def load_telemetry_summary(work_dir, session):
-    """Summarize ``.work/<session>/telemetry/events.jsonl``; None if unavailable.
+def _read_events(path):
+    """Parse one JSONL telemetry file tolerantly.
 
-    Individual lines are parsed tolerantly: a torn or partial append (the file
-    is written concurrently by hooks) must not cost us the rest of the events.
+    A torn or partial append (the file is written concurrently by hooks) must
+    not cost us the rest of the events.
     """
-    if not session:
-        return None
-    path = Path(work_dir) / str(session) / "telemetry" / "events.jsonl"
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        lines = Path(path).read_text(encoding="utf-8").splitlines()
     except OSError:
-        return None
+        return []
     events = []
     for line in lines:
         line = line.strip()
@@ -49,8 +46,35 @@ def load_telemetry_summary(work_dir, session):
             continue
         if isinstance(event, dict):
             events.append(event)
+    return events
+
+
+def load_telemetry_summary(work_dir, session):
+    """Summarize this session's telemetry; None when there is none to report.
+
+    Reads BOTH sinks.  Stage markers land in ``.work/<session>/telemetry/`` but
+    hook events land in the session-less ``.work/_runtime/`` bucket, so reading
+    only the dated path made the report claim zero subagents and zero tools on
+    every run.
+
+    ``_runtime`` is a single unbounded file spanning every session, and
+    ``summarize_events`` counts an event whose ``session_date`` is absent against
+    whatever session it is given.  Only explicitly attributed lines are therefore
+    merged -- events written before the gate recorded the session stay excluded
+    rather than being misattributed to it.
+    """
+    if not session:
+        return None
+    work_dir = Path(work_dir)
+    events = _read_events(work_dir / str(session) / "telemetry" / "events.jsonl")
+    events += [
+        event
+        for event in _read_events(work_dir / "_runtime" / "events.jsonl")
+        if event.get("session_date") == str(session)
+    ]
     if not events:
         return None
+    events.sort(key=lambda event: str(event.get("timestamp") or ""))
     return summarize_events(events, session)
 
 
@@ -117,8 +141,8 @@ def main(argv=None):
     """Send one failure alert; returns 0 only when the send succeeded.
 
     Never raises: any failure (missing env, Gmail API error, unreadable
-    context files) is reported on stderr and mapped to exit 1 so the caller's
-    original failure handling stays in control.
+    context files, a malformed invocation) is reported on stderr and mapped to
+    exit 1 so the caller's original failure handling stays in control.
     """
     try:
         parser = argparse.ArgumentParser(description="配信失敗アラートメール（Layer B）")
@@ -141,6 +165,16 @@ def main(argv=None):
         )
         gmail.send_plain_email(subject, body)
         return 0
+    except SystemExit as exc:
+        # argparse raises SystemExit, which is a BaseException and would escape
+        # the handler below.  A misspelled flag must not be able to turn this
+        # alert into a silent no-op -- that is the failure mode this whole layer
+        # exists to remove.
+        if exc.code in (0, None):
+            return 0
+        print("[notify_failure] ERROR bad invocation (exit %s)" % (exc.code,),
+              file=sys.stderr, flush=True)
+        return 1
     except Exception as exc:  # noqa: BLE001 — alerting must never mask the failure
         print("[notify_failure] ERROR %s: %s" % (type(exc).__name__, exc),
               file=sys.stderr, flush=True)

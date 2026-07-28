@@ -11,6 +11,10 @@ already-completed business session.
 Output (stdout is exactly one token; diagnostics go to stderr):
   OK                       nothing missing (exit 0)
   MISSING=YYYY-MM-DD       the repository manifest lacks a completed session (exit 1)
+  STALLED=YYYY-MM-DD:stage=NAME
+                           same gap, but the durable run status proves a session
+                           started and never delivered -- i.e. it died part-way
+                           rather than never firing (exit 1)
   PAGES_STALE=YYYY-MM-DD   repo is current but the live Pages manifest is behind (exit 1)
   (no token)               unreadable/malformed manifest or bad --now (exit 2)
 
@@ -22,6 +26,8 @@ usage:
 from __future__ import annotations
 
 import argparse
+import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -74,12 +80,46 @@ def read_manifest_dates(path, label):
         raise ValueError("%s manifest invalid: %s" % (label, exc)) from exc
 
 
+_STAGE_SAFE_RE = re.compile(r"[^A-Za-z0-9_.-]+")
+
+
+def read_stalled_stage(path, session):
+    """Return the stage a started-but-undelivered run was inside.
+
+    ``None`` whenever the status cannot prove a stall: absent, unreadable, for a
+    different session, or already delivered.  Fails soft on purpose -- a bad
+    status file must degrade the alarm to plain ``MISSING``, never break it or
+    invent a stall.
+    """
+    if not path:
+        return None
+    try:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        elog("[watchdog] WARN 実行ステータスを読めない（MISSINGとして扱う）: %s" % exc)
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("session") != str(session):
+        elog("[watchdog] WARN ステータスのsession=%r は対象=%r と一致しない"
+             % (payload.get("session"), session))
+        return None
+    if payload.get("delivered"):
+        # The run says it delivered but the manifest disagrees: that is a
+        # publication problem, not a stall, so let MISSING/PAGES_STALE speak.
+        return None
+    stage = payload.get("died_at") or payload.get("last_stage") or "unknown"
+    return _STAGE_SAFE_RE.sub("-", str(stage))[:64] or "unknown"
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="日次配信の欠落判定（watchdog・ネット無し）")
     parser.add_argument("--manifest", default=str(gate.DEFAULT_MANIFEST),
                         help="リポジトリの公開manifest（既定 docs/data/manifest.json）")
     parser.add_argument("--live-manifest", default=None,
                         help="curlで取得済みの本番Pages manifestのローカルパス（任意）")
+    parser.add_argument("--status", default=None,
+                        help="routine-statusブランチから取り出した実行ステータスJSON（任意）")
     parser.add_argument("--now", default=None,
                         help="判定時刻 ISO-8601（テスト用。naiveはJSTと解釈。既定は現在UTC→JST）")
     args = parser.parse_args(argv)
@@ -106,6 +146,15 @@ def main(argv=None):
          % (now_jst.isoformat(), max(published, default=None)))
     missing = gate.select_target_session(now_jst, published)
     if missing is not None:
+        # An unpublished session covers two very different failures: the routine
+        # never fired, or it fired and died part-way.  The durable status is the
+        # only thing that can tell them apart, so STALLED refines MISSING here
+        # rather than competing with it.
+        stalled_stage = read_stalled_stage(args.status, missing.isoformat())
+        if stalled_stage:
+            elog("[watchdog] decision=STALLED（起動記録はあるが配信未完了）")
+            print("STALLED=%s:stage=%s" % (missing.isoformat(), stalled_stage))   # ← stdout
+            return 1
         elog("[watchdog] decision=MISSING（repo manifestに完了済みセッションが無い）")
         print("MISSING=%s" % missing.isoformat())   # ← stdout（1トークン）
         return 1

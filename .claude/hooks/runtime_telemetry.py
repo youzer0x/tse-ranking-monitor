@@ -22,6 +22,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from tse_ranking_monitor.runtime import status as run_status  # noqa: E402
 from tse_ranking_monitor.runtime.telemetry import (  # noqa: E402
     TelemetryWriter,
     compact_line,
@@ -59,6 +60,11 @@ def main(argv=None):
     path = writer.record_stage(args.session, args.name, args.phase, args.status)
     print("[routine-metrics] stage_%s session=%s stage=%s path=%s"
           % (args.phase, args.session, args.name, path.relative_to(ROOT)))
+    # Every stage boundary pushes the run's position somewhere outside .work/, so
+    # a session that is killed later still leaves a record of how far it got.
+    # Best-effort by design: observability must never block the pipeline.
+    run_status.publish_status_quietly(
+        ROOT, run_status.collect_status(ROOT, args.session))
     return 0
 
 
