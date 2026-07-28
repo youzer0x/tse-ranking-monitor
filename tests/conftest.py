@@ -18,6 +18,21 @@ import pytest
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
+@pytest.fixture(autouse=True)
+def isolated_runtime_root(tmp_path, monkeypatch):
+    """Keep session-pointer writes out of the real repository.
+
+    ``gate.emit_session_and_exit`` records the in-flight session under
+    ``<root>/.work``.  Tests that drive ``main()`` would otherwise write into the
+    developer's own checkout and leave a stale pointer claiming a session is
+    running, which the end-of-session guard would act on.
+    """
+    from tse_ranking_monitor import gate
+
+    monkeypatch.setattr(gate, "ROOT", tmp_path / "runtime-root")
+    return tmp_path / "runtime-root"
+
+
 @pytest.fixture
 def market_golden():
     """docs/data の実出力を凍結した market.json（validate_market の正常系サンプル）。

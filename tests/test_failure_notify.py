@@ -37,6 +37,53 @@ def _write_repair_targets(tmp_path):
     return path
 
 
+def _write_runtime_events(tmp_path, lines):
+    runtime_dir = tmp_path / "_runtime"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    (runtime_dir / "events.jsonl").write_text(
+        "\n".join(json.dumps(line) for line in lines) + "\n", encoding="utf-8")
+
+
+def test_telemetry_summary_merges_attributed_hook_events(tmp_path):
+    """Hook events land in the session-less _runtime bucket, so a report that
+    reads only the dated file claims zero subagents on every run."""
+    _write_events(tmp_path)
+    _write_runtime_events(tmp_path, [
+        {"event": "subagent_stop", "status": "completed", "session_date": "2026-07-15"},
+        {"event": "tool_end", "status": "completed", "session_date": "2026-07-15"},
+    ])
+
+    summary = nf.load_telemetry_summary(tmp_path, "2026-07-15")
+
+    assert summary["events"] == 4          # 2 dated + 2 attributed (torn line skipped)
+    assert summary["subagents"] == {"started": 1, "completed": 1}
+    assert summary["tools"] == {"completed": 1, "failed": 1}
+
+
+def test_telemetry_summary_excludes_other_sessions_and_unattributed_lines(tmp_path):
+    """_runtime is one unbounded file across every session, and summarize_events
+    counts session-less events against whatever session it is given."""
+    _write_events(tmp_path)
+    _write_runtime_events(tmp_path, [
+        {"event": "subagent_stop", "status": "completed", "session_date": "2026-07-14"},
+        {"event": "subagent_stop", "status": "completed"},   # no session at all
+    ])
+
+    summary = nf.load_telemetry_summary(tmp_path, "2026-07-15")
+
+    assert summary["events"] == 2
+    assert summary["subagents"] == {"started": 1, "completed": 0}
+
+
+def test_main_reports_a_malformed_invocation_instead_of_exiting_silently(capsys):
+    """argparse raises SystemExit, a BaseException; a misspelled flag must not
+    turn the alert into a no-op."""
+    assert nf.main(["--stage", "publish"]) == 1     # --reason missing
+
+    err = capsys.readouterr().err
+    assert "[notify_failure] ERROR" in err
+
+
 def test_build_failure_report_contains_all_context():
     telemetry = {
         "events": 12,

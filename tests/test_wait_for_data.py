@@ -163,3 +163,42 @@ def test_explicit_date_option_preserves_manual_override(monkeypatch, capsys):
 
     assert wfd.main() == 0
     assert capsys.readouterr().out.strip() == "SESSION=2026-07-14"
+
+
+def test_emitting_a_session_records_the_in_flight_pointer(
+    monkeypatch, capsys, isolated_runtime_root
+):
+    """The pointer is how hook telemetry and the end-of-session guard learn the
+    session; nothing exports it, so the gate must record it."""
+    monkeypatch.setenv("JQUANTS_API_KEY", "test")
+    monkeypatch.setattr(wfd._impl, "_prev_counts", lambda _date: ("2026-07-13", 100, 100))
+    monkeypatch.setattr(
+        wfd._impl, "evaluate",
+        lambda *_args: {
+            "strict": True, "near": True, "probe_ok": True,
+            "bars_ratio": 1.0, "master_ratio": 1.0,
+            "bars_n": 100, "master_n": 100,
+        },
+    )
+    monkeypatch.setattr(
+        wfd._impl.sys, "argv", ["wait_for_data.py", "--date", "2026-07-14"])
+
+    assert wfd.main() == 0
+    assert capsys.readouterr().out.strip() == "SESSION=2026-07-14"
+
+    pointer = json.loads(
+        (isolated_runtime_root / ".work" / "_runtime" / "current_session.json")
+        .read_text(encoding="utf-8")
+    )
+    assert pointer["session"] == "2026-07-14"
+
+
+def test_skip_does_not_record_an_in_flight_pointer(monkeypatch, capsys, isolated_runtime_root):
+    """A holiday must not leave a pointer, or the guard would alert for a day
+    that was never supposed to produce anything."""
+    monkeypatch.setattr(
+        wfd._impl.sys, "argv", ["wait_for_data.py", "--date", "2026-07-19"])
+
+    assert wfd.main() == 0
+    assert capsys.readouterr().out.strip() == "SKIP"
+    assert not (isolated_runtime_root / ".work" / "_runtime" / "current_session.json").exists()

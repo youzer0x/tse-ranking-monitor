@@ -61,6 +61,66 @@ def test_writer_concurrently_appends_parseable_json_lines(tmp_path):
     assert {event["index"] for event in decoded} == set(range(40))
 
 
+def test_session_pointer_round_trips_and_fails_soft(tmp_path):
+    telemetry.write_session_pointer(tmp_path, "2026-07-27", run_id="run-9")
+
+    pointer = telemetry.read_session_pointer(tmp_path)
+    assert pointer["session"] == "2026-07-27"
+    assert pointer["run_id"] == "run-9"
+    assert pointer["started_at"]
+
+    telemetry.session_pointer_path(tmp_path).write_text("{not json", encoding="utf-8")
+    assert telemetry.read_session_pointer(tmp_path) is None
+    assert telemetry.read_session_pointer(tmp_path / "nonexistent") is None
+
+
+def test_hook_event_without_session_is_attributed_via_pointer(tmp_path):
+    """Hook payloads never carry the trading session; the pointer supplies it."""
+    writer = telemetry.TelemetryWriter(tmp_path)
+
+    unattributed = writer.append({"event": "subagent_stop", "status": "completed"})
+    assert unattributed == writer.event_path(None)
+
+    telemetry.write_session_pointer(tmp_path, "2026-07-27")
+    attributed = writer.append({"event": "subagent_stop", "status": "completed"})
+
+    assert attributed == writer.event_path("2026-07-27")
+    written = json.loads(attributed.read_text(encoding="utf-8").splitlines()[-1])
+    assert written["session_date"] == "2026-07-27"
+
+
+def test_explicit_session_date_wins_over_pointer(tmp_path):
+    telemetry.write_session_pointer(tmp_path, "2026-07-27")
+    writer = telemetry.TelemetryWriter(tmp_path)
+
+    path = writer.append({"event": "stage_start"}, "2026-07-24")
+
+    assert path == writer.event_path("2026-07-24")
+
+
+def test_unfinished_stage_is_the_most_recently_started(tmp_path, monkeypatch):
+    writer = telemetry.TelemetryWriter(tmp_path)
+    clock = iter((1_000_000_000, 2_000_000_000, 2_500_000_000))
+    monkeypatch.setattr(telemetry.time, "time_ns", lambda: next(clock))
+
+    writer.record_stage("2026-07-27", "stage1", "start")
+    writer.record_stage("2026-07-27", "research", "start")
+    writer.record_stage("2026-07-27", "stage1", "end")
+
+    # stage1 finished, so its sentinel is gone; research is where the run stopped.
+    assert writer.last_unfinished_stage("2026-07-27") == "research"
+    assert [stage for stage, _ in writer.unfinished_stages("2026-07-27")] == ["research"]
+
+
+def test_no_unfinished_stage_when_every_stage_ended(tmp_path):
+    writer = telemetry.TelemetryWriter(tmp_path)
+    writer.record_stage("2026-07-27", "stage1", "start")
+    writer.record_stage("2026-07-27", "stage1", "end")
+
+    assert writer.last_unfinished_stage("2026-07-27") is None
+    assert writer.last_unfinished_stage("2026-07-24") is None
+
+
 def test_stage_end_records_duration_and_summary(tmp_path, monkeypatch):
     writer = telemetry.TelemetryWriter(tmp_path)
     clock = iter((1_000_000_000, 1_345_000_000))
