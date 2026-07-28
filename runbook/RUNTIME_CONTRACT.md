@@ -86,3 +86,9 @@ python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"
 ```
 
 `<S>` 確定済みなら `--session <S>` を、validator残があれば `--repair-targets .work/<S>/research/repair_targets.json` を付ける。
+
+この通知はコード側でも強制される。`SessionEnd`／`StopFailure` フックが `.claude/hooks/routine_guard.py` を実行し、ゲートが記録した in-flight セッションが存在するのに `.delivered` センチネルが無い場合、停止stage（未完了stageから判定）を添えて自動で通知する。既に通知済みなら再送しない。したがって上記の明示実行を省いても無音にはならないが、**理由を一文で書けるのは実行中のエージェントだけ**なので、停止条件に当たったら省略せず自分で実行する。
+
+`.delivered` は `publish.py --notify` の送信成功時にコードが書く。stage名は自由に付けてよいが、**完走の判定はこのセンチネルだけを根拠にする**。
+
+各stage境界の `stage start|end` は `routine-status` ブランチへ実行位置をpushする（best-effort）。これは基盤都合でセッションが強制終了され、フックすら走らない場合に外部watchdogが「どのstageで止まったか」を知る唯一の経路である。push失敗は警告のみで配信を止めない。

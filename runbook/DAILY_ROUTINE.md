@@ -97,10 +97,12 @@
 
 ## 監視と失敗通知
 
-- **ルーチン内失敗メール**：契約ゲート成功後にSKIP以外で停止する場合、`python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"` が停止stage・理由・telemetry要約・validator残件をGmail平文で送る（best-effort。送信失敗でも当初の非ゼロ終了を維持する。`RUNTIME_CONTRACT.md` §6）。
-- **配信watchdog**：`.github/workflows/watchdog.yml` が毎営業日 19:10 JST（主検査）と 22:50 JST（再検査・回復auto-close）に `tools/watchdog_check.py` で公開manifest・**Pages実配信manifest**・契約lockを照合し、配信欠落（`MISSING`）・Pages未反映（`PAGES_STALE`）・lock不一致のいずれかで `delivery-watchdog` ラベルのissueを作成/追記する（GITHUB_TOKENのみ使用・常時open 1件・回復時自動close）。利用上限等でセッションが無言で死んだ場合もこの層が検知する。
-- **通知の冪等化**：`publish.py --notify` は送信前にローカルHEADと `origin/main` の一致を最大5分待って検証する。direct/fallbackの勝者だけが一致し、push未達・非fast-forward敗者・Actions拒否は未送信のまま非ゼロ終了する＝二重メールを構造的に防ぐ。
-- **明示的な残存リスク**：Gmail送達自体の外部検証は行わない（失敗通知と同一チャネルで循環するため。公開・Pages配信は完了済みで影響は通知メールのみ。ルーチンの非ゼロ終了とclaude.aiプッシュ通知で検知する）。
+- **ルーチン内失敗メール**：契約ゲート成功後にSKIP以外で停止する場合、`python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"` が停止stage・理由・telemetry要約・validator残件をGmail平文で送る（best-effort。送信失敗でも当初の非ゼロ終了を維持する。`RUNTIME_CONTRACT.md` §6）。telemetry要約は `.work/<S>/telemetry/` のstageイベントと `.work/_runtime/` のフックイベント（セッション明示分のみ）をマージして集計する。
+- **終了時ガード（コード強制）**：`.claude/settings.json` の `SessionEnd`／`StopFailure` が `.claude/hooks/routine_guard.py` を実行する。ゲートが `.work/_runtime/current_session.json` に記録した in-flight セッションがあり `.delivered` センチネルが無ければ、未完了stageを停止stageとして自動で失敗メールを送る（`.notified` で冪等化・送信失敗時はマーカーを書かず再試行可能）。**上のメールがエージェントの散文指示に依存していた穴を塞ぐ層**であり、エージェントが諦めた・エラー終了した・公開せず終わったケースを拾う。`StopFailure` は実測で発火しないことがあるため `SessionEnd` を主とする。
+- **耐久実行ステータス**：各stage境界の `stage start|end` が `routine-status` ブランチへ実行位置（session・未完了stage・delivered）をpushする（best-effort・作業ツリーとHEADには触れないgit plumbing・force pushしない）。テレメトリは `.work/` にしか無く、**基盤都合でセッションが強制終了されるとフックすら走らない**ため、外部から死んだ位置を知る唯一の経路である。push拒否時は警告のみで配信を止めない。
+- **配信watchdog**：`.github/workflows/watchdog.yml` が毎営業日 19:10 JST（主検査）と 22:50 JST（再検査・回復auto-close）に `tools/watchdog_check.py` で公開manifest・**Pages実配信manifest**・**`routine-status` の実行ステータス**・契約lockを照合し、配信欠落（`MISSING`）・途中死（`STALLED=<S>:stage=<name>`）・Pages未反映（`PAGES_STALE`）・lock不一致のいずれかで `delivery-watchdog` ラベルのissueを作成/追記する（GITHUB_TOKENのみ使用・常時open 1件・回復時自動close）。利用上限等でセッションが無言で死んだ場合もこの層が検知し、ステータスがあれば停止stageまで名指しする。**実際に届く警報は `exit 1` によるGitHubの "Run failed" 通知メールであり、bot作成issueの通知メールは配信されない**ため、問題は `::error` アノテーションにも出してメール本文に載せる。点検範囲はランキング作成対象日のみ（cronは平日・祝日抑止は `business_day` に委ねる）で、土日に定期実行しないため金曜の失敗は月曜まで警報されない（配信自体は土曜20:35のバックアップがcatch-upする）。
+- **通知の冪等化**：`publish.py --notify` は送信前にローカルHEADと `origin/main` の一致を最大5分待って検証する。direct/fallbackの勝者だけが一致し、push未達・非fast-forward敗者・Actions拒否は未送信のまま非ゼロ終了する＝二重メールを構造的に防ぐ。送信成功時に `.delivered` センチネルを書き、これが完走の唯一の機械的証拠となる。
+- **明示的な残存リスク**：Gmail送達自体の外部検証は行わない（失敗通知と同一チャネルで循環するため。公開・Pages配信は完了済みで影響は通知メールのみ。ルーチンの非ゼロ終了とclaude.aiプッシュ通知で検知する）。**killされたプロセスは自分について報告できない**ため、基盤都合の強制終了は依然として自己申告できない。この場合の検知はwatchdog層に限られ、停止stageの粒度も最後にpushされたステータスまでである。
 
 ## 関連
 
