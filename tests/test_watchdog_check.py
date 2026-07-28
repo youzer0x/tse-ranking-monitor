@@ -1,8 +1,11 @@
 """配信欠落watchdogの判定テスト（ネット無し・固定時刻。2026-07-15は水曜）。"""
 import json
 from datetime import date
+from pathlib import Path
 
 import watchdog_check as wdc
+
+WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "watchdog.yml"
 
 
 def _manifest(tmp_path, dates, name="manifest.json"):
@@ -133,6 +136,97 @@ def test_unreadable_live_manifest_is_exit_2(tmp_path, capsys):
     assert capsys.readouterr().out == ""
 
 
+def _status(tmp_path, payload, name="status.json"):
+    path = tmp_path / name
+    path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    return str(path)
+
+
+def test_started_but_undelivered_session_reports_the_stage(tmp_path, capsys):
+    """MISSING cannot distinguish "never fired" from "died part-way"."""
+    manifest = _manifest(tmp_path, ["2026-07-14"])
+    status = _status(tmp_path, {
+        "session": "2026-07-15", "delivered": False, "died_at": "stage2",
+    })
+
+    code = wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"])
+
+    assert code == 1
+    assert capsys.readouterr().out.strip() == "STALLED=2026-07-15:stage=stage2"
+
+
+def test_stall_falls_back_to_last_stage_when_no_death_recorded(tmp_path, capsys):
+    manifest = _manifest(tmp_path, ["2026-07-14"])
+    status = _status(tmp_path, {
+        "session": "2026-07-15", "delivered": False, "last_stage": "research",
+    })
+
+    assert wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 1
+    assert capsys.readouterr().out.strip() == "STALLED=2026-07-15:stage=research"
+
+
+def test_status_for_another_session_degrades_to_missing(tmp_path, capsys):
+    manifest = _manifest(tmp_path, ["2026-07-14"])
+    status = _status(tmp_path, {
+        "session": "2026-07-14", "delivered": False, "died_at": "stage2",
+    })
+
+    assert wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 1
+    assert capsys.readouterr().out.strip() == "MISSING=2026-07-15"
+
+
+def test_delivered_status_with_an_unpublished_manifest_stays_missing(tmp_path, capsys):
+    """A run claiming success while the manifest disagrees is a publication
+    problem, not a stall."""
+    manifest = _manifest(tmp_path, ["2026-07-14"])
+    status = _status(tmp_path, {"session": "2026-07-15", "delivered": True})
+
+    assert wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 1
+    assert capsys.readouterr().out.strip() == "MISSING=2026-07-15"
+
+
+def test_unreadable_status_degrades_to_missing(tmp_path, capsys):
+    manifest = _manifest(tmp_path, ["2026-07-14"])
+    broken = tmp_path / "broken.json"
+    broken.write_text("{not json", encoding="utf-8")
+
+    assert wdc.main(["--manifest", str(manifest), "--status", str(broken),
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 1
+    out = capsys.readouterr()
+    assert out.out.strip() == "MISSING=2026-07-15"
+    assert "実行ステータスを読めない" in out.err
+
+
+def test_status_is_ignored_when_nothing_is_missing(tmp_path, capsys):
+    manifest = _manifest(tmp_path, ["2026-07-15"])
+    status = _status(tmp_path, {
+        "session": "2026-07-15", "delivered": False, "died_at": "stage2",
+    })
+
+    assert wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 0
+    assert capsys.readouterr().out.strip() == "OK"
+
+
+def test_stage_name_is_sanitised_to_keep_one_stdout_token(tmp_path, capsys):
+    manifest = _manifest(tmp_path, ["2026-07-14"])
+    status = _status(tmp_path, {
+        "session": "2026-07-15", "delivered": False,
+        "died_at": "stage 2\nrm -rf /",
+    })
+
+    assert wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 1
+    out = capsys.readouterr().out.strip()
+    assert out.startswith("STALLED=2026-07-15:stage=")
+    assert len(out.splitlines()) == 1
+    assert " " not in out
+
+
 def test_bad_now_is_exit_2(tmp_path, capsys):
     manifest = _manifest(tmp_path, ["2026-07-15"])
 
@@ -140,3 +234,39 @@ def test_bad_now_is_exit_2(tmp_path, capsys):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "--now" in captured.err
+
+
+# --- workflow wiring: the checker is only useful if the workflow feeds it ------
+
+def test_workflow_feeds_the_durable_status_to_the_checker():
+    """Without --status the checker can never distinguish a stall from a no-show."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "origin routine-status" in text
+    assert "status/latest.json" in text
+    assert "--status /tmp/run-status.json" in text
+
+
+def test_workflow_treats_stalled_as_a_problem():
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "STALLED=*)" in text
+
+
+def test_workflow_emits_annotations_so_detail_reaches_the_failure_mail():
+    """Issue notifications for a bot-authored issue are not delivered; the
+    "Run failed" mail is the real alarm and it includes annotations."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "::error title=Delivery watchdog::" in text
+
+
+def test_watchdog_only_runs_on_tse_weekdays():
+    """Scoped to ranking target days: no weekend runs.  Holiday suppression is
+    the checker's job via business_day, which cron cannot express."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    crons = [line.strip() for line in text.splitlines() if line.strip().startswith("- cron:")]
+    assert crons, "watchdog must stay scheduled"
+    for cron in crons:
+        assert "* * 1-5" in cron, cron

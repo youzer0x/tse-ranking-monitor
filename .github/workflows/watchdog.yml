@@ -37,17 +37,32 @@ jobs:
           set +e
           curl -fsSL "$PAGES_URL/data/manifest.json" -o /tmp/live-manifest.json
           echo "code=$?" >> "$GITHUB_OUTPUT"
+      # A session that is killed cannot report on itself, so it pushes its
+      # position to a side branch while it is still alive.  Reading it is what
+      # lets this layer say "died at stage X" instead of only "nothing arrived".
+      - name: Fetch durable run status
+        id: status
+        run: |
+          set +e
+          git fetch --no-tags --depth=1 origin routine-status 2>/dev/null \
+            && git show FETCH_HEAD:status/latest.json > /tmp/run-status.json 2>/dev/null
+          if [ -s /tmp/run-status.json ]; then
+            echo "available=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=0" >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
       - name: Run delivery check
         id: check
         env:
           LIVE_CODE: ${{ steps.live.outputs.code }}
+          STATUS_AVAILABLE: ${{ steps.status.outputs.available }}
         run: |
           set +e
-          if [ "$LIVE_CODE" = "0" ]; then
-            token=$(python tools/watchdog_check.py --live-manifest /tmp/live-manifest.json)
-          else
-            token=$(python tools/watchdog_check.py)
-          fi
+          args=""
+          [ "$LIVE_CODE" = "0" ] && args="$args --live-manifest /tmp/live-manifest.json"
+          [ "$STATUS_AVAILABLE" = "1" ] && args="$args --status /tmp/run-status.json"
+          token=$(python tools/watchdog_check.py $args)
           code=$?
           echo "token=${token}" >> "$GITHUB_OUTPUT"
           echo "code=${code}" >> "$GITHUB_OUTPUT"
@@ -63,6 +78,7 @@ jobs:
           problems=()
           case "$TOKEN" in
             MISSING=*)     problems+=("delivery missing: ${TOKEN}") ;;
+            STALLED=*)     problems+=("routine died mid-run: ${TOKEN}") ;;
             PAGES_STALE=*) problems+=("live Pages stale: ${TOKEN}") ;;
           esac
           if [ "$CHECK_CODE" != "0" ] && [ "$CHECK_CODE" != "1" ]; then
@@ -79,6 +95,14 @@ jobs:
             --json number --jq '.[0].number')
 
           if [ "${#problems[@]}" -gt 0 ]; then
+            # The alarm that actually reaches a mailbox is GitHub's own
+            # "Run failed" notification for the exit 1 below; issue notifications
+            # for a bot-authored issue do not get delivered. Annotations are
+            # included in that mail, so the detail has to go here -- putting it
+            # only in the issue body means nobody reads it until they look.
+            for p in "${problems[@]}"; do
+              echo "::error title=Delivery watchdog::${p} (checked at ${now_jst})"
+            done
             gh label create delivery-watchdog \
               --description "daily delivery watchdog alerts" --color D93F0B || true
             body="Delivery watchdog detected a problem."$'\n\n'
