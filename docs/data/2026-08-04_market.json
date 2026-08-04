@@ -1,0 +1,905 @@
+{
+  "schema_version": 1,
+  "kind": "market_analysis",
+  "session_date": "2026-08-04",
+  "prev_date": "2026-08-03",
+  "generated_at": "2026-08-04 17:47 JST",
+  "title": "東京株式市場 セクター/テーマ 騰落率分析",
+  "universe": {
+    "description": "",
+    "min_turnover_yen": 100000000,
+    "n_liquid": 1545
+  },
+  "market": {
+    "topix_pct": 0.04,
+    "breadth": {
+      "up": 758,
+      "down": 765,
+      "flat": 22
+    },
+    "top_sector_by_turnover": {
+      "name": "電気機器",
+      "turnover_oku": 49325.4
+    },
+    "top_stock_by_turnover": {
+      "code": "285A",
+      "name": "キオクシアホールディングス",
+      "turnover_oku": 25975.2
+    }
+  },
+  "thesis": [
+    "TOPIX +0.04%・値上がり758 / 値下がり765と全体は膠着する中、前営業日（8/3）引け後に集中した決算・株主還元開示が電子部品商社（卸売業）・機械・情報通信の3クラスターを主導し、不動産での[[JPMC]]MBO・TOB（[公開買付開始公告](https://www.release.tdnet.info/inbs/140120260803507167.pdf)）ストップ高と電気機器クラスターの蓄電システム新製品開示が加わり、30銘柄が5%超の上昇となった。",
+    "卸売業では[[スズデン]]（Q1売上+47.7%・配当利回り7.3%）と[[ダイトロン]]（H1営業利益+35.5%・自社株買い25億円）がS高・急伸し、機械では[[JUKI]]（上期経常黒字転換・4-6月期54倍増益）がS高、電気機器では[[パワーエックス]]の大容量蓄電システム「Mega Power 4000」・「Grid Connector」同時開示が7銘柄クラスターをけん引した。[[Terra Drone]]は信用取引増し担保措置解除により4日続伸・+19.67%を記録した。"
+  ],
+  "overview": {
+    "snapshot": [
+      {
+        "label": "TOPIX（終値ベース）",
+        "value": "auto:topix"
+      },
+      {
+        "label": "値上がり / 値下がり / 変わらず",
+        "value": "auto:breadth"
+      },
+      {
+        "label": "最大売買代金セクター",
+        "value": "auto:top_sector"
+      },
+      {
+        "label": "最大売買代金銘柄",
+        "value": "auto:top_stock"
+      }
+    ],
+    "points": [
+      "全体はほぼ横ばい（TOPIX +0.04%・値下がり765銘柄）。電気機器の売買代金が全市場最大（約4.93兆円）となり、[[キオクシアホールディングス]]（285A、+5.96%・約2.60兆円）が主導した。AI向けNAND需要期待の継続物色とみられる。",
+      "電子部品商社クラスター（卸売業）で[[スズデン]]（Q1売上+47.7%・営業利益+154.5%・年間配当105→176円に増額）と[[ダイトロン]]（H1営業利益50.5億円・前年比+35.5%・自社株買い25億円）の開示がS高・急伸を招き、[[トーメンデバイス]]・[[内外テック]]への連れ高につながった。",
+      "機械クラスターでは前日（8/3）の[[FUJI]]Q1大幅増益・通期最高益上方修正（[FUJI決算速報ZAI](https://diamond.jp/zai/articles/-/1071025)）を起点に、[[JUKI]]（上期経常黒字転換・4-6月期54倍増益・S高）・[[住友重機械工業]]（Q2決算・通期経常+12.7%上方修正）が当日固有の開示で上昇し、[[サムコ]]にも波及した。",
+      "不動産クラスターでは[[JPMC]]（3276）にサンライズキャピタル傘下Amsterdam1・Amsterdam2が1株2,250円（プレミアム+23.49%）のMBO・TOBを発表し（前営業日18:00開示）、買付期間2026年8月4日〜9月15日のTOB価格へのサヤ寄せを受けてS高水準の+21.95%となった。"
+    ],
+    "flow": [
+      "【卸売業クラスター・電子部品商社】[[スズデン]]（7480）は2026-08-03 15:30に第1四半期決算（売上+47.7%・営業利益+154.5%）・通期経常60%上方修正・配当105→176円（利回り7.3%超）を同時開示し（[TDnet決算短信](https://www.release.tdnet.info/inbs/140120260803506496.pdf)）、翌8月4日はS高水準の+20.82%。[[ダイトロン]]（7609）も同日16:00にH1営業利益50.5億円（+35.5%・予想36.6億円大幅超過）・通期90億円上方修正・配当120円・自社株買い25億円を一括開示し（[TDnet決算短信](https://www.release.tdnet.info/inbs/140120260803507098.pdf)）、+15.92%。AI・データセンター向け半導体関連電子部品の需要急増がセクター横断で並走した。",
+      "【機械クラスター】[[FUJI]]（6134）が前営業日8/3引け後に2027年3月期Q1大幅増益（営業利益前年比約2.9倍）・通期過去最高益上方修正を開示し（[TDnet決算短信](https://www.release.tdnet.info/inbs/140120260803506270.pdf)）、機械クラスター（s33:3600）の物色起点となった。[[JUKI]]（6440）は8/4 13:00開示の1-6月期経常黒字転換・4-6月期54倍増益という大幅サプライズでS高（+18.52%）となり（[TDnet決算短信](https://www.release.tdnet.info/inbs/140120260803506995.pdf)）、[[住友重機械工業]]（6302）も14:00開示の通期経常+12.7%上方修正で後場上げ幅を拡大した（[TDnet決算短信](https://www.release.tdnet.info/inbs/140120260804507994.pdf)）。",
+      "【電気機器クラスター】[[パワーエックス]]（485A）が2026-08-03 16:30に大規模蓄電所向け高容量蓄電システム「Mega Power 4000」シリーズ（Type A: 4,680kWh・Type B: 4,233kWhの液冷式LFP電池、2027年5月量産開始予定）と系統接続設備一体型「Grid Connector」シリーズを同時開示（[TDnet Mega Power 4000](https://www.release.tdnet.info/inbs/140120260803507397.pdf)）。電気機器クラスター（s33:3650）7銘柄に物色が波及した。[[アスタリスク]]（6522）は独自材料として8/4 12:00に固定型次世代RFID「AsReader BOX-Type」のアパレル旗艦店「coca」Diversity Tokyo Plaza店への導入をTDnetで開示し（[TDnet RFID開示](https://www.release.tdnet.info/inbs/140120260729502525.pdf)）、後場から+19.07%急伸した。",
+      "【不動産クラスター・TOB】サンライズキャピタル傘下Amsterdam1・Amsterdam2が[[JPMC]]（3276）に対し1株2,250円（前日終値1,822円に対しプレミアム+23.49%）の公開買付を2026-08-03 18:00に発表（[TDnet MBO開示](https://www.release.tdnet.info/inbs/140120260803506930.pdf)）。TOB成立後に上場廃止予定で取締役会が賛同・応募推奨を表明した。8月4日はS高水準の+21.95%を記録した。",
+      "【情報通信業クラスター】[[東計電算]]（4746）が2026-08-03 15:30に今期連結最終利益56%上方修正（最高益更新）・期末配当303円50銭増額・株式分割を同時開示し（[TDnet業績修正](https://www.release.tdnet.info/inbs/140120260722597842.pdf)）、翌8/4はS高寄り付き・+14.31%。情報通信業クラスター（s33:5250）内の[[さくらインターネット]]・[[Synspective]]・[[note]]・[[YE DIGITAL]]に連れ高が波及した。"
+    ],
+    "flow_conclusion": [
+      "決算シーズン集中日。全体は売り買い拮抗（TOPIX +0.04%）ながら、電子部品商社・機械・電気機器の3クラスターを決算・新製品開示が牽引し、不動産MBOと情報通信業が加わって30銘柄が5%超の上昇となった。",
+      "[[Terra Drone]]（278A）は信用取引増し担保措置解除（8/3大引け後）が主因で4日続伸・+19.67%。[[日東紡績]]（3110）・[[古河電気工業]]（5801）は翌日以降の決算発表前の先行買い、[[セイワホールディングス]]（523A）は名証ネクスト重複上場（8/6）前の先行買いがそれぞれの主因とみられる。"
+    ]
+  },
+  "sectors33": [
+    {
+      "name": "非鉄金属",
+      "n": 18,
+      "up": 15,
+      "down": 3,
+      "flat": 0,
+      "w_pct": 6.84,
+      "mean_pct": 3.05,
+      "median_pct": 2.27,
+      "turnover_oku": 5648.2,
+      "drivers": [
+        {
+          "code": "5803",
+          "name": "フジクラ",
+          "pct": 7.88
+        },
+        {
+          "code": "5801",
+          "name": "古河電気工業",
+          "pct": 11.44
+        }
+      ]
+    },
+    {
+      "name": "精密機器",
+      "n": 36,
+      "up": 27,
+      "down": 9,
+      "flat": 0,
+      "w_pct": 6.62,
+      "mean_pct": 2.66,
+      "median_pct": 1.82,
+      "turnover_oku": 1205.0,
+      "drivers": [
+        {
+          "code": "278A",
+          "name": "Terra Drone",
+          "pct": 19.67
+        }
+      ]
+    },
+    {
+      "name": "電気機器",
+      "n": 145,
+      "up": 113,
+      "down": 31,
+      "flat": 1,
+      "w_pct": 4.19,
+      "mean_pct": 2.33,
+      "median_pct": 2.3,
+      "turnover_oku": 49325.4,
+      "drivers": [
+        {
+          "code": "285A",
+          "name": "キオクシアホールディングス",
+          "pct": 5.96
+        }
+      ]
+    },
+    {
+      "name": "機械",
+      "n": 115,
+      "up": 93,
+      "down": 21,
+      "flat": 1,
+      "w_pct": 3.43,
+      "mean_pct": 2.46,
+      "median_pct": 2.03,
+      "turnover_oku": 8253.5,
+      "drivers": [
+        {
+          "code": "7011",
+          "name": "三菱重工業",
+          "pct": 7.69
+        }
+      ]
+    },
+    {
+      "name": "海運業",
+      "n": 6,
+      "up": 4,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 2.47,
+      "mean_pct": 2.69,
+      "median_pct": 1.53,
+      "turnover_oku": 749.9,
+      "drivers": [
+        {
+          "code": "9104",
+          "name": "商船三井",
+          "pct": 4.43
+        }
+      ]
+    },
+    {
+      "name": "金属製品",
+      "n": 26,
+      "up": 15,
+      "down": 11,
+      "flat": 0,
+      "w_pct": 2.32,
+      "mean_pct": 1.91,
+      "median_pct": 0.46,
+      "turnover_oku": 741.7,
+      "drivers": [
+        {
+          "code": "3436",
+          "name": "SUMCO",
+          "pct": 2.55
+        }
+      ]
+    },
+    {
+      "name": "ガラス･土石製品",
+      "n": 25,
+      "up": 21,
+      "down": 4,
+      "flat": 0,
+      "w_pct": 2.23,
+      "mean_pct": 1.78,
+      "median_pct": 1.17,
+      "turnover_oku": 1242.7,
+      "drivers": [
+        {
+          "code": "3110",
+          "name": "日東紡績",
+          "pct": 14.23
+        }
+      ]
+    },
+    {
+      "name": "繊維製品",
+      "n": 18,
+      "up": 11,
+      "down": 7,
+      "flat": 0,
+      "w_pct": 1.2,
+      "mean_pct": 0.59,
+      "median_pct": 0.26,
+      "turnover_oku": 167.1,
+      "drivers": [
+        {
+          "code": "3103",
+          "name": "ユニチカ",
+          "pct": 4.53
+        },
+        {
+          "code": "3402",
+          "name": "東レ",
+          "pct": 1.51
+        }
+      ]
+    },
+    {
+      "name": "化学",
+      "n": 110,
+      "up": 81,
+      "down": 28,
+      "flat": 1,
+      "w_pct": 1.08,
+      "mean_pct": 1.54,
+      "median_pct": 1.05,
+      "turnover_oku": 3564.9,
+      "drivers": [
+        {
+          "code": "4004",
+          "name": "レゾナック・ホールディングス",
+          "pct": 4.45
+        },
+        {
+          "code": "4063",
+          "name": "信越化学工業",
+          "pct": 2.43
+        }
+      ]
+    },
+    {
+      "name": "建設業",
+      "n": 73,
+      "up": 43,
+      "down": 29,
+      "flat": 1,
+      "w_pct": 0.98,
+      "mean_pct": 0.53,
+      "median_pct": 0.33,
+      "turnover_oku": 1090.9,
+      "drivers": [
+        {
+          "code": "1942",
+          "name": "関電工",
+          "pct": 3.61
+        },
+        {
+          "code": "1803",
+          "name": "清水建設",
+          "pct": 2.61
+        }
+      ]
+    },
+    {
+      "name": "輸送用機器",
+      "n": 47,
+      "up": 17,
+      "down": 30,
+      "flat": 0,
+      "w_pct": 0.54,
+      "mean_pct": -0.03,
+      "median_pct": -0.85,
+      "turnover_oku": 4598.1,
+      "drivers": [
+        {
+          "code": "7272",
+          "name": "ヤマハ発動機",
+          "pct": 13.4
+        }
+      ]
+    },
+    {
+      "name": "不動産業",
+      "n": 50,
+      "up": 13,
+      "down": 35,
+      "flat": 2,
+      "w_pct": 0.2,
+      "mean_pct": -0.0,
+      "median_pct": -0.65,
+      "turnover_oku": 865.4,
+      "drivers": [
+        {
+          "code": "8918",
+          "name": "ランド",
+          "pct": 10.0
+        },
+        {
+          "code": "3498",
+          "name": "霞ヶ関キャピタル",
+          "pct": 4.99
+        }
+      ]
+    },
+    {
+      "name": "鉄鋼",
+      "n": 23,
+      "up": 11,
+      "down": 11,
+      "flat": 1,
+      "w_pct": 0.03,
+      "mean_pct": 0.76,
+      "median_pct": 0.0,
+      "turnover_oku": 476.1,
+      "drivers": [
+        {
+          "code": "5411",
+          "name": "JFEホールディングス",
+          "pct": 0.31
+        },
+        {
+          "code": "5446",
+          "name": "北越メタル",
+          "pct": 10.82
+        }
+      ]
+    },
+    {
+      "name": "その他製品",
+      "n": 33,
+      "up": 17,
+      "down": 15,
+      "flat": 1,
+      "w_pct": 0.02,
+      "mean_pct": 0.19,
+      "median_pct": 0.19,
+      "turnover_oku": 959.6,
+      "drivers": [
+        {
+          "code": "7936",
+          "name": "アシックス",
+          "pct": 1.53
+        },
+        {
+          "code": "7966",
+          "name": "リンテック",
+          "pct": 4.04
+        }
+      ]
+    },
+    {
+      "name": "卸売業",
+      "n": 109,
+      "up": 47,
+      "down": 61,
+      "flat": 1,
+      "w_pct": -0.05,
+      "mean_pct": 0.76,
+      "median_pct": -0.27,
+      "turnover_oku": 3218.0,
+      "drivers": [
+        {
+          "code": "8002",
+          "name": "丸紅",
+          "pct": -3.8
+        }
+      ]
+    },
+    {
+      "name": "倉庫･運輸関連業",
+      "n": 8,
+      "up": 4,
+      "down": 4,
+      "flat": 0,
+      "w_pct": -0.07,
+      "mean_pct": -0.02,
+      "median_pct": 0.02,
+      "turnover_oku": 60.6,
+      "drivers": [
+        {
+          "code": "9364",
+          "name": "上組",
+          "pct": -0.96
+        }
+      ]
+    },
+    {
+      "name": "証券･商品先物取引業",
+      "n": 22,
+      "up": 6,
+      "down": 16,
+      "flat": 0,
+      "w_pct": -0.17,
+      "mean_pct": -0.99,
+      "median_pct": -0.91,
+      "turnover_oku": 462.5,
+      "drivers": [
+        {
+          "code": "8601",
+          "name": "大和証券グループ本社",
+          "pct": -2.57
+        }
+      ]
+    },
+    {
+      "name": "鉱業",
+      "n": 5,
+      "up": 2,
+      "down": 3,
+      "flat": 0,
+      "w_pct": -0.22,
+      "mean_pct": 0.56,
+      "median_pct": -0.53,
+      "turnover_oku": 153.1,
+      "drivers": [
+        {
+          "code": "1605",
+          "name": "INPEX",
+          "pct": -0.77
+        }
+      ]
+    },
+    {
+      "name": "医薬品",
+      "n": 38,
+      "up": 16,
+      "down": 21,
+      "flat": 1,
+      "w_pct": -0.29,
+      "mean_pct": -0.01,
+      "median_pct": -0.39,
+      "turnover_oku": 1793.8,
+      "drivers": [
+        {
+          "code": "4568",
+          "name": "第一三共",
+          "pct": -2.72
+        },
+        {
+          "code": "4506",
+          "name": "住友ファーマ",
+          "pct": -3.19
+        }
+      ]
+    },
+    {
+      "name": "ゴム製品",
+      "n": 10,
+      "up": 4,
+      "down": 6,
+      "flat": 0,
+      "w_pct": -0.32,
+      "mean_pct": 0.51,
+      "median_pct": -0.11,
+      "turnover_oku": 225.7,
+      "drivers": [
+        {
+          "code": "5108",
+          "name": "ブリヂストン",
+          "pct": -0.82
+        }
+      ]
+    },
+    {
+      "name": "その他金融業",
+      "n": 20,
+      "up": 6,
+      "down": 14,
+      "flat": 0,
+      "w_pct": -0.36,
+      "mean_pct": -0.36,
+      "median_pct": -0.97,
+      "turnover_oku": 477.0,
+      "drivers": [
+        {
+          "code": "8439",
+          "name": "東京センチュリー",
+          "pct": -3.11
+        },
+        {
+          "code": "8593",
+          "name": "三菱HCキャピタル",
+          "pct": -1.47
+        }
+      ]
+    },
+    {
+      "name": "パルプ・紙",
+      "n": 10,
+      "up": 3,
+      "down": 7,
+      "flat": 0,
+      "w_pct": -0.5,
+      "mean_pct": -0.47,
+      "median_pct": -0.47,
+      "turnover_oku": 101.1,
+      "drivers": [
+        {
+          "code": "3946",
+          "name": "トーモク",
+          "pct": -3.63
+        }
+      ]
+    },
+    {
+      "name": "サービス業",
+      "n": 105,
+      "up": 40,
+      "down": 61,
+      "flat": 4,
+      "w_pct": -0.71,
+      "mean_pct": -0.2,
+      "median_pct": -0.42,
+      "turnover_oku": 1770.6,
+      "drivers": [
+        {
+          "code": "4661",
+          "name": "オリエンタルランド",
+          "pct": -4.6
+        }
+      ]
+    },
+    {
+      "name": "空運業",
+      "n": 2,
+      "up": 0,
+      "down": 2,
+      "flat": 0,
+      "w_pct": -0.79,
+      "mean_pct": -0.82,
+      "median_pct": -0.82,
+      "turnover_oku": 164.4,
+      "drivers": [
+        {
+          "code": "9201",
+          "name": "日本航空",
+          "pct": -0.7
+        },
+        {
+          "code": "9202",
+          "name": "ANAホールディングス",
+          "pct": -0.93
+        }
+      ]
+    },
+    {
+      "name": "電気･ガス業",
+      "n": 22,
+      "up": 7,
+      "down": 14,
+      "flat": 1,
+      "w_pct": -0.88,
+      "mean_pct": -0.24,
+      "median_pct": -0.42,
+      "turnover_oku": 649.7,
+      "drivers": [
+        {
+          "code": "9503",
+          "name": "関西電力",
+          "pct": -2.77
+        }
+      ]
+    },
+    {
+      "name": "小売業",
+      "n": 127,
+      "up": 25,
+      "down": 101,
+      "flat": 1,
+      "w_pct": -0.89,
+      "mean_pct": -1.05,
+      "median_pct": -1.4,
+      "turnover_oku": 2757.1,
+      "drivers": [
+        {
+          "code": "9983",
+          "name": "ファーストリテイリング",
+          "pct": -1.13
+        }
+      ]
+    },
+    {
+      "name": "石油･石炭製品",
+      "n": 5,
+      "up": 1,
+      "down": 3,
+      "flat": 1,
+      "w_pct": -1.06,
+      "mean_pct": -0.38,
+      "median_pct": -0.97,
+      "turnover_oku": 122.7,
+      "drivers": [
+        {
+          "code": "5020",
+          "name": "ENEOSホールディングス",
+          "pct": -0.97
+        },
+        {
+          "code": "5019",
+          "name": "出光興産",
+          "pct": -1.38
+        }
+      ]
+    },
+    {
+      "name": "銀行業",
+      "n": 70,
+      "up": 35,
+      "down": 34,
+      "flat": 1,
+      "w_pct": -1.24,
+      "mean_pct": -0.07,
+      "median_pct": 0.02,
+      "turnover_oku": 4807.6,
+      "drivers": [
+        {
+          "code": "8306",
+          "name": "三菱UFJフィナンシャル・グループ",
+          "pct": -2.72
+        }
+      ]
+    },
+    {
+      "name": "情報･通信業",
+      "n": 164,
+      "up": 71,
+      "down": 90,
+      "flat": 3,
+      "w_pct": -1.34,
+      "mean_pct": 0.33,
+      "median_pct": -0.33,
+      "turnover_oku": 5802.5,
+      "drivers": [
+        {
+          "code": "9984",
+          "name": "ソフトバンクグループ",
+          "pct": -3.06
+        }
+      ]
+    },
+    {
+      "name": "保険業",
+      "n": 9,
+      "up": 1,
+      "down": 7,
+      "flat": 1,
+      "w_pct": -1.42,
+      "mean_pct": -1.12,
+      "median_pct": -1.42,
+      "turnover_oku": 981.5,
+      "drivers": [
+        {
+          "code": "8766",
+          "name": "東京海上ホールディングス",
+          "pct": -2.23
+        }
+      ]
+    },
+    {
+      "name": "食料品",
+      "n": 55,
+      "up": 8,
+      "down": 47,
+      "flat": 0,
+      "w_pct": -1.54,
+      "mean_pct": -1.77,
+      "median_pct": -1.87,
+      "turnover_oku": 1617.8,
+      "drivers": [
+        {
+          "code": "2282",
+          "name": "日本ハム",
+          "pct": -8.41
+        },
+        {
+          "code": "2914",
+          "name": "日本たばこ産業",
+          "pct": -2.49
+        }
+      ]
+    },
+    {
+      "name": "水産・農林業",
+      "n": 5,
+      "up": 0,
+      "down": 5,
+      "flat": 0,
+      "w_pct": -1.71,
+      "mean_pct": -1.54,
+      "median_pct": -1.83,
+      "turnover_oku": 33.1,
+      "drivers": [
+        {
+          "code": "1332",
+          "name": "ニッスイ",
+          "pct": -2.0
+        },
+        {
+          "code": "1333",
+          "name": "Umios",
+          "pct": -1.91
+        }
+      ]
+    },
+    {
+      "name": "陸運業",
+      "n": 34,
+      "up": 1,
+      "down": 33,
+      "flat": 0,
+      "w_pct": -2.09,
+      "mean_pct": -1.98,
+      "median_pct": -1.88,
+      "turnover_oku": 985.4,
+      "drivers": [
+        {
+          "code": "9064",
+          "name": "ヤマトホールディングス",
+          "pct": -6.15
+        },
+        {
+          "code": "9024",
+          "name": "西武ホールディングス",
+          "pct": -4.22
+        }
+      ]
+    }
+  ],
+  "theme_matrix": {
+    "rows": [
+      {
+        "side": "buy",
+        "theme": "電子部品商社・AI需要決算ラッシュ",
+        "stocks": "スズデン・ダイトロン・トーメンデバイス・内外テック",
+        "background": "[[スズデン]]（7480）Q1売上+47.7%・営業利益+154.5%・通期経常60%上方修正・配当利回り7.3%超超過（2026-08-03 15:30開示）と、[[ダイトロン]]（7609）H1営業利益50.5億円（+35.5%・予想大幅超過）・通期90億円・25億円自社株買い（同日16:00開示）がAI・データセンター向け半導体需要の強さを確認させた。[[トーメンデバイス]]（2737）・[[内外テック]]（3374）はクラスター連れ高とみられる。"
+      },
+      {
+        "side": "buy",
+        "theme": "機械・半導体装置決算",
+        "stocks": "JUKI・FUJI・住友重機械工業・サムコ",
+        "background": "[[FUJI]]（6134）の前日（8/3）Q1大幅増益・通期最高益上方修正が機械クラスターの物色起点。[[JUKI]]（6440）は当日13:00開示の上期経常黒字転換・4-6月期54倍増益という大幅サプライズでS高。[[住友重機械工業]]（6302）は14:00開示の通期経常+12.7%上方修正が後場を押し上げた。"
+      },
+      {
+        "side": "buy",
+        "theme": "電気機器・蓄電システム新製品",
+        "stocks": "パワーエックス・アスタリスク・アドテック・精工技研・サン電子・QDレーザ・santec",
+        "background": "[[パワーエックス]]（485A）が2026-08-03 16:30に蓄電所向け「Mega Power 4000」（最大4,680kWh）・「Grid Connector」を同時開示し、電気機器クラスター（s33:3650）7銘柄に物色が波及した。[[アスタリスク]]（6522）は独立材料としてアパレルRFID採用により後場から急伸した。"
+      },
+      {
+        "side": "buy",
+        "theme": "不動産MBO・TOB",
+        "stocks": "JPMC・ランド",
+        "background": "サンライズキャピタル傘下がJPMC（3276）に1株2,250円（プレミアム+23.49%）のTOBを2026-08-03 18:00に開示した。TOB成立後に上場廃止を予定し取締役会が賛同。[[JPMC]]はS高水準の+21.95%。[[ランド]]（8918）はクラスター連れ高とみられる。"
+      },
+      {
+        "side": "buy",
+        "theme": "情報通信業・上方修正・株式分割",
+        "stocks": "東計電算・さくらインターネット・Synspective・note・YE DIGITAL",
+        "background": "[[東計電算]]（4746）が2026-08-03 15:30に今期最終利益56%上方修正（最高益）・期末配当303円50銭増額・株式分割を同時開示し、翌日S高。情報通信業クラスター（s33:5250）5銘柄に連れ高が波及した。"
+      },
+      {
+        "side": "buy",
+        "theme": "信用規制解除・個別テーマ",
+        "stocks": "Terra Drone・セイワホールディングス・日東紡績・古河電気工業",
+        "background": "[[Terra Drone]]（278A）は2026-08-03大引け後の信用取引増し担保措置解除（委託保証金率引き下げ）が主因で4日続伸（+19.67%）。[[セイワホールディングス]]（523A）は名証ネクスト重複上場（8/6）前の先行買い。[[日東紡績]]（3110）・[[古河電気工業]]（5801）は翌日以降の決算前先行買いおよびAI向け素材テーマ継続とみられる。"
+      }
+    ],
+    "character": "決算集中日・ほぼ横ばいの全体相場（TOPIX +0.04%）の中、電子部品商社・機械・電気機器・不動産・情報通信の5テーマが個別に上昇を主導した。AI/半導体向け需要好調を背景とした電子部品・装置の増益サプライズと株主還元強化が開示集中日に重なり、クラスター全体の底上げとなった典型的な決算物色相場。"
+  },
+  "methodology": {},
+  "news_sources": [
+    {
+      "topic": "JPMC MBO・公開買付",
+      "links": [
+        {
+          "label": "JPMC MBOの実施及び応募推奨に関するお知らせ（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803506930.pdf"
+        },
+        {
+          "label": "Amsterdam1・Amsterdam2によるJPMC公開買付け開始（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803507167.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "スズデン Q1大幅増益・通期上方修正・増配",
+      "links": [
+        {
+          "label": "スズデン 2027年3月期第1四半期決算短信（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803506496.pdf"
+        },
+        {
+          "label": "スズデン、今期経常を60%上方修正・配当も71円増額（株探）",
+          "url": "https://kabutan.jp/news/?b=k202608030071"
+        }
+      ]
+    },
+    {
+      "topic": "ダイトロン H1大幅増益・通期上方修正・自社株買い",
+      "links": [
+        {
+          "label": "ダイトロン 2026年12月期第2四半期決算短信（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803507098.pdf"
+        },
+        {
+          "label": "ダイトロン 業績上方修正に加えて増配・自社株買いも発表（ダイヤモンドZAI）",
+          "url": "https://diamond.jp/zai/articles/-/1071024"
+        }
+      ]
+    },
+    {
+      "topic": "FUJI Q1大幅増益・通期最高益上方修正",
+      "links": [
+        {
+          "label": "FUJI 2027年3月期第1四半期決算短信（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803506270.pdf"
+        },
+        {
+          "label": "FUJI 第1四半期大幅増益・通期上方修正（ダイヤモンドZAI）",
+          "url": "https://diamond.jp/zai/articles/-/1071025"
+        }
+      ]
+    },
+    {
+      "topic": "JUKI 上期経常黒字転換・4-6月期54倍増益",
+      "links": [
+        {
+          "label": "JUKI 2026年12月期第2四半期決算短信（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803506995.pdf"
+        },
+        {
+          "label": "JUKIはS高、収益改善で1〜6月期利益急拡大（株探）",
+          "url": "https://kabutan.jp/news/?b=n202608040759"
+        }
+      ]
+    },
+    {
+      "topic": "パワーエックス 蓄電システム「Mega Power 4000」・「Grid Connector」発表",
+      "links": [
+        {
+          "label": "パワーエックス「Mega Power 4000」シリーズ発表（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803507397.pdf"
+        },
+        {
+          "label": "パワーエックス「Grid Connector」シリーズ発表（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803507401.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "東計電算 業績上方修正・増配・株式分割",
+      "links": [
+        {
+          "label": "東計電算 業績・配当修正（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260722597842.pdf"
+        },
+        {
+          "label": "東計電算 株式分割（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260803507006.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "アスタリスク RFIDソリューション「AsReader BOX-Type」アパレル採用",
+      "links": [
+        {
+          "label": "アスタリスク「AsReader BOX-Type」coca旗艦店への導入（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260729502525.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "Terra Drone 信用取引増し担保措置解除",
+      "links": [
+        {
+          "label": "テラドローン信用取引増し担保措置解除（株式新聞Web）",
+          "url": "https://kabushiki.jp/news/760804"
+        }
+      ]
+    },
+    {
+      "topic": "ヤマハ発動機 中間期過去最高・通期70%上方修正",
+      "links": [
+        {
+          "label": "ヤマハ発動機 2026年12月期中間期業績概要（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260804507737.pdf"
+        },
+        {
+          "label": "ヤマハ発動機 通期連結業績予想の修正（TDnet）",
+          "url": "https://www.release.tdnet.info/inbs/140120260804508030.pdf"
+        }
+      ]
+    }
+  ],
+  "sources_accessed": "2026-08-04",
+  "disclaimer": []
+}
