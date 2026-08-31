@@ -1,0 +1,765 @@
+{
+  "schema_version": 1,
+  "kind": "market_analysis",
+  "session_date": "2026-08-12",
+  "prev_date": "2026-08-10",
+  "generated_at": "2026-08-31 21:14 JST",
+  "title": "2026年8月12日（火）東証値上がり率ランキング — 業績開示ラッシュ・TOPIX史上最高値更新",
+  "universe": {
+    "description": "",
+    "min_turnover_yen": 100000000,
+    "n_liquid": 1630
+  },
+  "market": {
+    "topix_pct": 0.94,
+    "breadth": {
+      "up": 1019,
+      "down": 576,
+      "flat": 35
+    },
+    "top_sector_by_turnover": {
+      "name": "電気機器",
+      "turnover_oku": 40244.9
+    },
+    "top_stock_by_turnover": {
+      "code": "285A",
+      "name": "キオクシアホールディングス",
+      "turnover_oku": 19253.5
+    }
+  },
+  "thesis": "前営業日（2026年8月10日）引け後に決算・業績修正が相次ぎTDnetに開示され、8月11日（山の日）の休場を挟んで翌々営業日の8月12日に一斉評価が広がった。精工技研（6834）がAIデータセンター向け光コネクタ研磨機・測定装置（AIDC特需）でQ1創業以来最高益・[通期+44%上方修正](https://www.release.tdnet.info/inbs/140120260805510416.pdf)・9月1日付1株→5株分割・増配を発表し17,474億円の売買代金を伴い+12.48%高。ミナトHD（6862）は今期経常2.3倍修正・最高益・12円増配で+20.42%急騰し、電気機器クラスター（s33:3650）全体の牽引役となった。日経平均株価は前営業日比553円高の6万7,524円で引け、TOPIXおよびプライム指数は終値ベースで史上最高値を更新（[株探マーケット日報](https://s.kabutan.jp/news/n202608121134/)）。後場は韓国総合株価指数（KOSPI）の上昇をきっかけに一段高となり、1,019銘柄が上昇する業績相場が演出された。",
+  "overview": {
+    "snapshot": [
+      {
+        "label": "TOPIX（終値ベース）",
+        "value": "+0.94% 4,139.0"
+      },
+      {
+        "label": "値上がり / 値下がり / 変わらず",
+        "value": "1,019 / 576 / 35"
+      },
+      {
+        "label": "日経平均株価",
+        "value": "+553円 67,524円（史上最高値圏）"
+      },
+      {
+        "label": "最大売買代金セクター",
+        "value": "電気機器 約4.0兆円"
+      },
+      {
+        "label": "最大売買代金銘柄",
+        "value": "キオクシアホールディングス 約1.9兆円"
+      }
+    ],
+    "points": [
+      "精工技研（6834）がAIDC特需でQ1創業以来最高益・通期+44%修正・9月1:5分割を発表し、電気機器クラスター（s33:3650）の連想高を牽引。ミナトHD（6862）は今期経常2.3倍最高益・12円増配で+20.42%急騰。",
+      "ソリトンシステムズ（3040）が11:30にH1営業利益+124%・過去最高利益修正・増配を開示し、情報・通信業クラスター（s33:5250）全体の物色を促した。システムサポートHD（4396）が13:00に12期連続最高益・増配を重ねて開示。",
+      "アドウェイズ（2489）が14:30に[今期経常2.2倍上方修正](https://s.kabutan.jp/news/k202608120031/)・上場20周年記念配当・優待拡充を発表。リゾートトラスト（4681）はQ1営業利益+78.4%・進捗率63%でサービス業クラスター（s33:9050）を底上げ。",
+      "シナネンHD（8132）のQ1最終益2.5倍・自社株買い消却（[TDnet開示](https://www.release.tdnet.info/inbs/140120260805510267.pdf)）、Cominix（3173）の切削工具駆け込み需要で上期経常2.2倍・4期ぶり最高益が卸売業クラスター（s33:6050）に連れ高をもたらしたとみられる。",
+      "サンテック（1960）はAIDC・半導体工場建設向けでQ1経常+252.3%・35年ぶり高値圏に突入し建設業クラスター（s33:2050）での買い物色をけん引したとみられる。",
+      "TOPIX・プライム指数が終値ベースで史上最高値を更新。後場はKOSPIの上昇に連動した追加買いが入り、半導体・AIDC関連株が全体相場を牽引する構造が継続した。"
+    ]
+  },
+  "sectors33": [
+    {
+      "name": "金属製品",
+      "n": 25,
+      "up": 15,
+      "down": 9,
+      "flat": 1,
+      "w_pct": 4.61,
+      "mean_pct": 0.53,
+      "median_pct": 0.2,
+      "turnover_oku": 736.4,
+      "drivers": [
+        {
+          "code": "3436",
+          "name": "SUMCO",
+          "pct": 4.59
+        },
+        {
+          "code": "5985",
+          "name": "サンコール",
+          "pct": 13.94
+        }
+      ]
+    },
+    {
+      "name": "非鉄金属",
+      "n": 19,
+      "up": 11,
+      "down": 8,
+      "flat": 0,
+      "w_pct": 3.74,
+      "mean_pct": 0.96,
+      "median_pct": 0.54,
+      "turnover_oku": 8551.5,
+      "drivers": [
+        {
+          "code": "5803",
+          "name": "フジクラ",
+          "pct": 3.94
+        },
+        {
+          "code": "5801",
+          "name": "古河電気工業",
+          "pct": 6.83
+        }
+      ]
+    },
+    {
+      "name": "ガラス･土石製品",
+      "n": 25,
+      "up": 15,
+      "down": 10,
+      "flat": 0,
+      "w_pct": 3.38,
+      "mean_pct": 0.64,
+      "median_pct": 0.46,
+      "turnover_oku": 831.3,
+      "drivers": [
+        {
+          "code": "3110",
+          "name": "日東紡績",
+          "pct": 8.35
+        }
+      ]
+    },
+    {
+      "name": "電気機器",
+      "n": 153,
+      "up": 87,
+      "down": 64,
+      "flat": 2,
+      "w_pct": 3.15,
+      "mean_pct": 0.31,
+      "median_pct": 0.37,
+      "turnover_oku": 40244.9,
+      "drivers": [
+        {
+          "code": "285A",
+          "name": "キオクシアホールディングス",
+          "pct": 3.87
+        }
+      ]
+    },
+    {
+      "name": "銀行業",
+      "n": 68,
+      "up": 66,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 2.79,
+      "mean_pct": 2.61,
+      "median_pct": 2.59,
+      "turnover_oku": 4753.8,
+      "drivers": [
+        {
+          "code": "8306",
+          "name": "三菱UFJフィナンシャル・グループ",
+          "pct": 2.74
+        },
+        {
+          "code": "8316",
+          "name": "三井住友フィナンシャルグループ",
+          "pct": 3.44
+        }
+      ]
+    },
+    {
+      "name": "鉱業",
+      "n": 5,
+      "up": 4,
+      "down": 1,
+      "flat": 0,
+      "w_pct": 2.7,
+      "mean_pct": 1.53,
+      "median_pct": 1.38,
+      "turnover_oku": 350.2,
+      "drivers": [
+        {
+          "code": "1605",
+          "name": "INPEX",
+          "pct": 2.91
+        }
+      ]
+    },
+    {
+      "name": "化学",
+      "n": 118,
+      "up": 65,
+      "down": 51,
+      "flat": 2,
+      "w_pct": 1.51,
+      "mean_pct": 0.39,
+      "median_pct": 0.42,
+      "turnover_oku": 4023.5,
+      "drivers": [
+        {
+          "code": "4004",
+          "name": "レゾナック・ホールディングス",
+          "pct": 6.58
+        }
+      ]
+    },
+    {
+      "name": "精密機器",
+      "n": 36,
+      "up": 24,
+      "down": 11,
+      "flat": 1,
+      "w_pct": 1.35,
+      "mean_pct": 1.01,
+      "median_pct": 0.91,
+      "turnover_oku": 1245.6,
+      "drivers": [
+        {
+          "code": "8050",
+          "name": "セイコーグループ",
+          "pct": 5.34
+        },
+        {
+          "code": "268A",
+          "name": "リガク・ホールディングス",
+          "pct": 7.19
+        }
+      ]
+    },
+    {
+      "name": "その他製品",
+      "n": 39,
+      "up": 21,
+      "down": 16,
+      "flat": 2,
+      "w_pct": 1.3,
+      "mean_pct": 0.68,
+      "median_pct": 0.28,
+      "turnover_oku": 2508.3,
+      "drivers": [
+        {
+          "code": "7974",
+          "name": "任天堂",
+          "pct": 2.7
+        }
+      ]
+    },
+    {
+      "name": "その他金融業",
+      "n": 24,
+      "up": 20,
+      "down": 4,
+      "flat": 0,
+      "w_pct": 1.23,
+      "mean_pct": 1.46,
+      "median_pct": 0.75,
+      "turnover_oku": 529.5,
+      "drivers": [
+        {
+          "code": "8591",
+          "name": "オリックス",
+          "pct": 1.26
+        }
+      ]
+    },
+    {
+      "name": "証券･商品先物取引業",
+      "n": 20,
+      "up": 10,
+      "down": 10,
+      "flat": 0,
+      "w_pct": 1.18,
+      "mean_pct": 0.47,
+      "median_pct": 0.09,
+      "turnover_oku": 373.6,
+      "drivers": [
+        {
+          "code": "8473",
+          "name": "SBIホールディングス",
+          "pct": 1.93
+        },
+        {
+          "code": "8604",
+          "name": "野村ホールディングス",
+          "pct": 1.03
+        }
+      ]
+    },
+    {
+      "name": "水産・農林業",
+      "n": 5,
+      "up": 4,
+      "down": 0,
+      "flat": 1,
+      "w_pct": 1.12,
+      "mean_pct": 1.17,
+      "median_pct": 0.6,
+      "turnover_oku": 35.9,
+      "drivers": [
+        {
+          "code": "1379",
+          "name": "ホクト",
+          "pct": 4.33
+        }
+      ]
+    },
+    {
+      "name": "石油･石炭製品",
+      "n": 6,
+      "up": 5,
+      "down": 0,
+      "flat": 1,
+      "w_pct": 0.86,
+      "mean_pct": 0.65,
+      "median_pct": 0.59,
+      "turnover_oku": 203.7,
+      "drivers": [
+        {
+          "code": "5020",
+          "name": "ENEOSホールディングス",
+          "pct": 1.1
+        }
+      ]
+    },
+    {
+      "name": "機械",
+      "n": 119,
+      "up": 68,
+      "down": 49,
+      "flat": 2,
+      "w_pct": 0.85,
+      "mean_pct": 0.6,
+      "median_pct": 0.21,
+      "turnover_oku": 5306.2,
+      "drivers": [
+        {
+          "code": "7013",
+          "name": "IHI",
+          "pct": 4.98
+        },
+        {
+          "code": "7011",
+          "name": "三菱重工業",
+          "pct": 2.25
+        }
+      ]
+    },
+    {
+      "name": "情報･通信業",
+      "n": 193,
+      "up": 142,
+      "down": 49,
+      "flat": 2,
+      "w_pct": 0.84,
+      "mean_pct": 1.31,
+      "median_pct": 0.97,
+      "turnover_oku": 4768.3,
+      "drivers": [
+        {
+          "code": "9984",
+          "name": "ソフトバンクグループ",
+          "pct": 0.66
+        },
+        {
+          "code": "9684",
+          "name": "スクウェア・エニックス・ホールディングス",
+          "pct": 3.59
+        }
+      ]
+    },
+    {
+      "name": "食料品",
+      "n": 51,
+      "up": 27,
+      "down": 22,
+      "flat": 2,
+      "w_pct": 0.81,
+      "mean_pct": 0.28,
+      "median_pct": 0.32,
+      "turnover_oku": 1454.1,
+      "drivers": [
+        {
+          "code": "2802",
+          "name": "味の素",
+          "pct": 3.49
+        }
+      ]
+    },
+    {
+      "name": "電気･ガス業",
+      "n": 22,
+      "up": 17,
+      "down": 5,
+      "flat": 0,
+      "w_pct": 0.81,
+      "mean_pct": 0.78,
+      "median_pct": 0.87,
+      "turnover_oku": 555.2,
+      "drivers": [
+        {
+          "code": "9502",
+          "name": "中部電力",
+          "pct": 2.56
+        },
+        {
+          "code": "9532",
+          "name": "大阪瓦斯",
+          "pct": 2.49
+        }
+      ]
+    },
+    {
+      "name": "陸運業",
+      "n": 34,
+      "up": 22,
+      "down": 9,
+      "flat": 3,
+      "w_pct": 0.69,
+      "mean_pct": 0.43,
+      "median_pct": 0.39,
+      "turnover_oku": 892.7,
+      "drivers": [
+        {
+          "code": "9024",
+          "name": "西武ホールディングス",
+          "pct": 5.6
+        },
+        {
+          "code": "9147",
+          "name": "NIPPON EXPRESSホールディングス",
+          "pct": 1.67
+        }
+      ]
+    },
+    {
+      "name": "建設業",
+      "n": 75,
+      "up": 52,
+      "down": 20,
+      "flat": 3,
+      "w_pct": 0.63,
+      "mean_pct": 0.86,
+      "median_pct": 0.56,
+      "turnover_oku": 1531.7,
+      "drivers": [
+        {
+          "code": "1942",
+          "name": "関電工",
+          "pct": 2.36
+        },
+        {
+          "code": "1801",
+          "name": "大成建設",
+          "pct": 1.58
+        }
+      ]
+    },
+    {
+      "name": "保険業",
+      "n": 10,
+      "up": 6,
+      "down": 4,
+      "flat": 0,
+      "w_pct": 0.43,
+      "mean_pct": -0.26,
+      "median_pct": 0.45,
+      "turnover_oku": 1055.7,
+      "drivers": [
+        {
+          "code": "8750",
+          "name": "第一ライフグループ",
+          "pct": 2.04
+        }
+      ]
+    },
+    {
+      "name": "パルプ・紙",
+      "n": 10,
+      "up": 3,
+      "down": 7,
+      "flat": 0,
+      "w_pct": 0.21,
+      "mean_pct": -0.31,
+      "median_pct": -0.3,
+      "turnover_oku": 70.6,
+      "drivers": [
+        {
+          "code": "3891",
+          "name": "ニッポン高度紙工業",
+          "pct": 5.33
+        }
+      ]
+    },
+    {
+      "name": "サービス業",
+      "n": 120,
+      "up": 86,
+      "down": 32,
+      "flat": 2,
+      "w_pct": 0.18,
+      "mean_pct": 0.94,
+      "median_pct": 1.01,
+      "turnover_oku": 3818.2,
+      "drivers": [
+        {
+          "code": "6098",
+          "name": "リクルートホールディングス",
+          "pct": 3.06
+        }
+      ]
+    },
+    {
+      "name": "不動産業",
+      "n": 57,
+      "up": 40,
+      "down": 12,
+      "flat": 5,
+      "w_pct": 0.08,
+      "mean_pct": 1.07,
+      "median_pct": 0.58,
+      "turnover_oku": 1119.0,
+      "drivers": [
+        {
+          "code": "3288",
+          "name": "オープンハウスグループ",
+          "pct": 2.69
+        },
+        {
+          "code": "8995",
+          "name": "誠建設工業",
+          "pct": 20.69
+        }
+      ]
+    },
+    {
+      "name": "輸送用機器",
+      "n": 46,
+      "up": 22,
+      "down": 24,
+      "flat": 0,
+      "w_pct": 0.06,
+      "mean_pct": 0.03,
+      "median_pct": -0.07,
+      "turnover_oku": 2571.4,
+      "drivers": [
+        {
+          "code": "7012",
+          "name": "川崎重工業",
+          "pct": 3.01
+        }
+      ]
+    },
+    {
+      "name": "医薬品",
+      "n": 43,
+      "up": 25,
+      "down": 17,
+      "flat": 1,
+      "w_pct": -0.01,
+      "mean_pct": 0.63,
+      "median_pct": 0.25,
+      "turnover_oku": 1380.2,
+      "drivers": [
+        {
+          "code": "4578",
+          "name": "大塚ホールディングス",
+          "pct": -2.47
+        }
+      ]
+    },
+    {
+      "name": "ゴム製品",
+      "n": 11,
+      "up": 3,
+      "down": 8,
+      "flat": 0,
+      "w_pct": -0.06,
+      "mean_pct": -0.66,
+      "median_pct": -0.49,
+      "turnover_oku": 624.8,
+      "drivers": [
+        {
+          "code": "5108",
+          "name": "ブリヂストン",
+          "pct": -2.11
+        }
+      ]
+    },
+    {
+      "name": "倉庫･運輸関連業",
+      "n": 8,
+      "up": 6,
+      "down": 2,
+      "flat": 0,
+      "w_pct": -0.12,
+      "mean_pct": 0.15,
+      "median_pct": 0.22,
+      "turnover_oku": 53.4,
+      "drivers": [
+        {
+          "code": "9301",
+          "name": "三菱倉庫",
+          "pct": -1.41
+        }
+      ]
+    },
+    {
+      "name": "鉄鋼",
+      "n": 21,
+      "up": 10,
+      "down": 11,
+      "flat": 0,
+      "w_pct": -0.18,
+      "mean_pct": 0.33,
+      "median_pct": -0.31,
+      "turnover_oku": 485.5,
+      "drivers": [
+        {
+          "code": "5411",
+          "name": "JFEホールディングス",
+          "pct": -1.22
+        }
+      ]
+    },
+    {
+      "name": "小売業",
+      "n": 130,
+      "up": 74,
+      "down": 53,
+      "flat": 3,
+      "w_pct": -0.67,
+      "mean_pct": 0.17,
+      "median_pct": 0.24,
+      "turnover_oku": 2868.8,
+      "drivers": [
+        {
+          "code": "9843",
+          "name": "ニトリホールディングス",
+          "pct": -5.11
+        },
+        {
+          "code": "9983",
+          "name": "ファーストリテイリング",
+          "pct": -0.85
+        }
+      ]
+    },
+    {
+      "name": "空運業",
+      "n": 2,
+      "up": 0,
+      "down": 2,
+      "flat": 0,
+      "w_pct": -0.73,
+      "mean_pct": -0.73,
+      "median_pct": -0.73,
+      "turnover_oku": 135.1,
+      "drivers": [
+        {
+          "code": "9202",
+          "name": "ANAホールディングス",
+          "pct": -0.87
+        },
+        {
+          "code": "9201",
+          "name": "日本航空",
+          "pct": -0.59
+        }
+      ]
+    },
+    {
+      "name": "海運業",
+      "n": 6,
+      "up": 1,
+      "down": 5,
+      "flat": 0,
+      "w_pct": -0.86,
+      "mean_pct": -0.27,
+      "median_pct": -0.27,
+      "turnover_oku": 445.3,
+      "drivers": [
+        {
+          "code": "9104",
+          "name": "商船三井",
+          "pct": -1.8
+        }
+      ]
+    },
+    {
+      "name": "繊維製品",
+      "n": 17,
+      "up": 12,
+      "down": 5,
+      "flat": 0,
+      "w_pct": -3.38,
+      "mean_pct": -0.42,
+      "median_pct": 0.29,
+      "turnover_oku": 319.5,
+      "drivers": [
+        {
+          "code": "3103",
+          "name": "ユニチカ",
+          "pct": -7.32
+        }
+      ]
+    },
+    {
+      "name": "卸売業",
+      "n": 112,
+      "up": 56,
+      "down": 54,
+      "flat": 2,
+      "w_pct": -5.66,
+      "mean_pct": 0.11,
+      "median_pct": 0.05,
+      "turnover_oku": 3301.1,
+      "drivers": [
+        {
+          "code": "8136",
+          "name": "サンリオ",
+          "pct": -18.12
+        }
+      ]
+    }
+  ],
+  "theme_matrix": {},
+  "methodology": {},
+  "news_sources": [
+    {
+      "topic": "精工技研（6834）Q1創業以来最高益・通期+44%修正・9月1株→5株分割・増配（TDnet 2026-08-10 16:00開示）",
+      "links": [
+        {
+          "label": "TDnet：2027年3月期第1四半期決算短信〔日本基準〕(連結)（精工技研）",
+          "url": "https://www.release.tdnet.info/inbs/140120260806511916.pdf"
+        },
+        {
+          "label": "TDnet：2027年3月期第2四半期及び通期連結業績予想の修正並びに配当予想の修正（増配）（精工技研）",
+          "url": "https://www.release.tdnet.info/inbs/140120260805510416.pdf"
+        },
+        {
+          "label": "株探：精工技研は気配値のまま一気呵成の上値追い、AIDC特需で今期業績と配当を大幅増額（2026-08-12 09:11）",
+          "url": "https://s.kabutan.jp/news/n202608120345/"
+        }
+      ]
+    },
+    {
+      "topic": "ソリトンシステムズ（3040）2026年12月期H1最高益・増配（TDnet 2026-08-12 11:30開示）",
+      "links": [
+        {
+          "label": "TDnet：2026年12月期連結業績予想および期末配当予想の修正(増配）（ソリトンシステムズ）",
+          "url": "https://www.release.tdnet.info/inbs/140120260810517049.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "TOPIXおよびプライム指数が終値ベースで史上最高値を更新（2026-08-12）",
+      "links": [
+        {
+          "label": "株探 マーケット日報 2026年8月12日",
+          "url": "https://s.kabutan.jp/news/n202608121134/"
+        }
+      ]
+    }
+  ],
+  "sources_accessed": "2026-08-31",
+  "disclaimer": []
+}
