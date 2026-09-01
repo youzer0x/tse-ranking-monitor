@@ -1,0 +1,4198 @@
+{
+  "schema_version": 1,
+  "session_date": "2026-08-13",
+  "prev_date": "2026-08-12",
+  "prev5_date": "2026-08-05",
+  "session_window": "2026-08-13 09:00–15:30 JST（前場9:00-11:30／後場12:30-15:30）",
+  "generated_at": "2026-09-01 16:40 JST",
+  "criteria": {
+    "min_pct": 5.0,
+    "min_turnover_yen": 10000000,
+    "min_mcap_oku": 100,
+    "max_rank": 30
+  },
+  "capped": true,
+  "counts": {
+    "qualifying": 98,
+    "ranked": 30,
+    "dropped_turnover": 7,
+    "dropped_mcap": 21,
+    "excluded": 786
+  },
+  "rows": [
+    {
+      "code": "194A",
+      "name": "WOLVES HAND",
+      "market": "グロース",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "9050",
+      "sec33_name": "サービス業",
+      "scale_cat": "-",
+      "mcap_oku": 152,
+      "mcap_oku_exact": 151.5,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 26.67,
+      "pct5": 25.83,
+      "close": 1900.0,
+      "adj_close": 1900.0,
+      "prev_adj_close": 1500.0,
+      "turnover_yen": 392649600,
+      "turnover_m": 392.6,
+      "shoutfy_jq": 7974000,
+      "period_end": "2026-06-30",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "12:30",
+          "code": "194A",
+          "name": "Ｇ－ＷＯＬＶＥＳ",
+          "title": "2026年６月期決算短信〔日本基準〕（連結）",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260813518909.pdf",
+          "origin": "day",
+          "date": "2026-08-13"
+        },
+        {
+          "time": "12:30",
+          "code": "194A",
+          "name": "Ｇ－ＷＯＬＶＥＳ",
+          "title": "2026年６月期決算短信説明資料",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260813518927.pdf",
+          "origin": "day",
+          "date": "2026-08-13"
+        },
+        {
+          "time": "12:30",
+          "code": "194A",
+          "name": "Ｇ－ＷＯＬＶＥＳ",
+          "title": "配当方針の変更及び2027年６月期の配当予想（初配）に関するお知らせ",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260813519001.pdf",
+          "origin": "day",
+          "date": "2026-08-13"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-20T19:40:00+09:00",
+          "category": "特集",
+          "title": "利益成長【青天井】銘柄リスト〔第4弾〕33社選出 ＜成長株特集＞",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=n202608201221"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-14T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1渋谷工、弁護士コム、TOPPANなど",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=n202608140297"
+        },
+        {
+          "datetime": "2026-08-13T15:40:08+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 12 銘柄　　S安＝ 3 銘柄　(8月13日)",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=n202608131012"
+        },
+        {
+          "datetime": "2026-08-13T15:32:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・１３日＞（大引け）＝ウルフハンド、スターゼン、Ｋ＆Ｏエナジなど",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=n202608130990"
+        },
+        {
+          "datetime": "2026-08-13T13:19:00+09:00",
+          "category": "材料",
+          "title": "ウルフハンドは後場Ｓ高、２７年６月期は営業益３９％増を計画し初配当実施へ",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=n202608130757"
+        },
+        {
+          "datetime": "2026-08-13T12:30:00+09:00",
+          "category": "決算",
+          "title": "ウルフハンド、今期経常は39％増で7期連続最高益、26円で初配当へ",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=k202608130017"
+        },
+        {
+          "datetime": "2026-08-13T12:30:00+09:00",
+          "category": "開示",
+          "title": "配当方針の変更及び2027年６月期の配当予想（初配）に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260813/140120260813519001/"
+        },
+        {
+          "datetime": "2026-08-13T12:30:00+09:00",
+          "category": "開示",
+          "title": "2026年６月期決算短信説明資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260813/140120260813518927/"
+        },
+        {
+          "datetime": "2026-08-13T12:30:00+09:00",
+          "category": "開示",
+          "title": "2026年６月期決算短信〔日本基準〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260813/140120260813518909/"
+        },
+        {
+          "datetime": "2026-08-12T19:43:19+09:00",
+          "category": "注目",
+          "title": "★本日の【イチオシ決算】 日本マイクロ、ＡＲＣＨＩＯ、ＴＯＰＰＡＮ (8月12日)",
+          "url": "https://kabutan.jp/stock/news?code=194A&b=n202608121311"
+        },
+        {
+          "datetime": "2026-08-12T12:50:00+09:00",
+          "category": "開示",
+          "title": "2026年６月期決算発表の日程変更（前倒し）に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260812518053/"
+        }
+      ],
+      "factor": "2026年8月13日12時30分にTDnetへ同時開示した2026年6月期決算短信〔日本基準〕（連結）（経常利益+24.6%・3期連続増益・6期連続増収）と2027年6月期経常利益予想+38.7%（7期連続最高益見通し）、および配当方針の変更及び2027年6月期の配当予想（初配）に関するお知らせ（初配当26円）の三点が好感され、後場でストップ高となった。株探ニュースが13時19分にS高を速報。",
+      "factor_kind": "開示",
+      "rank": 1,
+      "sector_cluster": {
+        "sec33": "9050",
+        "name": "サービス業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "6027",
+            "name": "弁護士ドットコム",
+            "rank": 4,
+            "pct": 18.87,
+            "turnover_m": 2891.5,
+            "has_disclosure": true
+          },
+          {
+            "code": "7059",
+            "name": "コプロ・ホールディングス",
+            "rank": 11,
+            "pct": 14.0,
+            "turnover_m": 944.2,
+            "has_disclosure": true
+          },
+          {
+            "code": "2489",
+            "name": "アドウェイズ",
+            "rank": 19,
+            "pct": 10.29,
+            "turnover_m": 946.0,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6027",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "3103",
+      "name": "ユニチカ",
+      "market": "スタンダード",
+      "sec17": "4",
+      "sec17_name": "素材・化学",
+      "sec33": "3100",
+      "sec33_name": "繊維製品",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 780,
+      "mcap_oku_exact": 779.7,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 22.5,
+      "pct5": 33.8,
+      "close": 1350.0,
+      "adj_close": 1350.0,
+      "prev_adj_close": 1102.0,
+      "turnover_yen": 39336740600,
+      "turnover_m": 39336.7,
+      "shoutfy_jq": 57752343,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T16:30:00+09:00",
+          "category": "開示",
+          "title": "当社株式の所属業種変更のお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901530004/"
+        },
+        {
+          "datetime": "2026-08-16T09:00:00+09:00",
+          "category": "注目",
+          "title": "今週の「妙味株」一本釣り！ ─ ユニチカ",
+          "url": "https://kabutan.jp/stock/news?code=3103&b=n202608160026"
+        },
+        {
+          "datetime": "2026-08-14T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2ミナトHD、ユニチカ、コロンビア・ワークスなど",
+          "url": "https://kabutan.jp/stock/news?code=3103&b=n202608140303"
+        },
+        {
+          "datetime": "2026-08-12T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2内外テック、QDレーザー、ダイジェットなど",
+          "url": "https://kabutan.jp/stock/news?code=3103&b=n202608120190"
+        },
+        {
+          "datetime": "2026-08-11T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2内外テック、QDレーザー、ダイジェットなど",
+          "url": "https://kabutan.jp/stock/news?code=3103&b=n202608110209"
+        },
+        {
+          "datetime": "2026-08-10T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2レーザーテック、TOWA、日本タングステンなど",
+          "url": "https://kabutan.jp/stock/news?code=3103&b=n202608100023"
+        },
+        {
+          "datetime": "2026-08-08T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2レーザーテック、TOWA、日本タングステンなど",
+          "url": "https://kabutan.jp/stock/news?code=3103&b=n202608080119"
+        }
+      ],
+      "factor": "2026年8月6日発表の2027年3月期第1四半期決算（営業利益前年同期比46.4%増、純利益約3.1倍）を起点とする構造改革評価の上昇が継続した（継続テーマ、起点：2026年8月6日）。材料窓内にユニチカ自身の新規開示・報道はなく、同一繊維製品セクターの同業ダイニック（3551）が2026年8月12日17時にTDnetで好調な第1四半期決算を開示したことが繊維株センチメントを支持する一因となった可能性がある。5日間騰落率+33.8%は8月6日以降の継続上昇を裏付ける。",
+      "factor_kind": "テーマ",
+      "rank": 2,
+      "sector_cluster": {
+        "sec33": "3100",
+        "name": "繊維製品",
+        "size": 2,
+        "peers": [
+          {
+            "code": "3551",
+            "name": "ダイニック",
+            "rank": 10,
+            "pct": 14.77,
+            "turnover_m": 338.9,
+            "has_disclosure": true
+          }
+        ],
+        "leader_code": "3551",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "146A",
+      "name": "コロンビア・ワークス",
+      "market": "スタンダード",
+      "sec17": "17",
+      "sec17_name": "不動産",
+      "sec33": "8050",
+      "sec33_name": "不動産業",
+      "scale_cat": "-",
+      "mcap_oku": 309,
+      "mcap_oku_exact": 309.0,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 21.18,
+      "pct5": 23.61,
+      "close": 4005.0,
+      "adj_close": 4005.0,
+      "prev_adj_close": 3305.0,
+      "turnover_yen": 499809500,
+      "turnover_m": 499.8,
+      "shoutfy_jq": 7716600,
+      "period_end": "2026-12-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "16:00",
+          "code": "146A",
+          "name": "コロンビア・ワークス",
+          "title": "2026年12月期　第２四半期（中間期）決算短信〔日本基準〕（連結）",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517737.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "16:00",
+          "code": "146A",
+          "name": "コロンビア・ワークス",
+          "title": "2026年12月期第２四半期 決算説明資料",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517904.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "16:00",
+          "code": "146A",
+          "name": "コロンビア・ワークス",
+          "title": "中期経営計画（～2030年）",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517907.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T16:00:00+09:00",
+          "category": "開示",
+          "title": "想定されるご質問と当社見解(2026年８月)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529528/"
+        },
+        {
+          "datetime": "2026-09-01T16:00:00+09:00",
+          "category": "開示",
+          "title": "中期経営計画(～2030年)概要(補足テキスト)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529522/"
+        },
+        {
+          "datetime": "2026-09-01T16:00:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期第２四半期決算概要(補足テキスト)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529513/"
+        },
+        {
+          "datetime": "2026-08-26T16:00:00+09:00",
+          "category": "開示",
+          "title": "(Delayed)Medium-Term Management Plan through FY2030",
+          "url": "https://kabutan.jp/disclosures/pdf/20260826/140120260826526473/"
+        },
+        {
+          "datetime": "2026-08-26T16:00:00+09:00",
+          "category": "開示",
+          "title": "(Delayed)Presentation Materials of H1 FY2026 Financial Results",
+          "url": "https://kabutan.jp/disclosures/pdf/20260826/140120260826526471/"
+        },
+        {
+          "datetime": "2026-08-19T16:00:00+09:00",
+          "category": "開示",
+          "title": "当社子会社による投資助言業務受託のお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260819/140120260819523078/"
+        },
+        {
+          "datetime": "2026-08-17T16:30:00+09:00",
+          "category": "開示",
+          "title": "(Delayed) Consolidated Financial Results for the Six Months Ended June 30, 2026 (Under Japanese GAAP)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260817/140120260817521930/"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=146A&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-14T16:00:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期第２四半期決算概要及び中期経営計画動画  アーカイブ配信のお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260814521317/"
+        },
+        {
+          "datetime": "2026-08-14T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2ミナトHD、ユニチカ、コロンビア・ワークスなど",
+          "url": "https://kabutan.jp/stock/news?code=146A&b=n202608140303"
+        },
+        {
+          "datetime": "2026-08-13T15:40:08+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 12 銘柄　　S安＝ 3 銘柄　(8月13日)",
+          "url": "https://kabutan.jp/stock/news?code=146A&b=n202608131012"
+        },
+        {
+          "datetime": "2026-08-13T09:43:00+09:00",
+          "category": "材料",
+          "title": "コロンビアはＳ高、不動産開発物件の売却により６月中間期営業益２．６倍",
+          "url": "https://kabutan.jp/stock/news?code=146A&b=n202608130472"
+        }
+      ],
+      "factor": "2026年8月12日16:00にTDnet開示された2026年12月期第2四半期（中間期）決算短信において、売上高約199億円（前年同期比105.3%増）・営業利益約33億円（同156.9%増、約2.6倍）と大幅な増収増益を発表したことを好感し、2026年8月13日にS高（前日比700円高・+21.18%）となった。不動産開発物件（レジデンス物件）の売却が主な増益要因とみられる。同日開示の決算説明資料および中期経営計画（～2030年）も材料視されたとみられる。不動産業セクター（s33:8050）内では、自社開示のない3277サンセイランディックに連れ高とみられる動きがあった。",
+      "factor_kind": "開示",
+      "rank": 3,
+      "sector_cluster": {
+        "sec33": "8050",
+        "name": "不動産業",
+        "size": 2,
+        "peers": [
+          {
+            "code": "3277",
+            "name": "サンセイランディック",
+            "rank": 8,
+            "pct": 16.13,
+            "turnover_m": 268.9,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "146A",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "6027",
+      "name": "弁護士ドットコム",
+      "market": "プライム",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "9050",
+      "sec33_name": "サービス業",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 720,
+      "mcap_oku_exact": 720.3,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 18.87,
+      "pct5": 31.8,
+      "close": 3150.0,
+      "adj_close": 3150.0,
+      "prev_adj_close": 2650.0,
+      "turnover_yen": 2891530200,
+      "turnover_m": 2891.5,
+      "shoutfy_jq": 22867600,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "15:30",
+          "code": "6027",
+          "name": "弁護士ドットコム",
+          "title": "2027年３月期 第１四半期決算短信〔日本基準〕(連結)",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260810517022.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "15:30",
+          "code": "6027",
+          "name": "弁護士ドットコム",
+          "title": "2027年３月期 第１四半期 決算説明資料",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812518086.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Regarding the Status of Purchase of Treasury Shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831529146/"
+        },
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況に関するお知らせ（会社法第459条第１項の規定による定款の定めに基づく自己株式の取得）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831529132/"
+        },
+        {
+          "datetime": "2026-09-01T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1壱番屋、東海カーボン、クオンツ総研ホールディングスなど",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202609010083"
+        },
+        {
+          "datetime": "2026-08-31T16:30:00+09:00",
+          "category": "開示",
+          "title": "クラウドサインシリーズ、「クラウドサイン 書類管理」を提供開始",
+          "url": "https://kabutan.jp/disclosures/pdf/20260831/140120260831528964/"
+        },
+        {
+          "datetime": "2026-08-29T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ティアフォー、テラドローン、シリコンスタ (8月24日～28日)",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608290121"
+        },
+        {
+          "datetime": "2026-08-27T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1 インテージHD、テラドローン、弁護士ドットコムなど",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608270104"
+        },
+        {
+          "datetime": "2026-08-26T16:11:07+09:00",
+          "category": "材料",
+          "title": "本日の注目個別銘柄：エーバランス、シリコンスタ、稀元素など",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608260885"
+        },
+        {
+          "datetime": "2026-08-26T15:40:04+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 10 銘柄　　S安＝ 1 銘柄　(8月26日)",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608260809"
+        },
+        {
+          "datetime": "2026-08-26T10:58:08+09:00",
+          "category": "材料",
+          "title": "弁護士コム---大幅反発、クラウドサイン事業などの成長期待から国内証券が新規買い推奨",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608260416"
+        },
+        {
+          "datetime": "2026-08-25T17:00:32+09:00",
+          "category": "特集",
+          "title": "レーティング日報【新規格付け】　(8月25日)",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608250941"
+        },
+        {
+          "datetime": "2026-08-25T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1弁護士コム、東映アニメ、住友金属鉱山など",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608250092"
+        },
+        {
+          "datetime": "2026-08-24T15:52:32+09:00",
+          "category": "材料",
+          "title": "本日の注目個別銘柄：住友鉱、弁護士コム、東映アニメなど（訂正）",
+          "url": "https://kabutan.jp/stock/news?code=6027&b=n202608240784"
+        }
+      ],
+      "factor": "2026年8月12日15時30分にTDnetへ開示した2027年3月期第1四半期決算（売上高48.4億円・前年同期比+27.3%、営業利益7.0億円・同+36.8%）が好感された。[決算説明資料](https://www.release.tdnet.info/inbs/140120260812518086.pdf)では法務AI「LegalBrainエージェント」のARRが2026年3月〜7月の4カ月で3.8倍に拡大し、クラウドサインのARRが2026年7月に10億円を突破した旨が開示されており、「AI時代に独自データで強みを持つ企業」への評価転換が株価上昇の一因とみられる。",
+      "factor_kind": "開示",
+      "rank": 4,
+      "sector_cluster": {
+        "sec33": "9050",
+        "name": "サービス業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "194A",
+            "name": "WOLVES HAND",
+            "rank": 1,
+            "pct": 26.67,
+            "turnover_m": 392.6,
+            "has_disclosure": true
+          },
+          {
+            "code": "7059",
+            "name": "コプロ・ホールディングス",
+            "rank": 11,
+            "pct": 14.0,
+            "turnover_m": 944.2,
+            "has_disclosure": true
+          },
+          {
+            "code": "2489",
+            "name": "アドウェイズ",
+            "rank": 19,
+            "pct": 10.29,
+            "turnover_m": 946.0,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6027",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "4588",
+      "name": "オンコリスバイオファーマ",
+      "market": "グロース",
+      "sec17": "5",
+      "sec17_name": "医薬品",
+      "sec33": "3250",
+      "sec33_name": "医薬品",
+      "scale_cat": "-",
+      "mcap_oku": 988,
+      "mcap_oku_exact": 988.1,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 17.42,
+      "pct5": 24.22,
+      "close": 3370.0,
+      "adj_close": 3370.0,
+      "prev_adj_close": 2870.0,
+      "turnover_yen": 8786891600,
+      "turnover_m": 8786.9,
+      "shoutfy_jq": 29319700,
+      "period_end": "2026-12-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:40:04+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 4 銘柄　　S安＝ 4 銘柄　(9月1日)",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202609010809"
+        },
+        {
+          "datetime": "2026-08-31T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2オンコリス、シリコンスタ、エコモットなど",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608310022"
+        },
+        {
+          "datetime": "2026-08-29T09:00:00+09:00",
+          "category": "特集",
+          "title": "今週の【上場来高値銘柄】オンコリス、リクルート、岩井コスモなど72銘柄",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608290125"
+        },
+        {
+          "datetime": "2026-08-29T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ティアフォー、テラドローン、シリコンスタ (8月24日～28日)",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608290121"
+        },
+        {
+          "datetime": "2026-08-29T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2オンコリス、シリコンスタ、エコモットなど",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608290085"
+        },
+        {
+          "datetime": "2026-08-28T15:43:20+09:00",
+          "category": "材料",
+          "title": "新興市場銘柄ダイジェスト:オンコリスがストップ高で年初来高値更新、エコモットがストップ高",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608280856"
+        },
+        {
+          "datetime": "2026-08-28T15:40:05+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 14 銘柄　　S安＝ 0 銘柄　(8月28日)",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608280843"
+        },
+        {
+          "datetime": "2026-08-28T15:34:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・２８日＞（大引け）＝リベラウェア、タイミー、ＦＩＸＥＲなど",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608280829"
+        },
+        {
+          "datetime": "2026-08-28T11:31:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・２８日＞（前引け）＝オンコリス、シリコンスタ、リンクバル",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608280498"
+        },
+        {
+          "datetime": "2026-08-28T10:52:00+09:00",
+          "category": "材料",
+          "title": "オンコリスが利食いこなし上場来高値更新、「ＯＢＰ－６０１」の海外医学誌掲載が刺激材料に",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608280430"
+        },
+        {
+          "datetime": "2026-08-28T10:15:57+09:00",
+          "category": "材料",
+          "title": "オンコリス---急騰、OBP-601の第IIa相臨床試験結果が海外医学誌に掲載",
+          "url": "https://kabutan.jp/stock/news?code=4588&b=n202608280371"
+        },
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "LINE-1阻害剤センサブジン（OBP-601）の海外医学誌掲載のお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260827526930/"
+        }
+      ],
+      "factor": "オンコリスバイオファーマが2026年8月12日8時45分にTDnetで「テロメライシン注の薬価基準収載並びに保険適用に関するお知らせ」を開示し、同社開発の腫瘍溶解ウイルス製剤テロメライシン注（OBP-301、一般名：スラタデノツレブ）が2026年8月13日付で食道がんを適応症として薬価収載（保険適用開始）されることを公表した。薬価は患者1人1クール約930万7,467円（310万2,489円/2mL1瓶）に設定されたことを新薬情報オンラインが確認しており、富士フイルム富山化学を販売パートナーとして同月21日の販売開始が予定されていた。同社にとって初の医薬品の実市場参入確定を材料視した買いが集中したとみられる。",
+      "factor_kind": "報道",
+      "rank": 5,
+      "sector_cluster": {
+        "sec33": "3250",
+        "name": "医薬品",
+        "size": 3,
+        "peers": [
+          {
+            "code": "4593",
+            "name": "ヘリオス",
+            "rank": 22,
+            "pct": 9.84,
+            "turnover_m": 1171.6,
+            "has_disclosure": true
+          },
+          {
+            "code": "4565",
+            "name": "ネクセラファーマ",
+            "rank": 25,
+            "pct": 8.48,
+            "turnover_m": 2187.4,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "4593",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "6862",
+      "name": "ミナトホールディングス",
+      "market": "スタンダード",
+      "sec17": "9",
+      "sec17_name": "電機・精密",
+      "sec33": "3650",
+      "sec33_name": "電気機器",
+      "scale_cat": "-",
+      "mcap_oku": 273,
+      "mcap_oku_exact": 273.4,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 17.03,
+      "pct5": 48.01,
+      "close": 3450.0,
+      "adj_close": 3450.0,
+      "prev_adj_close": 2948.0,
+      "turnover_yen": 75900000,
+      "turnover_m": 75.9,
+      "shoutfy_jq": 7925714,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況に関するお知らせ（会社法第165条第２項の規定による定款の定めに基づく自己株式の取得）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529750/"
+        },
+        {
+          "datetime": "2026-08-28T15:30:00+09:00",
+          "category": "開示",
+          "title": "シンジケートローン契約締結に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260828/140120260828527808/"
+        },
+        {
+          "datetime": "2026-08-28T15:30:00+09:00",
+          "category": "開示",
+          "title": "ミナトホールディングスグループの富士電工　富士電機より「コアパートナー企業」に3年連続で認定",
+          "url": "https://kabutan.jp/disclosures/pdf/20260828/140120260828527527/"
+        },
+        {
+          "datetime": "2026-08-20T19:40:00+09:00",
+          "category": "特集",
+          "title": "利益成長【青天井】銘柄リスト〔第4弾〕33社選出 ＜成長株特集＞",
+          "url": "https://kabutan.jp/stock/news?code=6862&b=n202608201221"
+        },
+        {
+          "datetime": "2026-08-19T15:30:00+09:00",
+          "category": "開示",
+          "title": "譲渡制限付株式報酬としての自己株式の処分の払込完了に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260819/140120260819522713/"
+        },
+        {
+          "datetime": "2026-08-17T09:13:00+09:00",
+          "category": "材料",
+          "title": "ミナトＨＤが反落、東証が信用取引に関する臨時措置を実施",
+          "url": "https://kabutan.jp/stock/news?code=6862&b=n202608170176"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=6862&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "ミナトホールディングス「第21回 日経・東証IRフェア2026」に出展　～設立70周年「デジタルコンソーシアム構想」でさらなる成長へ～",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260814520339/"
+        },
+        {
+          "datetime": "2026-08-14T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2ミナトHD、ユニチカ、コロンビア・ワークスなど",
+          "url": "https://kabutan.jp/stock/news?code=6862&b=n202608140303"
+        },
+        {
+          "datetime": "2026-08-13T15:40:08+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 12 銘柄　　S安＝ 3 銘柄　(8月13日)",
+          "url": "https://kabutan.jp/stock/news?code=6862&b=n202608131012"
+        },
+        {
+          "datetime": "2026-08-13T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2シンデン・ハイテックス、Cominix、オーネックスなど",
+          "url": "https://kabutan.jp/stock/news?code=6862&b=n202608130245"
+        },
+        {
+          "datetime": "2026-08-12T15:40:23+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 12 銘柄　　S安＝ 4 銘柄　(8月12日)",
+          "url": "https://kabutan.jp/stock/news?code=6862&b=n202608121007"
+        }
+      ],
+      "factor": "2026年8月10日大引け後に開示した2027年3月期第1四半期決算（売上高前年同期比+343.4%の230億円・Q1経常利益58倍の47.9億円・通期予想を32億円→93億円に2.9倍上方修正）を起点とする継続テーマである。デジタルデバイス事業が汎用メモリの需給逼迫・価格上昇および富士電機・ブレインインテグラルの新規連結により前年同期比+442.8%の151億円に急拡大した。翌2026年8月11日が山の日（休場）だったため市場の反応が2026年8月12日（ストップ高）・2026年8月13日（+17.03%）に分散したとみられる。電気機器クラスタ（村田製作所ほか）の地合いも連れ高を後押しした一因とみられる。起点開示：[2027年3月期第1四半期決算短信（ミナトホールディングス社IR）](https://www.minato.co.jp/cms/wp-content/uploads/2026/08/20260810-1.pdf)（2026年8月10日）。",
+      "factor_kind": "テーマ",
+      "rank": 6,
+      "sector_cluster": {
+        "sec33": "3650",
+        "name": "電気機器",
+        "size": 3,
+        "peers": [
+          {
+            "code": "6779",
+            "name": "日本電波工業",
+            "rank": 17,
+            "pct": 10.66,
+            "turnover_m": 4323.3,
+            "has_disclosure": false
+          },
+          {
+            "code": "6981",
+            "name": "村田製作所",
+            "rank": 20,
+            "pct": 10.25,
+            "turnover_m": 326694.9,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6981",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "584A",
+      "name": "LiNKX",
+      "market": "グロース",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "5250",
+      "sec33_name": "情報･通信業",
+      "scale_cat": "-",
+      "mcap_oku": 186,
+      "mcap_oku_exact": 185.6,
+      "mcap_flag": "†",
+      "mcap_source": "jquants",
+      "pct": 16.17,
+      "pct5": 18.75,
+      "close": 2730.0,
+      "adj_close": 2730.0,
+      "prev_adj_close": 2350.0,
+      "turnover_yen": 1342446600,
+      "turnover_m": 1342.4,
+      "shoutfy_jq": 6797400,
+      "period_end": "2026-06-30",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "資本金の額の減少に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260827526919/"
+        },
+        {
+          "datetime": "2026-08-20T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2ソフトバンクグループ、LiNKX、アクシスCなど",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608200127"
+        },
+        {
+          "datetime": "2026-08-19T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2などハートシード、東京エレクトロン、レーザーテック",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608190103"
+        },
+        {
+          "datetime": "2026-08-18T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2 LiNKX、JDSC、キオクシアHDなど",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608180106"
+        },
+        {
+          "datetime": "2026-08-17T15:40:04+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 11 銘柄　　S安＝ 3 銘柄　(8月17日)",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608170784"
+        },
+        {
+          "datetime": "2026-08-17T15:32:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・１７日＞（大引け）＝バイセル、アルファＰ、エンバイオＨなど",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608170757"
+        },
+        {
+          "datetime": "2026-08-17T11:31:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・１７日＞（前引け）＝ＬｉＮＫＸ、プロシップ、ＩＢＪ",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608170409"
+        },
+        {
+          "datetime": "2026-08-17T09:38:00+09:00",
+          "category": "材料",
+          "title": "ＬｉＮＫＸがＳ高、ＡＸベースモダナイゼーション好調で今期営業益５７％増を計画",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608170226"
+        },
+        {
+          "datetime": "2026-08-14T18:05:09+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月14日)",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=n202608141313"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "決算",
+          "title": "ＬｉＮＫＸ、今期経常は63％増で5期連続最高益更新へ",
+          "url": "https://kabutan.jp/stock/news?code=584A&b=k202608140119"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年６月期通期 決算説明資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260814520975/"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年６月期 決算短信〔日本基準〕（非連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260813519434/"
+        }
+      ],
+      "factor": "情報・通信業クラスター（s33:5250）内の連れ高とみられる。クラスターリーダーのENECHANGE（4169）は2026年6月22日に上限400万株・10億円の自己株取得枠を設定し2026年8月10日より取得を開始しており、株式新聞Web、同社の2026年8月7日開示の第1四半期好決算（経常利益前年同期比2.8倍増）後の上昇モメンタムが継続していた。翌2026年8月14日にLiNKX自身の2026年6月期本決算発表を控えており、前日の期待買いが一因として加わった可能性があるが、材料窓内（2026-08-12T15:30〜2026-08-13T15:30）に確認された自社開示・記事はなく、クラスター連動のテーマ物色と推定される。",
+      "factor_kind": "テーマ",
+      "rank": 7,
+      "sector_cluster": {
+        "sec33": "5250",
+        "name": "情報･通信業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "4169",
+            "name": "ENECHANGE",
+            "rank": 13,
+            "pct": 13.41,
+            "turnover_m": 1666.0,
+            "has_disclosure": false
+          },
+          {
+            "code": "4396",
+            "name": "システムサポートホールディングス",
+            "rank": 18,
+            "pct": 10.49,
+            "turnover_m": 477.0,
+            "has_disclosure": false
+          },
+          {
+            "code": "3723",
+            "name": "日本ファルコム",
+            "rank": 23,
+            "pct": 9.35,
+            "turnover_m": 186.8,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "4169",
+        "leader_basis": "turnover"
+      },
+      "shares_kabutan": 7021500,
+      "mcap_kabutan_oku": 192
+    },
+    {
+      "code": "3277",
+      "name": "サンセイランディック",
+      "market": "スタンダード",
+      "sec17": "17",
+      "sec17_name": "不動産",
+      "sec33": "8050",
+      "sec33_name": "不動産業",
+      "scale_cat": "-",
+      "mcap_oku": 150,
+      "mcap_oku_exact": 149.5,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 16.13,
+      "pct5": 39.36,
+      "close": 871.0,
+      "adj_close": 871.0,
+      "prev_adj_close": 750.0,
+      "turnover_yen": 268921600,
+      "turnover_m": 268.9,
+      "shoutfy_jq": 17169800,
+      "period_end": "2026-12-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-22T09:00:00+09:00",
+          "category": "特集",
+          "title": "今週の【上場来高値銘柄】朝日インテク、シチズン、郵船など80銘柄",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=n202608220129"
+        },
+        {
+          "datetime": "2026-08-18T11:51:02+09:00",
+          "category": "５％",
+          "title": "サンセイランについて、松﨑隆司氏は保有割合が減少したと報告 [変更報告書No.7]",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=n202608180516"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-12T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1セイコーグループ、松田産業、リクルートHDなど",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=n202608120185"
+        },
+        {
+          "datetime": "2026-08-11T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1セイコーグループ、松田産業、リクルートHDなど",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=n202608110206"
+        },
+        {
+          "datetime": "2026-08-10T15:40:05+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 25 銘柄　　S安＝ 4 銘柄　(8月10日)",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=n202608100835"
+        },
+        {
+          "datetime": "2026-08-10T14:38:00+09:00",
+          "category": "材料",
+          "title": "サンセイランは後場急上昇、２６年１２月期業績予想及び配当予想を上方修正",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=n202608100756"
+        },
+        {
+          "datetime": "2026-08-10T14:00:00+09:00",
+          "category": "決算",
+          "title": "サンセイラン、今期経常を61％上方修正・最高益予想を上乗せ、配当を増額修正",
+          "url": "https://kabutan.jp/stock/news?code=3277&b=k202608100037"
+        },
+        {
+          "datetime": "2026-08-10T14:00:00+09:00",
+          "category": "開示",
+          "title": "主要株主及び主要株主である筆頭株主の異動（予定）並びに公開買付けに準ずる行為として政令で定める買い集め行為に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260810/140120260807515084/"
+        },
+        {
+          "datetime": "2026-08-10T14:00:00+09:00",
+          "category": "開示",
+          "title": "従業員持株会向け譲渡制限付株式インセンティブとしての自己株式の処分の払込完了及び一部失権に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260810/140120260807513925/"
+        },
+        {
+          "datetime": "2026-08-10T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期 第２四半期（中間期）決算短信〔日本基準〕(連結)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260810/140120260806512200/"
+        },
+        {
+          "datetime": "2026-08-10T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期第２四半期決算短信補足資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260810/140120260806511918/"
+        }
+      ],
+      "factor": "2026年8月10日14:00の適時開示「主要株主及び主要株主である筆頭株主の異動（予定）並びに公開買付けに準ずる行為として政令で定める買い集め行為に関するお知らせ」を起点とした上昇が継続。同日には中間期決算短信・通期業績予想の増額修正も発表されており、複数の好材料が材料視され2026年8月11日・12日の「前日に動いた銘柄」報道が示すとおり連続上昇していた。加えて不動産業クラスター（s33:8050）のリーダーであるコロンビア・ワークス（146A）が2026年8月12日16:00に中間期大幅増益決算（売上高＋105.3%、営業利益＋156.9%）と中期経営計画（EPS1,200円目標、2030年）をTDnet経由で開示したことが不動産業セクターへの追い風となり、連れ高の一因とみられる。",
+      "factor_kind": "テーマ",
+      "rank": 8,
+      "sector_cluster": {
+        "sec33": "8050",
+        "name": "不動産業",
+        "size": 2,
+        "peers": [
+          {
+            "code": "146A",
+            "name": "コロンビア・ワークス",
+            "rank": 3,
+            "pct": 21.18,
+            "turnover_m": 499.8,
+            "has_disclosure": true
+          }
+        ],
+        "leader_code": "146A",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "6340",
+      "name": "澁谷工業",
+      "market": "プライム",
+      "sec17": "8",
+      "sec17_name": "機械",
+      "sec33": "3600",
+      "sec33_name": "機械",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 1438,
+      "mcap_oku_exact": 1438.5,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 15.87,
+      "pct5": 13.43,
+      "close": 5110.0,
+      "adj_close": 5110.0,
+      "prev_adj_close": 4410.0,
+      "turnover_yen": 3673818000,
+      "turnover_m": 3673.8,
+      "shoutfy_jq": 28149877,
+      "period_end": "2026-06-30",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "14:00",
+          "code": "6340",
+          "name": "渋谷工",
+          "title": "2026年6月期　決算短信〔日本基準〕(連結)",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260801505982.pdf",
+          "origin": "day",
+          "date": "2026-08-13"
+        },
+        {
+          "time": "14:00",
+          "code": "6340",
+          "name": "渋谷工",
+          "title": "剰余金の配当に関するお知らせ",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517774.pdf",
+          "origin": "day",
+          "date": "2026-08-13"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T13:52:00+09:00",
+          "category": "材料",
+          "title": "北陸企業ニュース-業況改善が期待される企業-【今村証券アナリストレポート】",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=n202609010641"
+        },
+        {
+          "datetime": "2026-09-01T11:00:00+09:00",
+          "category": "開示",
+          "title": "独立役員届出書",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529541/"
+        },
+        {
+          "datetime": "2026-08-31T11:07:00+09:00",
+          "category": "材料",
+          "title": "澁谷工業：NEUTRAL継続【今村証券アナリストレポート】",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=n202608310352"
+        },
+        {
+          "datetime": "2026-08-18T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年6月期　決算説明資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260818/140120260817522041/"
+        },
+        {
+          "datetime": "2026-08-15T09:00:00+09:00",
+          "category": "特集",
+          "title": "今週の【上場来高値銘柄】物語コーポ、リクルート、アドテストなど101銘柄",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=n202608150295"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-14T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1渋谷工、弁護士コム、TOPPANなど",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=n202608140297"
+        },
+        {
+          "datetime": "2026-08-13T15:40:08+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 12 銘柄　　S安＝ 3 銘柄　(8月13日)",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=n202608131012"
+        },
+        {
+          "datetime": "2026-08-13T14:34:00+09:00",
+          "category": "材料",
+          "title": "渋谷工は後場急伸し上場来高値更新、２７年６月期は営業益２２％増を計画し２０円増配",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=n202608130931"
+        },
+        {
+          "datetime": "2026-08-13T14:00:00+09:00",
+          "category": "決算",
+          "title": "渋谷工、今期経常は19％増で2期ぶり最高益、前期配当を5円増額・今期は20円増配へ",
+          "url": "https://kabutan.jp/stock/news?code=6340&b=k202608130025"
+        },
+        {
+          "datetime": "2026-08-13T14:00:00+09:00",
+          "category": "開示",
+          "title": "[Summary] Consolidated Financial Results for the Fiscal Year Ended June 30, 2026 (Under Japanese GAAP)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260813/140120260813519286/"
+        }
+      ],
+      "factor": "2026年8月13日14:00に開示された2026年6月期決算短信において、売上高1,356億円（前期比5.1%増）・営業利益131億円（同4.9%減）と増収減益の実績ながら、2027年6月期業績予想として営業利益22%増超（約160億円）を示したことが材料視された。同日14:00開示の剰余金の配当に関するお知らせでは2026年6月期年間配当100円（前期比5円増）の確定と2027年6月期配当予想120円（同20円増配）を発表し、後場に急伸して上場来高値を更新した。",
+      "factor_kind": "開示",
+      "rank": 9,
+      "sector_cluster": {
+        "sec33": "3600",
+        "name": "機械",
+        "size": 3,
+        "peers": [
+          {
+            "code": "6287",
+            "name": "サトー",
+            "rank": 14,
+            "pct": 12.09,
+            "turnover_m": 1706.9,
+            "has_disclosure": true
+          },
+          {
+            "code": "6492",
+            "name": "岡野バルブ製造",
+            "rank": 29,
+            "pct": 7.89,
+            "turnover_m": 332.9,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6340",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "3551",
+      "name": "ダイニック",
+      "market": "スタンダード",
+      "sec17": "4",
+      "sec17_name": "素材・化学",
+      "sec33": "3100",
+      "sec33_name": "繊維製品",
+      "scale_cat": "-",
+      "mcap_oku": 135,
+      "mcap_oku_exact": 134.8,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 14.77,
+      "pct5": 15.86,
+      "close": 1585.0,
+      "adj_close": 1585.0,
+      "prev_adj_close": 1381.0,
+      "turnover_yen": 338905000,
+      "turnover_m": 338.9,
+      "shoutfy_jq": 8504747,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "17:00",
+          "code": "3551",
+          "name": "ダイニック",
+          "title": "2027年３月期第１四半期決算短信〔日本基準〕(連結)",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260807515241.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T09:45:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況（途中経過）に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831529084/"
+        },
+        {
+          "datetime": "2026-08-20T19:40:00+09:00",
+          "category": "特集",
+          "title": "利益成長【青天井】銘柄リスト〔第4弾〕33社選出 ＜成長株特集＞",
+          "url": "https://kabutan.jp/stock/news?code=3551&b=n202608201221"
+        },
+        {
+          "datetime": "2026-08-13T11:20:00+09:00",
+          "category": "材料",
+          "title": "ダイニックは急反発し１９年４カ月ぶり高値、４～６月期営業益４６％増",
+          "url": "https://kabutan.jp/stock/news?code=3551&b=n202608130610"
+        },
+        {
+          "datetime": "2026-08-12T18:04:32+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月12日)",
+          "url": "https://kabutan.jp/stock/news?code=3551&b=n202608121227"
+        },
+        {
+          "datetime": "2026-08-12T17:00:00+09:00",
+          "category": "決算",
+          "title": "ダイニック、4-6月期(1Q)経常は48％増益で着地",
+          "url": "https://kabutan.jp/stock/news?code=3551&b=k202608120209"
+        },
+        {
+          "datetime": "2026-08-12T17:00:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期第１四半期決算短信〔日本基準〕(連結)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260807515241/"
+        },
+        {
+          "datetime": "2026-08-03T10:00:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況（途中経過）に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260803/140120260731505802/"
+        },
+        {
+          "datetime": "2026-07-01T10:00:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況（途中経過）に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260701/140120260625579458/"
+        },
+        {
+          "datetime": "2026-06-26T14:07:00+09:00",
+          "category": "開示",
+          "title": "コーポレート・ガバナンスに関する報告書 2026/06/26",
+          "url": "https://kabutan.jp/disclosures/pdf/20260626/140120260529554317/"
+        },
+        {
+          "datetime": "2026-06-03T08:00:00+09:00",
+          "category": "開示",
+          "title": "2026年定時株主総会その他の電子提供措置事項（交付書面省略事項)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260603/140120260528551805/"
+        },
+        {
+          "datetime": "2026-06-03T08:00:00+09:00",
+          "category": "開示",
+          "title": "2026年定時株主総会招集通知および株主総会資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260603/140120260528551788/"
+        },
+        {
+          "datetime": "2026-06-01T10:00:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況（途中経過）に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260601/140120260529555859/"
+        }
+      ],
+      "factor": "2027年3月期第1四半期（4-6月期）の経常利益が前年同期比48%増益・営業利益が同46%増益となる好決算が材料視され、19年4カ月ぶりの高値を更新した。繊維製品セクター同クラスター（s33:3100）のユニチカ(3103)は当該期間に開示なく、連れ高とみられる。",
+      "factor_kind": "開示",
+      "rank": 10,
+      "sector_cluster": {
+        "sec33": "3100",
+        "name": "繊維製品",
+        "size": 2,
+        "peers": [
+          {
+            "code": "3103",
+            "name": "ユニチカ",
+            "rank": 2,
+            "pct": 22.5,
+            "turnover_m": 39336.7,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "3551",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "7059",
+      "name": "コプロ・ホールディングス",
+      "market": "プライム",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "9050",
+      "sec33_name": "サービス業",
+      "scale_cat": "-",
+      "mcap_oku": 371,
+      "mcap_oku_exact": 371.2,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 14.0,
+      "pct5": 13.73,
+      "close": 928.0,
+      "adj_close": 928.0,
+      "prev_adj_close": 814.0,
+      "turnover_yen": 944245500,
+      "turnover_m": 944.2,
+      "shoutfy_jq": 40000000,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "16:00",
+          "code": "7059",
+          "name": "コプロＨＤ",
+          "title": "2027年３月期第１四半期決算短信〔日本基準〕(連結)",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260810516886.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "16:00",
+          "code": "7059",
+          "name": "コプロＨＤ",
+          "title": "2027年３月期第１四半期決算説明資料",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260810516894.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "16:00",
+          "code": "7059",
+          "name": "コプロＨＤ",
+          "title": "2027年３月期第１四半期決算ファクトブック",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260810516898.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "16:00",
+          "code": "7059",
+          "name": "コプロＨＤ",
+          "title": "2027年３月期第２四半期（中間期）及び通期業績予想の修正に関するお知らせ",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517910.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-31T10:00:00+09:00",
+          "category": "開示",
+          "title": "札幌の若者を、地元の建設現場へ　札幌市とトライトエンジニアリング、官民連携の就職支援を継続　10 月に第3 回就活支援セミナー・職場見学会",
+          "url": "https://kabutan.jp/disclosures/pdf/20260831/140120260831528305/"
+        },
+        {
+          "datetime": "2026-08-24T19:30:00+09:00",
+          "category": "特集",
+          "title": "好決算ラッシュで輝く！　27年3月期「早くも上方修正」の厳選6銘柄 ＜株探トップ特集＞",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608241008"
+        },
+        {
+          "datetime": "2026-08-17T10:00:00+09:00",
+          "category": "開示",
+          "title": "Notice of Monthly Disclosure of Number of Technical Employees and Those Who Are in Operation, and Utilization Rate as of the End of July 2026",
+          "url": "https://kabutan.jp/disclosures/pdf/20260817/140120260812518632/"
+        },
+        {
+          "datetime": "2026-08-17T10:00:00+09:00",
+          "category": "開示",
+          "title": "2026年7月度 在籍技術者数、稼働技術者数・稼働率の月次開示に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260817/140120260812518628/"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-14T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1渋谷工、弁護士コム、TOPPANなど",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608140297"
+        },
+        {
+          "datetime": "2026-08-13T16:07:11+09:00",
+          "category": "材料",
+          "title": "本日の注目個別銘柄：TOPPAN、弁護士コム、サトーなど",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608131094"
+        },
+        {
+          "datetime": "2026-08-13T13:59:58+09:00",
+          "category": "材料",
+          "title": "コプロＨＤ---大幅続伸、第1四半期大幅増益で業績予想を上方修正",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608130887"
+        },
+        {
+          "datetime": "2026-08-13T10:12:00+09:00",
+          "category": "材料",
+          "title": "コプロＨＤは急伸、グループ技術者数の拡大進み今期は一転営業増益の見通しに",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608130516"
+        },
+        {
+          "datetime": "2026-08-12T19:43:19+09:00",
+          "category": "注目",
+          "title": "★本日の【イチオシ決算】 日本マイクロ、ＡＲＣＨＩＯ、ＴＯＰＰＡＮ (8月12日)",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608121311"
+        },
+        {
+          "datetime": "2026-08-12T18:04:32+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月12日)",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=n202608121227"
+        },
+        {
+          "datetime": "2026-08-12T16:00:00+09:00",
+          "category": "決算",
+          "title": "コプロＨＤ、上期経常を一転4％増益に上方修正、通期も増額",
+          "url": "https://kabutan.jp/stock/news?code=7059&b=k202608120169"
+        }
+      ],
+      "factor": "2027年3月期第1四半期の大幅増益と通期業績予想の上方修正が好感された。TDnet業績予想修正（2026-08-12 16:00開示）によれば上期経常利益予想を9億円→17.7億円、通期を30億円→38.8億円に引き上げた。TDnet 1Q決算短信では売上高139.4億円（前年比+68.0%）・営業利益9.6億円（同+55.1%）と各段階利益が過去最高水準を記録した。建設技術者派遣事業でグループ技術者数の拡大・高稼働率・売上単価伸長が寄与し、人件費・拠点関連費用が想定を下回ったことも上振れ要因となった。",
+      "factor_kind": "開示",
+      "rank": 11,
+      "sector_cluster": {
+        "sec33": "9050",
+        "name": "サービス業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "194A",
+            "name": "WOLVES HAND",
+            "rank": 1,
+            "pct": 26.67,
+            "turnover_m": 392.6,
+            "has_disclosure": true
+          },
+          {
+            "code": "6027",
+            "name": "弁護士ドットコム",
+            "rank": 4,
+            "pct": 18.87,
+            "turnover_m": 2891.5,
+            "has_disclosure": true
+          },
+          {
+            "code": "2489",
+            "name": "アドウェイズ",
+            "rank": 19,
+            "pct": 10.29,
+            "turnover_m": 946.0,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6027",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "5951",
+      "name": "ダイニチ工業",
+      "market": "スタンダード",
+      "sec17": "3",
+      "sec17_name": "建設・資材",
+      "sec33": "3550",
+      "sec33_name": "金属製品",
+      "scale_cat": "-",
+      "mcap_oku": 234,
+      "mcap_oku_exact": 233.7,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 13.41,
+      "pct5": 16.65,
+      "close": 1226.0,
+      "adj_close": 1226.0,
+      "prev_adj_close": 1081.0,
+      "turnover_yen": 111746700,
+      "turnover_m": 111.7,
+      "shoutfy_jq": 19058587,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-17T10:39:00+09:00",
+          "category": "材料",
+          "title": "ダイニチ工業が反発、レンジリー・キャピタルの株式保有割合上昇で思惑",
+          "url": "https://kabutan.jp/stock/news?code=5951&b=n202608170337"
+        },
+        {
+          "datetime": "2026-08-14T15:36:02+09:00",
+          "category": "５％",
+          "title": "ダイニチ工業について、Rangeley Capital, LLCは保有割合が増加したと報告 [変更報告書No.1]",
+          "url": "https://kabutan.jp/stock/news?code=5951&b=n202608141073"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "譲渡制限付株式報酬としての自己株式の処分の払込完了に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260806511938/"
+        },
+        {
+          "datetime": "2026-07-31T15:30:00+09:00",
+          "category": "開示",
+          "title": "[Summary] Financial Results for the Three Months Ended June 30, 2026",
+          "url": "https://kabutan.jp/disclosures/pdf/20260731/140120260731504436/"
+        },
+        {
+          "datetime": "2026-07-31T15:30:00+09:00",
+          "category": "決算",
+          "title": "ダイニチ工業、4-6月期(1Q)経常は赤字縮小で着地",
+          "url": "https://kabutan.jp/stock/news?code=5951&b=k202607310181"
+        },
+        {
+          "datetime": "2026-07-31T15:30:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期 第１四半期決算短信〔日本基準〕（非連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260731/140120260730502891/"
+        },
+        {
+          "datetime": "2026-07-10T16:00:00+09:00",
+          "category": "開示",
+          "title": "譲渡制限付株式報酬としての自己株式の処分に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260710/140120260710590927/"
+        },
+        {
+          "datetime": "2026-06-25T11:53:00+09:00",
+          "category": "開示",
+          "title": "コーポレート・ガバナンスに関する報告書 2026/06/25",
+          "url": "https://kabutan.jp/disclosures/pdf/20260625/140120260617572590/"
+        },
+        {
+          "datetime": "2026-05-27T08:00:00+09:00",
+          "category": "開示",
+          "title": "2026年定時株主総会資料（交付書面省略事項）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260527/140120260525546002/"
+        },
+        {
+          "datetime": "2026-05-27T08:00:00+09:00",
+          "category": "開示",
+          "title": "2026年定時株主総会招集ご通知",
+          "url": "https://kabutan.jp/disclosures/pdf/20260527/140120260525545957/"
+        },
+        {
+          "datetime": "2026-05-26T17:00:00+09:00",
+          "category": "開示",
+          "title": "取締役（監査等委員である取締役を除く。）の報酬額改定及び譲渡制限付株式報酬制度の導入に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260526/140120260518539949/"
+        },
+        {
+          "datetime": "2026-05-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "[Summary] Financial Results for the Year Ended March 31, 2026",
+          "url": "https://kabutan.jp/disclosures/pdf/20260513/140120260513528466/"
+        }
+      ],
+      "factor": "固有の材料窓内材料は確認できなかった。2026年8月13日は日経平均が3日続伸・+784円となりAI・半導体テーマが相場を主導するなか、[株探大引け](https://s.kabutan.jp/news/n202608131172/)によれば金属製品セクターが上昇率第4位業種となった。同クラスター（s33:3550）のテクニスコ（2962）が「半導体関連」として出来高上位となり、同セクター内への波及買いが一因とみられる。2026年7月31日発表の4-6月期（1Q）経常損失縮小が下支えとなった。",
+      "factor_kind": "テーマ",
+      "rank": 12,
+      "sector_cluster": {
+        "sec33": "3550",
+        "name": "金属製品",
+        "size": 2,
+        "peers": [
+          {
+            "code": "2962",
+            "name": "テクニスコ",
+            "rank": 26,
+            "pct": 8.28,
+            "turnover_m": 174.5,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "2962",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "4169",
+      "name": "ENECHANGE",
+      "market": "グロース",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "5250",
+      "sec33_name": "情報･通信業",
+      "scale_cat": "-",
+      "mcap_oku": 134,
+      "mcap_oku_exact": 134.3,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 13.41,
+      "pct5": 29.34,
+      "close": 313.0,
+      "adj_close": 313.0,
+      "prev_adj_close": 276.0,
+      "turnover_yen": 1666003500,
+      "turnover_m": 1666.0,
+      "shoutfy_jq": 42917292,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-25T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2キオクシアHD、ソフトバンクグループ、サンコールなど",
+          "url": "https://kabutan.jp/stock/news?code=4169&b=n202608250096"
+        },
+        {
+          "datetime": "2026-08-24T17:30:00+09:00",
+          "category": "開示",
+          "title": "[Delayed]Notice Concerning Capital and Business Alliance with Flight PILOT Co., Ltd.",
+          "url": "https://kabutan.jp/disclosures/pdf/20260824/140120260824525298/"
+        },
+        {
+          "datetime": "2026-08-07T12:00:00+09:00",
+          "category": "決算",
+          "title": "エネチェンジ、4-6月期(1Q)経常は黒字浮上で着地",
+          "url": "https://kabutan.jp/stock/news?code=4169&b=k202608070049"
+        },
+        {
+          "datetime": "2026-08-07T12:00:00+09:00",
+          "category": "開示",
+          "title": "Presentation Material for FY26 Q1 Financial Result",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514306/"
+        },
+        {
+          "datetime": "2026-08-07T12:00:00+09:00",
+          "category": "開示",
+          "title": "[Summary]Consolidated Financial Results for the First Quarter Ended June 30, 2026 (Under Japanese GAAP)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514296/"
+        },
+        {
+          "datetime": "2026-08-07T12:00:00+09:00",
+          "category": "開示",
+          "title": "2027年3月期第1四半期　決算説明資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514154/"
+        },
+        {
+          "datetime": "2026-08-07T12:00:00+09:00",
+          "category": "開示",
+          "title": "2027年3月期第1四半期 決算短信〔日本基準〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260728500538/"
+        },
+        {
+          "datetime": "2026-08-05T15:30:00+09:00",
+          "category": "開示",
+          "title": "[Delayed]Notice Concerning the Acquisition of Shares of DARWIN Inc. (Conversion into a Wholly Owned Subsidiary)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260805/140120260805510101/"
+        },
+        {
+          "datetime": "2026-08-05T15:30:00+09:00",
+          "category": "開示",
+          "title": "[Delayed]Notice Concerning Submission of an Answer to the Notice of Commencement of Administrative Proceedings",
+          "url": "https://kabutan.jp/disclosures/pdf/20260805/140120260805510091/"
+        },
+        {
+          "datetime": "2026-07-31T12:30:00+09:00",
+          "category": "開示",
+          "title": "（補足説明資料）株式会社Flight PILOTとの資本業務提携等に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260731/140120260731504960/"
+        }
+      ],
+      "factor": "2026年8月7日（材料窓外）に開示した4-6月期（1Q）経常利益の黒字浮上転換を契機に株価上昇が続き、5営業日騰落率+29.34%の水準で一段高となった。株探（2026年8月7日）が「エネチェンジ、4-6月期(1Q)経常は黒字浮上で着地」と報道。2026年6月22日に発表した自己株式取得枠（上限400万株・10億円）の取得期間が8月10日から開始され需給面でのサポートも並走した。2026年8月13日の値上がり率ランキングで「電気自動車関連」に分類され、EV充電インフラテーマへの関心も一因とみられる。",
+      "factor_kind": "テーマ",
+      "rank": 13,
+      "sector_cluster": {
+        "sec33": "5250",
+        "name": "情報･通信業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "584A",
+            "name": "LiNKX",
+            "rank": 7,
+            "pct": 16.17,
+            "turnover_m": 1342.4,
+            "has_disclosure": false
+          },
+          {
+            "code": "4396",
+            "name": "システムサポートホールディングス",
+            "rank": 18,
+            "pct": 10.49,
+            "turnover_m": 477.0,
+            "has_disclosure": false
+          },
+          {
+            "code": "3723",
+            "name": "日本ファルコム",
+            "rank": 23,
+            "pct": 9.35,
+            "turnover_m": 186.8,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "4169",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "6287",
+      "name": "サトー",
+      "market": "プライム",
+      "sec17": "8",
+      "sec17_name": "機械",
+      "sec33": "3600",
+      "sec33_name": "機械",
+      "scale_cat": "TOPIX Small 1",
+      "mcap_oku": 982,
+      "mcap_oku_exact": 982.2,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 12.09,
+      "pct5": 14.87,
+      "close": 2920.0,
+      "adj_close": 2920.0,
+      "prev_adj_close": 2605.0,
+      "turnover_yen": 1706868700,
+      "turnover_m": 1706.9,
+      "shoutfy_jq": 33635942,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "15:30",
+          "code": "6287",
+          "name": "サトー",
+          "title": "2027年3月期 第1四半期決算短信〔日本基準〕（連結）",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260807515748.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "15:30",
+          "code": "6287",
+          "name": "サトー",
+          "title": "2027年3月期 第1四半期 決算説明資料",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260807515822.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "15:30",
+          "code": "6287",
+          "name": "サトー",
+          "title": "自己株式の取得に係る事項の決定および自己株式の消却に関するお知らせ",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260807515838.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "（Delayed）Notice on Publication of a Sponsored Research Report",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529869/"
+        },
+        {
+          "datetime": "2026-09-01T08:30:00+09:00",
+          "category": "開示",
+          "title": "Announcement regarding changes in organizational structure and assignments",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831529039/"
+        },
+        {
+          "datetime": "2026-09-01T08:30:00+09:00",
+          "category": "開示",
+          "title": "機構改革ならびに人事異動に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831529026/"
+        },
+        {
+          "datetime": "2026-08-26T15:30:00+09:00",
+          "category": "開示",
+          "title": "スポンサードリサーチレポート発行のお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260826/140120260825525934/"
+        },
+        {
+          "datetime": "2026-08-14T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1渋谷工、弁護士コム、TOPPANなど",
+          "url": "https://kabutan.jp/stock/news?code=6287&b=n202608140297"
+        },
+        {
+          "datetime": "2026-08-13T16:07:11+09:00",
+          "category": "材料",
+          "title": "本日の注目個別銘柄：TOPPAN、弁護士コム、サトーなど",
+          "url": "https://kabutan.jp/stock/news?code=6287&b=n202608131094"
+        },
+        {
+          "datetime": "2026-08-13T13:45:53+09:00",
+          "category": "材料",
+          "title": "サトー---大幅反発、第1四半期大幅増益や自社株買い実施を発表",
+          "url": "https://kabutan.jp/stock/news?code=6287&b=n202608130874"
+        },
+        {
+          "datetime": "2026-08-13T10:02:00+09:00",
+          "category": "材料",
+          "title": "サトーが急反発、２７年３月期業績予想の上方修正と自社株買い発表を好感",
+          "url": "https://kabutan.jp/stock/news?code=6287&b=n202608130503"
+        },
+        {
+          "datetime": "2026-08-12T19:43:19+09:00",
+          "category": "注目",
+          "title": "★本日の【イチオシ決算】 日本マイクロ、ＡＲＣＨＩＯ、ＴＯＰＰＡＮ (8月12日)",
+          "url": "https://kabutan.jp/stock/news?code=6287&b=n202608121311"
+        },
+        {
+          "datetime": "2026-08-12T18:04:32+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月12日)",
+          "url": "https://kabutan.jp/stock/news?code=6287&b=n202608121227"
+        },
+        {
+          "datetime": "2026-08-12T15:30:00+09:00",
+          "category": "決算",
+          "title": "サトー、上期経常を7％上方修正・最高益予想を上乗せ、通期も増額",
+          "url": "https://kabutan.jp/stock/news?code=6287&b=k202608120067"
+        },
+        {
+          "datetime": "2026-08-12T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Regarding Repurchase and Cancellation of Own Shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260807515840/"
+        }
+      ],
+      "factor": "2027年3月期第1四半期（4-6月期）の営業利益が前年同期比45.3%増の34.3億円となる大幅増益決算を発表し、通期業績予想を従来の117億円から121億円へ上方修正した。加えて発行済み株式数の3.1%相当となる100万株・20億円を上限とする自社株買いを発表し、決算改善・上方修正・株主還元の3材料が一因となった。機械セクター同クラスター（s33:3600）の澁谷工業(6340)も当日に独自の開示を持ち、岡野バルブ製造(6492)は開示なく連れ高とみられる。",
+      "factor_kind": "開示",
+      "rank": 14,
+      "sector_cluster": {
+        "sec33": "3600",
+        "name": "機械",
+        "size": 3,
+        "peers": [
+          {
+            "code": "6340",
+            "name": "澁谷工業",
+            "rank": 9,
+            "pct": 15.87,
+            "turnover_m": 3673.8,
+            "has_disclosure": true
+          },
+          {
+            "code": "6492",
+            "name": "岡野バルブ製造",
+            "rank": 29,
+            "pct": 7.89,
+            "turnover_m": 332.9,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6340",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "4222",
+      "name": "児玉化学工業",
+      "market": "スタンダード",
+      "sec17": "4",
+      "sec17_name": "素材・化学",
+      "sec33": "3200",
+      "sec33_name": "化学",
+      "scale_cat": "-",
+      "mcap_oku": 108,
+      "mcap_oku_exact": 108.2,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 11.43,
+      "pct5": 12.89,
+      "close": 692.0,
+      "adj_close": 692.0,
+      "prev_adj_close": 621.0,
+      "turnover_yen": 2495496600,
+      "turnover_m": 2495.5,
+      "shoutfy_jq": 15637144,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "17:00",
+          "code": "4222",
+          "name": "児玉化",
+          "title": "2027年３月期　第１四半期決算〔日本基準〕（連結）",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812518315.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T16:00:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901530103/"
+        },
+        {
+          "datetime": "2026-08-31T15:35:02+09:00",
+          "category": "５％",
+          "title": "児玉化について、エンデバー・ユナイテッドは保有割合が減少したと報告 [変更報告書No.31]",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608310713"
+        },
+        {
+          "datetime": "2026-08-27T15:35:02+09:00",
+          "category": "５％",
+          "title": "児玉化について、エンデバー・ユナイテッドは保有割合が減少したと報告 [変更報告書No.30]",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608270794"
+        },
+        {
+          "datetime": "2026-08-25T15:37:02+09:00",
+          "category": "５％",
+          "title": "児玉化について、エンデバー・ユナイテッドは保有割合が減少したと報告 [変更報告書No.29]",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608250794"
+        },
+        {
+          "datetime": "2026-08-21T15:40:03+09:00",
+          "category": "５％",
+          "title": "児玉化について、エンデバー・ユナイテッドは保有割合が減少したと報告 [変更報告書No.28]",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608210895"
+        },
+        {
+          "datetime": "2026-08-20T15:46:02+09:00",
+          "category": "５％",
+          "title": "児玉化について、エンデバー・ユナイテッドは保有割合が減少したと報告 [変更報告書No.27]",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608200958"
+        },
+        {
+          "datetime": "2026-08-18T15:38:02+09:00",
+          "category": "５％",
+          "title": "児玉化について、エンデバー・ユナイテッドは保有割合が減少したと報告 [変更報告書No.26]",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608180854"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-14T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2ミナトHD、ユニチカ、コロンビア・ワークスなど",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608140303"
+        },
+        {
+          "datetime": "2026-08-13T15:40:08+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 12 銘柄　　S安＝ 3 銘柄　(8月13日)",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608131012"
+        },
+        {
+          "datetime": "2026-08-13T15:32:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・１３日＞（大引け）＝ウルフハンド、スターゼン、Ｋ＆Ｏエナジなど",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608130990"
+        },
+        {
+          "datetime": "2026-08-13T11:56:20+09:00",
+          "category": "材料",
+          "title": "児玉化学工業---1Q増収・営業利益及び経常利益大幅増、全てのセグメントが順調に推移",
+          "url": "https://kabutan.jp/stock/news?code=4222&b=n202608130686"
+        }
+      ],
+      "factor": "2027年3月期第1四半期（4-6月期）が増収・営業利益及び経常利益の大幅増益となり、全セグメントが順調に推移したとするTDnet開示が好感されたとみられる。化学セクター同クラスター（s33:3200）の有沢製作所(5208)は当該期間に開示なく、連れ高とみられる。",
+      "factor_kind": "開示",
+      "rank": 15,
+      "sector_cluster": {
+        "sec33": "3200",
+        "name": "化学",
+        "size": 2,
+        "peers": [
+          {
+            "code": "5208",
+            "name": "有沢製作所",
+            "rank": 24,
+            "pct": 9.06,
+            "turnover_m": 1050.0,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "4222",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "7911",
+      "name": "TOPPANホールディングス",
+      "market": "プライム",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "3800",
+      "sec33_name": "その他製品",
+      "scale_cat": "TOPIX Mid400",
+      "mcap_oku": 16056,
+      "mcap_oku_exact": 16055.6,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 10.78,
+      "pct5": 15.89,
+      "close": 5448.0,
+      "adj_close": 5448.0,
+      "prev_adj_close": 4918.0,
+      "turnover_yen": 37470523000,
+      "turnover_m": 37470.5,
+      "shoutfy_jq": 294706240,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "15:30",
+          "code": "7911",
+          "name": "ＴＯＰＰＡＮ　ＨＤ",
+          "title": "2027年３月期　第１四半期決算短信〔日本基準〕（連結）",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260811517449.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Status of Acquisition of Own Shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529578/"
+        },
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529558/"
+        },
+        {
+          "datetime": "2026-09-01T12:50:00+09:00",
+          "category": "材料",
+          "title": "＜みんかぶ・個人投資家の予想から＞＝「買い予想数上昇」５位にＴＯＰＰＡＮ",
+          "url": "https://kabutan.jp/stock/news?code=7911&b=n202609010544"
+        },
+        {
+          "datetime": "2026-08-28T10:57:00+09:00",
+          "category": "材料",
+          "title": "ＴＯＰＰＡＮはしっかり、９月３０日を基準日として１株から２株に株式分割へ",
+          "url": "https://kabutan.jp/stock/news?code=7911&b=n202608280439"
+        },
+        {
+          "datetime": "2026-08-27T17:00:02+09:00",
+          "category": "特集",
+          "title": "レーティング日報【最上位を継続＋目標株価を増額】　(8月27日)",
+          "url": "https://kabutan.jp/stock/news?code=7911&b=n202608270964"
+        },
+        {
+          "datetime": "2026-08-27T15:54:00+09:00",
+          "category": "材料",
+          "title": "ＴＯＰＰＡＮが９月３０日を基準日とする１株から２株への株式分割を発表",
+          "url": "https://kabutan.jp/stock/news?code=7911&b=n202608270856"
+        },
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "修正",
+          "title": "ＴＯＰＰＡＮ、株式分割に伴い配当予想を修正",
+          "url": "https://kabutan.jp/stock/news?code=7911&b=k202608270004"
+        },
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "株式分割、株式分割に伴う定款の一部変更、配当予想の修正及び株主優待制度の変更に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260827527179/"
+        },
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Acquisition of Shares Held by Shareholders Whose Whereabouts Are  Unknown",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260827527174/"
+        },
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "所在不明株主の株式買取りに関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260827527165/"
+        },
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning a Share Split and a Resulting Partial Amendment to the Articles of  Incorporation, Revisions to the Dividend Forecast",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260827527161/"
+        },
+        {
+          "datetime": "2026-08-19T09:13:28+09:00",
+          "category": "材料",
+          "title": "ワークマン、TOPPAN◆今日のフィスコ注目銘柄◆",
+          "url": "https://kabutan.jp/stock/news?code=7911&b=n202608190269"
+        }
+      ],
+      "factor": "2026年8月12日15:30にTDnet開示された2027年3月期第1四半期決算短信において、売上高4,573億円（前年同期比15.0%増）・営業利益200億円（同47.9%増）・親会社株主帰属四半期純利益216億円（同131.3%増・約2.3倍）と大幅増収増益を発表したことを好感し、翌2026年8月13日に一時ストップ高（前日比700円高・5,618円）に達した。[株式新聞Web](https://kabushiki.jp/news/763977)",
+      "factor_kind": "開示",
+      "rank": 16
+    },
+    {
+      "code": "6779",
+      "name": "日本電波工業",
+      "market": "プライム",
+      "sec17": "9",
+      "sec17_name": "電機・精密",
+      "sec33": "3650",
+      "sec33_name": "電気機器",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 732,
+      "mcap_oku_exact": 732.0,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 10.66,
+      "pct5": 6.46,
+      "close": 3165.0,
+      "adj_close": 3165.0,
+      "prev_adj_close": 2860.0,
+      "turnover_yen": 4323332100,
+      "turnover_m": 4323.3,
+      "shoutfy_jq": 23128605,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-31T19:30:00+09:00",
+          "category": "特集",
+          "title": "膨張する防衛費、「三羽烏」から「AI・ドローン」に広がる関連株 ＜株探トップ特集＞",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=n202608310987"
+        },
+        {
+          "datetime": "2026-08-21T09:44:02+09:00",
+          "category": "５％",
+          "title": "日電波について、野村証は保有割合が5％未満に減少したと報告 [変更報告書No.3]",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=n202608210297"
+        },
+        {
+          "datetime": "2026-08-14T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1渋谷工、弁護士コム、TOPPANなど",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=n202608140297"
+        },
+        {
+          "datetime": "2026-08-10T11:32:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・１０日＞（前引け）＝ノリタケ、日電波、平田機工",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=n202608100433"
+        },
+        {
+          "datetime": "2026-08-10T09:09:00+09:00",
+          "category": "材料",
+          "title": "日電波が急反発、ＡＤＡＳ関連やＡＩＤＣ向け水晶製品好調で今期業績予想を大幅増額",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=n202608100181"
+        },
+        {
+          "datetime": "2026-08-07T19:56:38+09:00",
+          "category": "注目",
+          "title": "★本日の【イチオシ決算】 リクルート、菱ガス化、テルモ (8月7日)",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=n202608071707"
+        },
+        {
+          "datetime": "2026-08-07T18:04:06+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月07日)",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=n202608071600"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice of Revision to the Consolidated Financial Forecasts for the First Half and Full Fiscal YearEnding March 31, 2027",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260806512536/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期第２四半期(中間期)及び通期連結業績予想の修正に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260806512506/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "[Summary]Consolidated Financial Results for the First Quarter of the Year Ending March 31, 2027 [IFRS]",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260806512483/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "決算",
+          "title": "日電波、上期最終を一転87％増益に上方修正、通期も増額",
+          "url": "https://kabutan.jp/stock/news?code=6779&b=k202608070376"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期　第１四半期決算短信〔ＩＦＲＳ〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260806512443/"
+        }
+      ],
+      "factor": "2026年8月10日にADAS関連・AIデータセンター向け水晶製品の好調を受け当期業績予想を大幅増額したことが引き続き評価された。株探（2026年8月10日）が「ADAS関連やAIDC向け水晶製品好調で今期業績予想を大幅増額」と報道。2026年8月13日の値上がり率ランキングで「データセンター関連」に分類され、電気機器セクターが上昇率第3位業種となった。クラスター（s33:3650）リーダーの村田製作所（6981）もAI・半導体銘柄として積極的に買われており、連れ高とみられる側面もある。",
+      "factor_kind": "テーマ",
+      "rank": 17,
+      "sector_cluster": {
+        "sec33": "3650",
+        "name": "電気機器",
+        "size": 3,
+        "peers": [
+          {
+            "code": "6862",
+            "name": "ミナトホールディングス",
+            "rank": 6,
+            "pct": 17.03,
+            "turnover_m": 75.9,
+            "has_disclosure": false
+          },
+          {
+            "code": "6981",
+            "name": "村田製作所",
+            "rank": 20,
+            "pct": 10.25,
+            "turnover_m": 326694.9,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6981",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "4396",
+      "name": "システムサポートホールディングス",
+      "market": "プライム",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "5250",
+      "sec33_name": "情報･通信業",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 291,
+      "mcap_oku_exact": 291.4,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 10.49,
+      "pct5": 25.65,
+      "close": 1401.0,
+      "adj_close": 1401.0,
+      "prev_adj_close": 1268.0,
+      "turnover_yen": 477021200,
+      "turnover_m": 477.0,
+      "shoutfy_jq": 20800000,
+      "period_end": "2026-06-30",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "独立役員届出書",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831528688/"
+        },
+        {
+          "datetime": "2026-09-01T08:00:00+09:00",
+          "category": "開示",
+          "title": "Notice of the 47th Annual General Meeting of Shareholders",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831528684/"
+        },
+        {
+          "datetime": "2026-09-01T08:00:00+09:00",
+          "category": "開示",
+          "title": "第47回定時株主総会その他の電子提供措置事項（交付書面に記載しない事項）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831528683/"
+        },
+        {
+          "datetime": "2026-09-01T08:00:00+09:00",
+          "category": "開示",
+          "title": "第47回定時株主総会招集ご通知及び株主総会資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831528682/"
+        },
+        {
+          "datetime": "2026-08-21T16:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Regarding Partial Correction of “Notice Regarding Distribution of Surplus”",
+          "url": "https://kabutan.jp/disclosures/pdf/20260821/140120260821524590/"
+        },
+        {
+          "datetime": "2026-08-21T16:00:00+09:00",
+          "category": "開示",
+          "title": "「剰余金の配当に関するお知らせ」の一部訂正について",
+          "url": "https://kabutan.jp/disclosures/pdf/20260821/140120260821524586/"
+        },
+        {
+          "datetime": "2026-08-21T13:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Regarding Distribution of Surplus",
+          "url": "https://kabutan.jp/disclosures/pdf/20260821/140120260819523322/"
+        },
+        {
+          "datetime": "2026-08-21T13:00:00+09:00",
+          "category": "開示",
+          "title": "剰余金の配当に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260821/140120260819523280/"
+        },
+        {
+          "datetime": "2026-08-18T11:00:00+09:00",
+          "category": "開示",
+          "title": "連結子会社システムサポートがServiceNowのCSM分野とHAM分野で「Validated Practice」認定を取得 App Engine、ITSM、ITOMを合わせた計5分野での認定は国内唯一",
+          "url": "https://kabutan.jp/disclosures/pdf/20260818/140120260818522204/"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=4396&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-13T13:21:50+09:00",
+          "category": "材料",
+          "title": "システムサポートHD---配当方針を変更、連結配当性向40.0％以上へ",
+          "url": "https://kabutan.jp/stock/news?code=4396&b=n202608130760"
+        },
+        {
+          "datetime": "2026-08-13T13:20:19+09:00",
+          "category": "材料",
+          "title": "システムサポートHD---中期経営計画2029を策定",
+          "url": "https://kabutan.jp/stock/news?code=4396&b=n202608130758"
+        }
+      ],
+      "factor": "2026年8月12日に発表した「中期経営計画2029」と配当方針変更が材料視された。財経新聞によれば2029年6月期に売上高436.18億円（CAGR+11.9%）・営業利益45.13億円（CAGR+15.0%）・営業利益率10.3%を目標とする3ヶ年計画を策定した。主力のクラウドインテグレーション事業でAI・データ領域拡大とストック型収益増を軸とし、あわせて2027年6月期から連結配当性向40%以上を目安とする累進配当継続方針を表明したことが株主還元改善として評価された。",
+      "factor_kind": "報道",
+      "rank": 18,
+      "sector_cluster": {
+        "sec33": "5250",
+        "name": "情報･通信業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "584A",
+            "name": "LiNKX",
+            "rank": 7,
+            "pct": 16.17,
+            "turnover_m": 1342.4,
+            "has_disclosure": false
+          },
+          {
+            "code": "4169",
+            "name": "ENECHANGE",
+            "rank": 13,
+            "pct": 13.41,
+            "turnover_m": 1666.0,
+            "has_disclosure": false
+          },
+          {
+            "code": "3723",
+            "name": "日本ファルコム",
+            "rank": 23,
+            "pct": 9.35,
+            "turnover_m": 186.8,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "4169",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "2489",
+      "name": "アドウェイズ",
+      "market": "スタンダード",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "9050",
+      "sec33_name": "サービス業",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 162,
+      "mcap_oku_exact": 162.1,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 10.29,
+      "pct5": 22.54,
+      "close": 386.0,
+      "adj_close": 386.0,
+      "prev_adj_close": 350.0,
+      "turnover_yen": 945989400,
+      "turnover_m": 946.0,
+      "shoutfy_jq": 42006000,
+      "period_end": "2026-12-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-31T10:09:06+09:00",
+          "category": "材料",
+          "title": "バリューコマース：構造転換期の中間期は損失縮小、早期黒字化と豊富な手元資金の使途が焦点",
+          "url": "https://kabutan.jp/stock/news?code=2489&b=n202608310274"
+        },
+        {
+          "datetime": "2026-08-15T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ミナトＨＤ、弁護士ＣＯＭ、ダイジェト (8月10日～14日)",
+          "url": "https://kabutan.jp/stock/news?code=2489&b=n202608150289"
+        },
+        {
+          "datetime": "2026-08-13T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1ソリトン、レゾナック、日東紡績など",
+          "url": "https://kabutan.jp/stock/news?code=2489&b=n202608130238"
+        },
+        {
+          "datetime": "2026-08-12T19:50:00+09:00",
+          "category": "市況",
+          "title": "本日の【株主優待】情報 (12日 発表分)",
+          "url": "https://kabutan.jp/stock/news?code=2489&b=n202608121321"
+        },
+        {
+          "datetime": "2026-08-12T15:09:00+09:00",
+          "category": "材料",
+          "title": "アドウェイズが後場急伸、２６年１２月期業績予想及び配当予想を上方修正",
+          "url": "https://kabutan.jp/stock/news?code=2489&b=n202608120942"
+        },
+        {
+          "datetime": "2026-08-12T14:30:00+09:00",
+          "category": "決算",
+          "title": "アドウェイズ、今期経常を2.2倍上方修正、配当も5.49円増額",
+          "url": "https://kabutan.jp/stock/news?code=2489&b=k202608120031"
+        },
+        {
+          "datetime": "2026-08-12T14:30:00+09:00",
+          "category": "開示",
+          "title": "株主優待制度の変更及び拡充に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260810517345/"
+        },
+        {
+          "datetime": "2026-08-12T14:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期 第2四半期（中間期）決算説明会資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260810517344/"
+        },
+        {
+          "datetime": "2026-08-12T14:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期 第2四半期（中間期）決算短信〔日本基準〕(連結)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260810517342/"
+        },
+        {
+          "datetime": "2026-08-12T14:30:00+09:00",
+          "category": "開示",
+          "title": "業績予想及び配当予想の修正に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260810517320/"
+        },
+        {
+          "datetime": "2026-08-05T12:00:00+09:00",
+          "category": "開示",
+          "title": "VECT INNOVATION、インハウスマーケティングにおける新サービス「vect」の提供を開始",
+          "url": "https://kabutan.jp/disclosures/pdf/20260805/140120260730503830/"
+        },
+        {
+          "datetime": "2026-07-31T13:00:00+09:00",
+          "category": "開示",
+          "title": "「令和8年熊本地震」の被災地に対する義援金寄付について",
+          "url": "https://kabutan.jp/disclosures/pdf/20260731/140120260731505103/"
+        }
+      ],
+      "factor": "2026年8月12日後場（prior、14:30ごろ）に開示した2026年12月期通期業績予想・配当予想の大幅上方修正への反応が翌営業日も継続した。日経会社情報DIGITALによれば通期経常利益を8億円→17.5億円（2.2倍）に修正した。株探決算速報によれば配当も6.57円→12.06円（前期6.42円）に大幅増額した。Q2ではアドプラットフォーム事業「UNICORN」の需要増・国内ゲーム/マンガアプリ向け広告堅調により売上高63.24億円（+7.1%）・営業利益9.56億円（前年同期は損失）と黒字転換を達成したことが背景にある。",
+      "factor_kind": "報道",
+      "rank": 19,
+      "sector_cluster": {
+        "sec33": "9050",
+        "name": "サービス業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "194A",
+            "name": "WOLVES HAND",
+            "rank": 1,
+            "pct": 26.67,
+            "turnover_m": 392.6,
+            "has_disclosure": true
+          },
+          {
+            "code": "6027",
+            "name": "弁護士ドットコム",
+            "rank": 4,
+            "pct": 18.87,
+            "turnover_m": 2891.5,
+            "has_disclosure": true
+          },
+          {
+            "code": "7059",
+            "name": "コプロ・ホールディングス",
+            "rank": 11,
+            "pct": 14.0,
+            "turnover_m": 944.2,
+            "has_disclosure": true
+          }
+        ],
+        "leader_code": "6027",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "6981",
+      "name": "村田製作所",
+      "market": "プライム",
+      "sec17": "9",
+      "sec17_name": "電機・精密",
+      "sec33": "3650",
+      "sec33_name": "電気機器",
+      "scale_cat": "TOPIX Large70",
+      "mcap_oku": 163145,
+      "mcap_oku_exact": 163145.1,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 10.25,
+      "pct5": 6.16,
+      "close": 8311.0,
+      "adj_close": 8311.0,
+      "prev_adj_close": 7538.0,
+      "turnover_yen": 326694863600,
+      "turnover_m": 326694.9,
+      "shoutfy_jq": 1963001843,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2ブレインズテクノロジー、アイサンテクノ、日本一ソフトウェアなど",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202609010087"
+        },
+        {
+          "datetime": "2026-08-30T14:00:00+09:00",
+          "category": "市況",
+          "title": "【和島英樹のマーケット・フォーキャスト】─日米金融政策と金利動向を注視、物色の主軸は好業績銘柄",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608300045"
+        },
+        {
+          "datetime": "2026-08-21T10:00:01+09:00",
+          "category": "特集",
+          "title": "「自分で銘柄を探す」を放棄したら、日立は4倍超え、丸紅は7倍に迫る",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608210326"
+        },
+        {
+          "datetime": "2026-08-20T13:28:22+09:00",
+          "category": "材料",
+          "title": "プロシップ---大幅続伸、「ProPlus＋」が村田製作所の新リース会計基準対応に採用",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608200688"
+        },
+        {
+          "datetime": "2026-08-20T11:00:00+09:00",
+          "category": "材料",
+          "title": "プロシップが続伸、「ＰｒｏＰｌｕｓ＋」が村田製に採用",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608200516"
+        },
+        {
+          "datetime": "2026-08-14T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1渋谷工、弁護士コム、TOPPANなど",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608140297"
+        },
+        {
+          "datetime": "2026-08-13T10:49:00+09:00",
+          "category": "材料",
+          "title": "アドテストが上場来高値更新、ＡＩ・半導体関連への資金回帰の流れが強まる",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608130573"
+        },
+        {
+          "datetime": "2026-08-13T08:40:27+09:00",
+          "category": "材料",
+          "title": "TOPPAN、村田製◆今日のフィスコ注目銘柄◆",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608130318"
+        },
+        {
+          "datetime": "2026-08-12T12:10:01+09:00",
+          "category": "特集",
+          "title": "キオクシアで今年3000万円、調整も跳ね飛ばす「順張りの鉄則」",
+          "url": "https://kabutan.jp/stock/news?code=6981&b=n202608120649"
+        }
+      ],
+      "factor": "2026年8月13日、アドバンテスト（6857）が前日比+7.20%（+2,490円）で株式分割考慮後の上場来高値を更新し、AI・半導体関連株への資金回帰の流れが鮮明化した。フィスコは同日08:40に村田製作所をボリンジャーバンドの-1σを支持線としたリバウンド候補の注目銘柄に取り上げ（[財経新聞](https://www.zaikei.co.jp/article/20260813/865526.html)）、サーバー向けMLCCでAIデータセンター需要拡大の恩恵銘柄としての認知と相まって買いが集中したとみられる。自社の開示はなく、AI・半導体テーマへの業種横断的な資金流入が主因。",
+      "factor_kind": "報道",
+      "rank": 20,
+      "sector_cluster": {
+        "sec33": "3650",
+        "name": "電気機器",
+        "size": 3,
+        "peers": [
+          {
+            "code": "6862",
+            "name": "ミナトホールディングス",
+            "rank": 6,
+            "pct": 17.03,
+            "turnover_m": 75.9,
+            "has_disclosure": false
+          },
+          {
+            "code": "6779",
+            "name": "日本電波工業",
+            "rank": 17,
+            "pct": 10.66,
+            "turnover_m": 4323.3,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "6981",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "6330",
+      "name": "東洋エンジニアリング",
+      "market": "プライム",
+      "sec17": "3",
+      "sec17_name": "建設・資材",
+      "sec33": "2050",
+      "sec33_name": "建設業",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 1471,
+      "mcap_oku_exact": 1470.7,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 10.13,
+      "pct5": 18.76,
+      "close": 2500.0,
+      "adj_close": 2500.0,
+      "prev_adj_close": 2270.0,
+      "turnover_yen": 12425123900,
+      "turnover_m": 12425.1,
+      "shoutfy_jq": 58828807,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1壱番屋、東海カーボン、クオンツ総研ホールディングスなど",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202609010083"
+        },
+        {
+          "datetime": "2026-08-30T19:30:00+09:00",
+          "category": "特集",
+          "title": "26年4-6月期【利益倍増】企業はこれだ！〔第3弾〕 39社選出 ＜成長株特集＞",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608300062"
+        },
+        {
+          "datetime": "2026-08-29T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ティアフォー、テラドローン、シリコンスタ (8月24日～28日)",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608290121"
+        },
+        {
+          "datetime": "2026-08-28T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1タムラ製、FIG、ジャパンマテリアルなど",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608280110"
+        },
+        {
+          "datetime": "2026-08-27T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2シリコンスタジオ、アサカ理研、Sイノベーションなど",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608270110"
+        },
+        {
+          "datetime": "2026-08-26T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1 イビデン、古河電気工業、ローツェなど",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608260105"
+        },
+        {
+          "datetime": "2026-08-25T15:34:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・２５日＞（大引け）＝東洋エンジ、フライヤーなど",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608250789"
+        },
+        {
+          "datetime": "2026-08-25T13:21:00+09:00",
+          "category": "材料",
+          "title": "東洋エンジが続伸、政府支援のレアアース海底採掘関連の急先鋒",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608250582"
+        },
+        {
+          "datetime": "2026-08-25T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1弁護士コム、東映アニメ、住友金属鉱山など",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608250092"
+        },
+        {
+          "datetime": "2026-08-24T17:30:00+09:00",
+          "category": "市況",
+          "title": "明日の株式相場に向けて＝「金＆レアアース」メタル系大相場の奔流",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608240915"
+        },
+        {
+          "datetime": "2026-08-24T15:52:32+09:00",
+          "category": "材料",
+          "title": "本日の注目個別銘柄：住友鉱、弁護士コム、東映アニメなど（訂正）",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608240784"
+        },
+        {
+          "datetime": "2026-08-24T12:36:45+09:00",
+          "category": "材料",
+          "title": "東洋エンジ---大幅反発、海外関連株高受けてレアアース関連として物色",
+          "url": "https://kabutan.jp/stock/news?code=6330&b=n202608240480"
+        }
+      ],
+      "factor": "2026年8月7日11:30開示の2027年3月期第1四半期決算（株探ニュース）後の上昇モメンタムが継続。同決算では経常利益が前年同期比2.8倍（33.7億円）、営業利益＋186.5%（19億円）、純利益＋414.6%（28億円）と大幅改善し、通期計画75億円に対する経常利益進捗率は45.0%に達した。並行して同社は南鳥島沖の中重レアアース採掘システムに係る技術開発受託を通じ2026年前半から投資テーマ性を帯びており、テーマ株としての需給と業績改善の確認が並走するかたちで売買代金約124億円を伴う上昇となった。材料窓内（2026-08-12T15:30〜2026-08-13T15:30）に新たな開示・記事は確認されていない。",
+      "factor_kind": "テーマ",
+      "rank": 21
+    },
+    {
+      "code": "4593",
+      "name": "ヘリオス",
+      "market": "グロース",
+      "sec17": "5",
+      "sec17_name": "医薬品",
+      "sec33": "3250",
+      "sec33_name": "医薬品",
+      "scale_cat": "-",
+      "mcap_oku": 377,
+      "mcap_oku_exact": 376.7,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 9.84,
+      "pct5": 10.28,
+      "close": 279.0,
+      "adj_close": 279.0,
+      "prev_adj_close": 254.0,
+      "turnover_yen": 1171625100,
+      "turnover_m": 1171.6,
+      "shoutfy_jq": 135002200,
+      "period_end": "2026-12-31",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "15:30",
+          "code": "4593",
+          "name": "Ｇ－ヘリオス",
+          "title": "2026年12月期 第２四半期（中間期）決算短信〔ＩＦＲＳ〕（連結）",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517605.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "15:30",
+          "code": "4593",
+          "name": "Ｇ－ヘリオス",
+          "title": "金融収益及び金融費用の計上に関するお知らせ",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517609.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "15:30",
+          "code": "4593",
+          "name": "Ｇ－ヘリオス",
+          "title": "2026年12月期　第２四半期決算説明資料",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812517614.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:43:56+09:00",
+          "category": "材料",
+          "title": "新興市場銘柄ダイジェスト:サイバーSOLが大幅反落、DELTA－Pがストップ高",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202609010822"
+        },
+        {
+          "datetime": "2026-09-01T13:08:00+09:00",
+          "category": "材料",
+          "title": "ヘリオスが反発、「再生医療等製品製造販売業許可」を取得",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202609010563"
+        },
+        {
+          "datetime": "2026-09-01T09:52:28+09:00",
+          "category": "材料",
+          "title": "ヘリオス---反発、「再生医療等製品製造販売業許可」を再取得",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202609010305"
+        },
+        {
+          "datetime": "2026-08-31T15:30:00+09:00",
+          "category": "開示",
+          "title": "「再生医療等製品製造販売業許可」取得に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260831/140120260831528284/"
+        },
+        {
+          "datetime": "2026-08-24T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2アーキテクツSJ、TORICO、オンコリスなど",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608240019"
+        },
+        {
+          "datetime": "2026-08-22T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2アーキテクツSJ、TORICO、オンコリスなど",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608220090"
+        },
+        {
+          "datetime": "2026-08-21T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2キオクシアHD、オキサイド、ヘリオスなど",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608210103"
+        },
+        {
+          "datetime": "2026-08-20T15:46:36+09:00",
+          "category": "材料",
+          "title": "新興市場銘柄ダイジェスト:オキサイドが急伸、ミライロが大幅反落",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608200959"
+        },
+        {
+          "datetime": "2026-08-20T10:54:03+09:00",
+          "category": "５％",
+          "title": "ヘリオスについて、モルガン・スタンレー・アンド・カンパニー・インターナショナル・ピーエルシーは保有割合が増加したと報告 [変更報告書No.1]",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608200503"
+        },
+        {
+          "datetime": "2026-08-20T10:07:16+09:00",
+          "category": "材料",
+          "title": "ヘリオス---反発、ヘリオスUDCの特許が中国で成立",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608200421"
+        },
+        {
+          "datetime": "2026-08-20T09:11:00+09:00",
+          "category": "材料",
+          "title": "ヘリオスは急反発、中国で低免疫原性ｉＰＳ細胞「ヘリオスＵＤＣ」の特許成立",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608200277"
+        },
+        {
+          "datetime": "2026-08-19T16:02:00+09:00",
+          "category": "材料",
+          "title": "ヘリオス、中国で低免疫原性ｉＰＳ細胞「ヘリオスＵＤＣ」の特許成立",
+          "url": "https://kabutan.jp/stock/news?code=4593&b=n202608190930"
+        }
+      ],
+      "factor": "2026年12月期第2四半期（中間期）決算で有価証券評価益1,079百万円を中心とした金融収益1,111百万円を計上し、税引前中間損失が前年同期の4,704百万円から2,278百万円へと大幅に縮小した。一方で営業損失は1,573百万円から2,404百万円へと拡大しており、金融収益の計上による純損失改善が株価上昇の一因となったとみられる。医薬品セクター同クラスター（s33:3250）のオンコリスバイオファーマ(4588)・ネクセラファーマ(4565)は当該期間に開示なく、連れ高とみられる。",
+      "factor_kind": "開示",
+      "rank": 22,
+      "sector_cluster": {
+        "sec33": "3250",
+        "name": "医薬品",
+        "size": 3,
+        "peers": [
+          {
+            "code": "4588",
+            "name": "オンコリスバイオファーマ",
+            "rank": 5,
+            "pct": 17.42,
+            "turnover_m": 8786.9,
+            "has_disclosure": false
+          },
+          {
+            "code": "4565",
+            "name": "ネクセラファーマ",
+            "rank": 25,
+            "pct": 8.48,
+            "turnover_m": 2187.4,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "4593",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "3723",
+      "name": "日本ファルコム",
+      "market": "グロース",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "5250",
+      "sec33_name": "情報･通信業",
+      "scale_cat": "-",
+      "mcap_oku": 298,
+      "mcap_oku_exact": 298.0,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 9.35,
+      "pct5": 6.66,
+      "close": 2899.0,
+      "adj_close": 2899.0,
+      "prev_adj_close": 2651.0,
+      "turnover_yen": 186828200,
+      "turnover_m": 186.8,
+      "shoutfy_jq": 10280000,
+      "period_end": "2026-09-30",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-15T09:00:00+09:00",
+          "category": "特集",
+          "title": "今週の【上場来高値銘柄】物語コーポ、リクルート、アドテストなど101銘柄",
+          "url": "https://kabutan.jp/stock/news?code=3723&b=n202608150295"
+        },
+        {
+          "datetime": "2026-08-12T14:00:00+09:00",
+          "category": "決算",
+          "title": "ファルコム、10-6月期(3Q累計)経常が5.7倍増益で着地・4-6月期も2.1倍増益",
+          "url": "https://kabutan.jp/stock/news?code=3723&b=k202608120026"
+        },
+        {
+          "datetime": "2026-08-12T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期 第３四半期決算短信〔日本基準〕（非連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260810517360/"
+        },
+        {
+          "datetime": "2026-07-04T09:00:00+09:00",
+          "category": "特集",
+          "title": "今週の【上場来高値銘柄】味の素、ＩＩＪ、ＯＳＧなど73銘柄",
+          "url": "https://kabutan.jp/stock/news?code=3723&b=n202607040061"
+        },
+        {
+          "datetime": "2026-05-13T14:00:00+09:00",
+          "category": "決算",
+          "title": "ファルコム、今期経常を一転61％増益に上方修正・4期ぶり最高益更新へ",
+          "url": "https://kabutan.jp/stock/news?code=3723&b=k202605130101"
+        },
+        {
+          "datetime": "2026-05-13T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期 第２四半期（中間期）決算短信〔日本基準〕（非連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260513/140120260512527204/"
+        },
+        {
+          "datetime": "2026-05-13T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期第２四半期（中間期）の業績予想値と実績値との差異及び通期業績予想の修正に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260513/140120260511523675/"
+        },
+        {
+          "datetime": "2026-02-13T14:00:00+09:00",
+          "category": "決算",
+          "title": "ファルコム、上期経常を5.8倍上方修正",
+          "url": "https://kabutan.jp/stock/news?code=3723&b=k202602130137"
+        },
+        {
+          "datetime": "2026-02-13T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期第２四半期（中間期）業績予想の修正に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260213/140120260212558215/"
+        },
+        {
+          "datetime": "2026-02-13T14:00:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期 第１四半期決算短信〔日本基準〕（非連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260213/140120260212558178/"
+        },
+        {
+          "datetime": "2026-01-09T15:30:00+09:00",
+          "category": "開示",
+          "title": "独立役員届出書",
+          "url": "https://kabutan.jp/disclosures/pdf/20260109/140120260109531549/"
+        },
+        {
+          "datetime": "2025-12-26T15:30:00+09:00",
+          "category": "開示",
+          "title": "事業計画及び成長可能性に関する事項",
+          "url": "https://kabutan.jp/disclosures/pdf/20251226/140120251225526971/"
+        }
+      ],
+      "factor": "2026年8月12日後場（14時台）に開示した2026年9月期第3四半期決算短信で10〜6月累計の経常利益が前年同期比470.7%増・12億8100万円と大幅増益となり、その翌営業日にも買いが継続したとみられる。主力RPGシリーズ最新作『空の軌跡 the 1st』がNintendo Switch 2含む複数プラットフォームで国内外展開し、製品・ライセンス両部門で収益増に寄与した。[gamebiz](https://gamebiz.jp/news/430929)や[電ファミニコゲーマー](https://news.denfaminicogamer.jp/news/2608123b)が報道。情報・通信業クラスタ（s33:5250）のリーダーはエネルギーDX系のENECHANGE（4169）であり、業態が大きく異なることからクラスタ内連動ではなく個別の決算材料が主因とみられる。",
+      "factor_kind": "報道",
+      "rank": 23,
+      "sector_cluster": {
+        "sec33": "5250",
+        "name": "情報･通信業",
+        "size": 4,
+        "peers": [
+          {
+            "code": "584A",
+            "name": "LiNKX",
+            "rank": 7,
+            "pct": 16.17,
+            "turnover_m": 1342.4,
+            "has_disclosure": false
+          },
+          {
+            "code": "4169",
+            "name": "ENECHANGE",
+            "rank": 13,
+            "pct": 13.41,
+            "turnover_m": 1666.0,
+            "has_disclosure": false
+          },
+          {
+            "code": "4396",
+            "name": "システムサポートホールディングス",
+            "rank": 18,
+            "pct": 10.49,
+            "turnover_m": 477.0,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "4169",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "5208",
+      "name": "有沢製作所",
+      "market": "プライム",
+      "sec17": "4",
+      "sec17_name": "素材・化学",
+      "sec33": "3200",
+      "sec33_name": "化学",
+      "scale_cat": "TOPIX Small 1",
+      "mcap_oku": 974,
+      "mcap_oku_exact": 974.5,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 9.06,
+      "pct5": 5.07,
+      "close": 2900.0,
+      "adj_close": 2900.0,
+      "prev_adj_close": 2659.0,
+      "turnover_yen": 1049961200,
+      "turnover_m": 1050.0,
+      "shoutfy_jq": 33603924,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-06T20:11:30+09:00",
+          "category": "注目",
+          "title": "★本日の【イチオシ決算】 三菱マ、任天堂、オリックス (8月6日)",
+          "url": "https://kabutan.jp/stock/news?code=5208&b=n202608061742"
+        },
+        {
+          "datetime": "2026-08-06T18:02:44+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月06日)",
+          "url": "https://kabutan.jp/stock/news?code=5208&b=n202608061555"
+        },
+        {
+          "datetime": "2026-08-06T16:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Additional Capital Investment (Acquisition of Non-current Assets) to Increase Production Capacity",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260806511567/"
+        },
+        {
+          "datetime": "2026-08-06T16:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Revisions to Consolidated Financial Forecasts and Dividend Forecasts for the Fiscal Year Ending March 31, 2027",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260806511543/"
+        },
+        {
+          "datetime": "2026-08-06T16:00:00+09:00",
+          "category": "開示",
+          "title": "Summary of Consolidated Financial Results for the Three Months Ended June 30, 2026 (Under Japanese GAAP)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260806511498/"
+        },
+        {
+          "datetime": "2026-08-06T16:00:00+09:00",
+          "category": "開示",
+          "title": "生産能力増強に向けた設備投資（固定資産の取得）の追加に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260805510977/"
+        },
+        {
+          "datetime": "2026-08-06T16:00:00+09:00",
+          "category": "開示",
+          "title": "業績予想および配当予想の修正に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260805510971/"
+        },
+        {
+          "datetime": "2026-08-06T16:00:00+09:00",
+          "category": "開示",
+          "title": "2027年3月期 第1四半期決算短信〔日本基準〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260805510769/"
+        },
+        {
+          "datetime": "2026-08-06T16:00:00+09:00",
+          "category": "決算",
+          "title": "有沢製、今期経常を一転4％増益に上方修正、配当も12円増額",
+          "url": "https://kabutan.jp/stock/news?code=5208&b=k202608060317"
+        },
+        {
+          "datetime": "2026-07-17T16:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Regarding Completion of Payment for Disposal of Treasury Stock as Restricted Stock Compensation",
+          "url": "https://kabutan.jp/disclosures/pdf/20260717/140120260710591285/"
+        },
+        {
+          "datetime": "2026-07-17T16:00:00+09:00",
+          "category": "開示",
+          "title": "譲渡制限付株式報酬としての自己株式の処分の払込完了に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260717/140120260710591197/"
+        }
+      ],
+      "factor": "独自の新規材料は確認されず、化学セクター（s33:3200）クラスター内リーダーの児玉化学工業（4222）が2026年8月12日に2027年3月期1Q経常利益97倍増益（全セグメントが順調に推移）を開示したことへの連れ高とみられる。株探決算速報によれば同社は増収かつ営業利益・経常利益とも大幅増を達成した。児玉化学工業（自動車向け樹脂成形部品主体）と有沢製作所（FPC材料・電子材料）は事業内容が異なるが同一セクターに属しており、化学セクター全体への物色が波及した可能性がある。",
+      "factor_kind": "テーマ",
+      "rank": 24,
+      "sector_cluster": {
+        "sec33": "3200",
+        "name": "化学",
+        "size": 2,
+        "peers": [
+          {
+            "code": "4222",
+            "name": "児玉化学工業",
+            "rank": 15,
+            "pct": 11.43,
+            "turnover_m": 2495.5,
+            "has_disclosure": true
+          }
+        ],
+        "leader_code": "4222",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "4565",
+      "name": "ネクセラファーマ",
+      "market": "プライム",
+      "sec17": "5",
+      "sec17_name": "医薬品",
+      "sec33": "3250",
+      "sec33_name": "医薬品",
+      "scale_cat": "TOPIX Small 1",
+      "mcap_oku": 1007,
+      "mcap_oku_exact": 1006.7,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 8.48,
+      "pct5": 23.66,
+      "close": 1087.0,
+      "adj_close": 1087.0,
+      "prev_adj_close": 1002.0,
+      "turnover_yen": 2187416100,
+      "turnover_m": 2187.4,
+      "shoutfy_jq": 92614159,
+      "period_end": "2026-12-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-27T09:55:00+09:00",
+          "category": "材料",
+          "title": "ネクセラが３日続伸、米ニューロクラインバイオからマイルストン受領へ",
+          "url": "https://kabutan.jp/stock/news?code=4565&b=n202608270339"
+        },
+        {
+          "datetime": "2026-08-26T16:30:00+09:00",
+          "category": "開示",
+          "title": "Nxera Pharma’s Partner Neurocrine Biosciences Receives IND Acceptance from the FDA for Phase 2 Study of NBI-1117567 for Alzheimer's Cognition",
+          "url": "https://kabutan.jp/disclosures/pdf/20260826/140120260826526541/"
+        },
+        {
+          "datetime": "2026-08-26T16:30:00+09:00",
+          "category": "開示",
+          "title": "提携先ニューロクライン社によるアルツハイマー病における認知機能障害を対象としたNBI-1117567のフェーズ2試験に関するIND受理のお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260826/140120260826526519/"
+        },
+        {
+          "datetime": "2026-08-21T10:45:02+09:00",
+          "category": "５％",
+          "title": "ネクセラについて、みずほ証券は保有割合が増加したと報告 [変更報告書No.2]",
+          "url": "https://kabutan.jp/stock/news?code=4565&b=n202608210444"
+        },
+        {
+          "datetime": "2026-08-14T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1渋谷工、弁護士コム、TOPPANなど",
+          "url": "https://kabutan.jp/stock/news?code=4565&b=n202608140297"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "Nxera Pharma Operational Highlights and Consolidated Results for the Second Quarter 2026",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514755/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期第2四半期累計期間（1月-6月）ビジネスハイライトおよび連結業績について",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514665/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "Consolidated Financial Results for the Six Months Ended June 30, 2026 (IFRS)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514611/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期第２四半期（中間期）決算短信〔ＩＦＲＳ〕(連結)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514534/"
+        }
+      ],
+      "factor": "2026年8月13日に米系大手証券がレーティング強気継続・目標株価を2,000円へ引き上げたと伝えられ、買いが集まったとみられる。また医薬品セクター（s33:3250）クラスター内リーダーのヘリオス（4593）が2026年8月12日に2Q決算と金融収益計上を開示したことが一因とみられる。中間損失が前年同期△4,708百万円から△2,266百万円へ約52%改善し、有価証券評価益1,079百万円を含む金融収益1,111百万円を計上した。バイオ・再生医療セクターへの連想買いが並走した可能性がある。",
+      "factor_kind": "報道",
+      "rank": 25,
+      "sector_cluster": {
+        "sec33": "3250",
+        "name": "医薬品",
+        "size": 3,
+        "peers": [
+          {
+            "code": "4588",
+            "name": "オンコリスバイオファーマ",
+            "rank": 5,
+            "pct": 17.42,
+            "turnover_m": 8786.9,
+            "has_disclosure": false
+          },
+          {
+            "code": "4593",
+            "name": "ヘリオス",
+            "rank": 22,
+            "pct": 9.84,
+            "turnover_m": 1171.6,
+            "has_disclosure": true
+          }
+        ],
+        "leader_code": "4593",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "2962",
+      "name": "テクニスコ",
+      "market": "スタンダード",
+      "sec17": "3",
+      "sec17_name": "建設・資材",
+      "sec33": "3550",
+      "sec33_name": "金属製品",
+      "scale_cat": "-",
+      "mcap_oku": 131,
+      "mcap_oku_exact": 131.0,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 8.28,
+      "pct5": 11.42,
+      "close": 1425.0,
+      "adj_close": 1425.0,
+      "prev_adj_close": 1316.0,
+      "turnover_yen": 174481100,
+      "turnover_m": 174.5,
+      "shoutfy_jq": 9193374,
+      "period_end": "2026-06-30",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "取締役及び監査役候補者選任並びに退任取締役に対する退職慰労金贈呈に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260826526626/"
+        },
+        {
+          "datetime": "2026-08-27T15:30:00+09:00",
+          "category": "開示",
+          "title": "独立役員届出書",
+          "url": "https://kabutan.jp/disclosures/pdf/20260827/140120260813518831/"
+        },
+        {
+          "datetime": "2026-08-22T08:50:00+09:00",
+          "category": "注目",
+          "title": "今週の【話題株ダイジェスト】 ＴＯＲＩＣＯ、ハイパー、エニマインド (8月17日～21日)",
+          "url": "https://kabutan.jp/stock/news?code=2962&b=n202608220125"
+        },
+        {
+          "datetime": "2026-08-21T11:30:00+09:00",
+          "category": "開示",
+          "title": "役員報酬の減額解除に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260821/140120260821524274/"
+        },
+        {
+          "datetime": "2026-08-19T15:40:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・１９日＞（大引け）＝イーレックス、Ｄガレージ、テクニスコなど",
+          "url": "https://kabutan.jp/stock/news?code=2962&b=n202608190881"
+        },
+        {
+          "datetime": "2026-08-19T11:24:00+09:00",
+          "category": "材料",
+          "title": "テクニスコが続騰、シルバーダイヤの成長を期待した買いが続く",
+          "url": "https://kabutan.jp/stock/news?code=2962&b=n202608190459"
+        },
+        {
+          "datetime": "2026-08-18T15:40:05+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 8 銘柄　　S安＝ 0 銘柄　(8月18日)",
+          "url": "https://kabutan.jp/stock/news?code=2962&b=n202608180867"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "決算",
+          "title": "テクニスコ、前期営業が一転赤字で下振れ着地・今期は黒字浮上へ",
+          "url": "https://kabutan.jp/stock/news?code=2962&b=k202608140144"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "連結業績予想と実績値との差異に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260813520008/"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年６月期 決算短信〔日本基準〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260813519912/"
+        }
+      ],
+      "factor": "AIデータセンター・ハイエンドCPU向けヒートシンク「シルバーダイヤ」に欧米主要顧客からの引き合いが増加しているとして、株探（2026年6月23日）が採用拡大期待を報道。2026年8月13日の値上がり率ランキングで「半導体関連」に分類され、同日の金属製品セクター上昇（第4位業種）に乗る形でAI・半導体テーマの資金が流入した。翌8月14日に2026年6月期本決算（売上高前期比11.4%増・2027年6月期売上57.5%増の強気予想）の開示が予定されていたことへの期待も一因とみられる。",
+      "factor_kind": "テーマ",
+      "rank": 26,
+      "sector_cluster": {
+        "sec33": "3550",
+        "name": "金属製品",
+        "size": 2,
+        "peers": [
+          {
+            "code": "5951",
+            "name": "ダイニチ工業",
+            "rank": 12,
+            "pct": 13.41,
+            "turnover_m": 111.7,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "2962",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "8338",
+      "name": "筑波銀行",
+      "market": "プライム",
+      "sec17": "15",
+      "sec17_name": "銀行",
+      "sec33": "7050",
+      "sec33_name": "銀行業",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 598,
+      "mcap_oku_exact": 597.7,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 8.22,
+      "pct5": 8.38,
+      "close": 724.0,
+      "adj_close": 724.0,
+      "prev_adj_close": 669.0,
+      "turnover_yen": 2168777400,
+      "turnover_m": 2168.8,
+      "shoutfy_jq": 82553721,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-27T07:15:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part1 インテージHD、テラドローン、弁護士ドットコムなど",
+          "url": "https://kabutan.jp/stock/news?code=8338&b=n202608270104"
+        },
+        {
+          "datetime": "2026-08-06T15:00:00+09:00",
+          "category": "決算",
+          "title": "筑波銀、4-6月期(1Q)経常は25％増益で着地",
+          "url": "https://kabutan.jp/stock/news?code=8338&b=k202608060098"
+        },
+        {
+          "datetime": "2026-08-06T15:00:00+09:00",
+          "category": "開示",
+          "title": "[Summary]Consolidated Financial Results for the Three Months Ended June 30, 2026(Under Japanese GAAP)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260805509315/"
+        },
+        {
+          "datetime": "2026-08-06T15:00:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期　第１四半期決算概要",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260805509299/"
+        },
+        {
+          "datetime": "2026-08-06T15:00:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期　第１四半期決算短信〔日本基準〕(連結)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260806/140120260805509293/"
+        },
+        {
+          "datetime": "2026-07-30T15:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning the Expected Recording of Gain on Return of Retirement Benefit Trust (Extraordinary Income)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260730/140120260730502830/"
+        },
+        {
+          "datetime": "2026-07-30T15:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Unrealized Losses on Securities as of the End of the First Quarter of the Fiscal Year Ending March 31, 2027",
+          "url": "https://kabutan.jp/disclosures/pdf/20260730/140120260728500868/"
+        },
+        {
+          "datetime": "2026-07-30T15:00:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期第１四半期末の有価証券含み損に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260730/140120260727500142/"
+        },
+        {
+          "datetime": "2026-07-30T15:00:00+09:00",
+          "category": "開示",
+          "title": "退職給付信託返還益（特別利益）の計上見込みに関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260730/140120260727500140/"
+        }
+      ],
+      "factor": "日銀が2026年8月10日に公表した7月金融政策決定会合の「主な意見」を受け市場が利上げ加速を意識し、地方銀行株全体に買いが波及した流れに連れた高とみられる。[日本経済新聞（2026-08-13 02:00）](https://www.nikkei.com/article/DGKKZO98112490S6A810C2DTD000/)は「銀行株が軒並み高　日銀利上げ加速の見方で」と報じ、福井銀行・千葉銀行など地銀株の上昇を確認した。同行自身の2026年8月6日開示の4-6月期（1Q）経常が前年同期比25%増益との好業績も下支え一因とみられる。銀行業クラスタ（s33:7050）内の山形銀行（8344）も同日7.88%上昇しており、セクター全体の動きと整合的。",
+      "factor_kind": "テーマ",
+      "rank": 27,
+      "sector_cluster": {
+        "sec33": "7050",
+        "name": "銀行業",
+        "size": 2,
+        "peers": [
+          {
+            "code": "8344",
+            "name": "山形銀行",
+            "rank": 30,
+            "pct": 7.88,
+            "turnover_m": 720.4,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "8338",
+        "leader_basis": "turnover"
+      }
+    },
+    {
+      "code": "8789",
+      "name": "フィンテック グローバル",
+      "market": "スタンダード",
+      "sec17": "16",
+      "sec17_name": "金融（除く銀行）",
+      "sec33": "7200",
+      "sec33_name": "その他金融業",
+      "scale_cat": "-",
+      "mcap_oku": 300,
+      "mcap_oku_exact": 300.0,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 7.97,
+      "pct5": 12.03,
+      "close": 149.0,
+      "adj_close": 149.0,
+      "prev_adj_close": 138.0,
+      "turnover_yen": 711403900,
+      "turnover_m": 711.4,
+      "shoutfy_jq": 201321700,
+      "period_end": "2026-09-30",
+      "corr": 1.0,
+      "disclosures": [
+        {
+          "time": "16:00",
+          "code": "8789",
+          "name": "フィンテック",
+          "title": "2026年９月期第３四半期決算短信〔日本基準〕(連結)",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812518012.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        },
+        {
+          "time": "16:00",
+          "code": "8789",
+          "name": "フィンテック",
+          "title": "自己株式取得に係る事項の決定に関するお知らせ",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120260812518003.pdf",
+          "origin": "prev",
+          "date": "2026-08-12"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice regarding status of repurchase of own shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529540/"
+        },
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529487/"
+        },
+        {
+          "datetime": "2026-08-18T10:00:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期第3四半期決算説明「ログミーFinance書き起こし」公開のお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260818/140120260818522185/"
+        },
+        {
+          "datetime": "2026-08-12T18:04:32+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月12日)",
+          "url": "https://kabutan.jp/stock/news?code=8789&b=n202608121227"
+        },
+        {
+          "datetime": "2026-08-12T16:00:00+09:00",
+          "category": "決算",
+          "title": "フィンテック、10-6月期(3Q累計)経常が39％増益で着地・4-6月期も40％増益",
+          "url": "https://kabutan.jp/stock/news?code=8789&b=k202608120195"
+        },
+        {
+          "datetime": "2026-08-12T16:00:00+09:00",
+          "category": "開示",
+          "title": "Summary of Financial Statements for the First Three Quarters of Fiscal 2026 (Under Japanese GAAP)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260812518072/"
+        },
+        {
+          "datetime": "2026-08-12T16:00:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期第３四半期決算短信〔日本基準〕(連結)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260812518012/"
+        },
+        {
+          "datetime": "2026-08-12T16:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Regarding Repurchase of Own Shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260812518005/"
+        },
+        {
+          "datetime": "2026-08-12T16:00:00+09:00",
+          "category": "開示",
+          "title": "自己株式取得に係る事項の決定に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260812/140120260812518003/"
+        },
+        {
+          "datetime": "2026-06-19T16:30:00+09:00",
+          "category": "開示",
+          "title": "組織変更および執行役員人事に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260619/140120260618573989/"
+        },
+        {
+          "datetime": "2026-06-09T16:36:00+09:00",
+          "category": "開示",
+          "title": "コーポレート・ガバナンスに関する報告書 2026/06/09",
+          "url": "https://kabutan.jp/disclosures/pdf/20260609/140120260609566387/"
+        },
+        {
+          "datetime": "2026-06-02T15:30:00+09:00",
+          "category": "開示",
+          "title": "令和８年度福井県公共施設マネジメント技術支援業務委託契約締結に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260602/140120260602559365/"
+        }
+      ],
+      "factor": "2026年9月期第3四半期累計（10-6月期）の経常利益が前年同期比39%増益で着地し、4-6月期単独でも40%増益となる好決算が[TDnet決算短信](https://www.release.tdnet.info/inbs/140120260812518012.pdf)で確認される。同日に自己株式取得に係る事項の決定も[TDnet開示](https://www.release.tdnet.info/inbs/140120260812518003.pdf)されており、好決算と株主還元策の同時開示が好感されたとみられる。クラスター帰属なし。",
+      "factor_kind": "開示",
+      "rank": 28
+    },
+    {
+      "code": "6492",
+      "name": "岡野バルブ製造",
+      "market": "スタンダード",
+      "sec17": "8",
+      "sec17_name": "機械",
+      "sec33": "3600",
+      "sec33_name": "機械",
+      "scale_cat": "-",
+      "mcap_oku": 282,
+      "mcap_oku_exact": 281.9,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 7.89,
+      "pct5": 4.17,
+      "close": 15720.0,
+      "adj_close": 15720.0,
+      "prev_adj_close": 14570.0,
+      "turnover_yen": 332868000,
+      "turnover_m": 332.9,
+      "shoutfy_jq": 1793000,
+      "period_end": "2026-09-30",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-07T18:04:06+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月07日)",
+          "url": "https://kabutan.jp/stock/news?code=6492&b=n202608071600"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "決算",
+          "title": "岡野バ、10-6月期(3Q累計)経常は27億円・通期計画を超過",
+          "url": "https://kabutan.jp/stock/news?code=6492&b=k202608070259"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年9月期　第3四半期決算短信〔日本基準〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260716594925/"
+        },
+        {
+          "datetime": "2026-07-11T09:00:00+09:00",
+          "category": "特集",
+          "title": "今週の【上場来高値銘柄】ワールド、リクルート、ファストリなど89銘柄",
+          "url": "https://kabutan.jp/stock/news?code=6492&b=n202607110133"
+        },
+        {
+          "datetime": "2026-07-04T09:00:00+09:00",
+          "category": "特集",
+          "title": "今週の【上場来高値銘柄】味の素、ＩＩＪ、ＯＳＧなど73銘柄",
+          "url": "https://kabutan.jp/stock/news?code=6492&b=n202607040061"
+        },
+        {
+          "datetime": "2026-06-17T14:47:00+09:00",
+          "category": "開示",
+          "title": "コーポレート・ガバナンスに関する報告書 2026/06/17",
+          "url": "https://kabutan.jp/disclosures/pdf/20260617/140120260522545352/"
+        },
+        {
+          "datetime": "2026-06-16T19:30:00+09:00",
+          "category": "特集",
+          "title": "政府の新指針で脚光、建て替え需要の国策「原発関連株」に再評価機運 ＜株探トップ特集＞",
+          "url": "https://kabutan.jp/stock/news?code=6492&b=n202606161284"
+        },
+        {
+          "datetime": "2026-06-11T15:30:00+09:00",
+          "category": "開示",
+          "title": "非上場の親会社等の決算に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260611/140120260611567818/"
+        }
+      ],
+      "factor": "2026年8月7日引け時（材料窓外）に開示した2026年9月期第3四半期累計（10-6月期）経常利益が27億円超と通期計画を既に超過するサプライズ決算への注目が継続した。株探（2026年8月7日）が「岡野バ、10-6月期3Q累計経常は27億円・通期計画を超過」と報道。原子力発電所向けバルブ・定期検査工事の需要増が背景にある。機械セクターは2026年8月13日の上昇率第5位業種となり、クラスター（s33:3600）リーダーの澁谷工業（6340）が同日に2026年6月期本決算（売上高過去最高更新）を開示したことも機械セクターへの注目を集めた一因とみられる。",
+      "factor_kind": "テーマ",
+      "rank": 29,
+      "sector_cluster": {
+        "sec33": "3600",
+        "name": "機械",
+        "size": 3,
+        "peers": [
+          {
+            "code": "6340",
+            "name": "澁谷工業",
+            "rank": 9,
+            "pct": 15.87,
+            "turnover_m": 3673.8,
+            "has_disclosure": true
+          },
+          {
+            "code": "6287",
+            "name": "サトー",
+            "rank": 14,
+            "pct": 12.09,
+            "turnover_m": 1706.9,
+            "has_disclosure": true
+          }
+        ],
+        "leader_code": "6340",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "8344",
+      "name": "山形銀行",
+      "market": "プライム",
+      "sec17": "15",
+      "sec17_name": "銀行",
+      "sec33": "7050",
+      "sec33_name": "銀行業",
+      "scale_cat": "TOPIX Small 2",
+      "mcap_oku": 1477,
+      "mcap_oku_exact": 1477.1,
+      "mcap_flag": "",
+      "mcap_source": "jquants",
+      "pct": 7.88,
+      "pct5": 13.91,
+      "close": 4585.0,
+      "adj_close": 4585.0,
+      "prev_adj_close": 4250.0,
+      "turnover_yen": 720393500,
+      "turnover_m": 720.4,
+      "shoutfy_jq": 32216115,
+      "period_end": "2027-03-31",
+      "corr": 1.0,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Situation for Acquisition of Treasury Shares and Completion of Acquisition",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529600/"
+        },
+        {
+          "datetime": "2026-09-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況および取得終了に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260901529581/"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Capital Adequacy Ratio at the End of the First Quarter of the Fiscal Year Ending March 31, 2027",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260813519863/"
+        },
+        {
+          "datetime": "2026-08-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "2027年3月期 第1四半期末の自己資本比率について",
+          "url": "https://kabutan.jp/disclosures/pdf/20260814/140120260813519401/"
+        },
+        {
+          "datetime": "2026-08-04T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Situation for Acquisition of Treasury Shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20260804/140120260730503413/"
+        },
+        {
+          "datetime": "2026-08-04T15:30:00+09:00",
+          "category": "開示",
+          "title": "自己株式の取得状況に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260804/140120260730503411/"
+        },
+        {
+          "datetime": "2026-08-03T18:02:53+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (08月03日)",
+          "url": "https://kabutan.jp/stock/news?code=8344&b=n202608030999"
+        },
+        {
+          "datetime": "2026-08-03T15:30:00+09:00",
+          "category": "開示",
+          "title": "[Summary]Consolidated Financial Results for the Three Months Ended June 30, 2026 (Under Japanese GAAP)",
+          "url": "https://kabutan.jp/disclosures/pdf/20260803/140120260731504712/"
+        },
+        {
+          "datetime": "2026-08-03T15:30:00+09:00",
+          "category": "開示",
+          "title": "2027年３月期 第１四半期決算短信〔日本基準〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260803/140120260731504595/"
+        },
+        {
+          "datetime": "2026-08-03T15:30:00+09:00",
+          "category": "決算",
+          "title": "山形銀、4-6月期(1Q)経常は66％増益で着地",
+          "url": "https://kabutan.jp/stock/news?code=8344&b=k202608030050"
+        },
+        {
+          "datetime": "2026-07-31T19:40:20+09:00",
+          "category": "注目",
+          "title": "★本日の【イチオシ決算】 カシオ、ダイハツイン、明電舎 (7月31日)",
+          "url": "https://kabutan.jp/stock/news?code=8344&b=n202607311437"
+        },
+        {
+          "datetime": "2026-07-01T15:30:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Situation for Acquisition of Treasury Shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20260701/140120260630584945/"
+        }
+      ],
+      "factor": "日銀が2026年8月10日に公表した7月金融政策決定会合の「主な意見」を受け市場が利上げ加速を意識し、地方銀行株全体に買いが波及した流れに連れた高とみられる。日本経済新聞（2026-08-13 02:00）は「銀行株が軒並み高　日銀利上げ加速の見方で」と報じ、地銀株の上昇を確認した。なお、同行の4-6月期（1Q）経常は2026年8月3日引け時点（材料窓外・前々週）に開示された前年同期比66%増益の大幅黒字決算であるが、当該開示は材料窓（2026-08-12T15:30〜2026-08-13T15:30）外のため当日の直接材料ではなく、起点日2026年8月3日の継続テーマとして下支え一因となっている可能性がある。",
+      "factor_kind": "テーマ",
+      "rank": 30,
+      "sector_cluster": {
+        "sec33": "7050",
+        "name": "銀行業",
+        "size": 2,
+        "peers": [
+          {
+            "code": "8338",
+            "name": "筑波銀行",
+            "rank": 27,
+            "pct": 8.22,
+            "turnover_m": 2168.8,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "8338",
+        "leader_basis": "turnover"
+      }
+    }
+  ],
+  "theme_clusters": [
+    {
+      "sec33": "9050",
+      "name": "サービス業",
+      "size": 4,
+      "members": [
+        "194A",
+        "6027",
+        "7059",
+        "2489"
+      ],
+      "leader_code": "6027",
+      "leader_basis": "disclosure"
+    },
+    {
+      "sec33": "5250",
+      "name": "情報･通信業",
+      "size": 4,
+      "members": [
+        "584A",
+        "4169",
+        "4396",
+        "3723"
+      ],
+      "leader_code": "4169",
+      "leader_basis": "turnover"
+    },
+    {
+      "sec33": "3250",
+      "name": "医薬品",
+      "size": 3,
+      "members": [
+        "4588",
+        "4593",
+        "4565"
+      ],
+      "leader_code": "4593",
+      "leader_basis": "disclosure"
+    },
+    {
+      "sec33": "3650",
+      "name": "電気機器",
+      "size": 3,
+      "members": [
+        "6862",
+        "6779",
+        "6981"
+      ],
+      "leader_code": "6981",
+      "leader_basis": "turnover"
+    },
+    {
+      "sec33": "3600",
+      "name": "機械",
+      "size": 3,
+      "members": [
+        "6340",
+        "6287",
+        "6492"
+      ],
+      "leader_code": "6340",
+      "leader_basis": "disclosure"
+    },
+    {
+      "sec33": "3100",
+      "name": "繊維製品",
+      "size": 2,
+      "members": [
+        "3103",
+        "3551"
+      ],
+      "leader_code": "3551",
+      "leader_basis": "disclosure"
+    },
+    {
+      "sec33": "8050",
+      "name": "不動産業",
+      "size": 2,
+      "members": [
+        "146A",
+        "3277"
+      ],
+      "leader_code": "146A",
+      "leader_basis": "disclosure"
+    },
+    {
+      "sec33": "3550",
+      "name": "金属製品",
+      "size": 2,
+      "members": [
+        "5951",
+        "2962"
+      ],
+      "leader_code": "2962",
+      "leader_basis": "turnover"
+    },
+    {
+      "sec33": "3200",
+      "name": "化学",
+      "size": 2,
+      "members": [
+        "4222",
+        "5208"
+      ],
+      "leader_code": "4222",
+      "leader_basis": "disclosure"
+    },
+    {
+      "sec33": "7050",
+      "name": "銀行業",
+      "size": 2,
+      "members": [
+        "8338",
+        "8344"
+      ],
+      "leader_code": "8338",
+      "leader_basis": "turnover"
+    }
+  ],
+  "dropped_turnover": [
+    {
+      "code": "8746",
+      "name": "unbanked",
+      "pct": 6.59,
+      "pct5": 5.43,
+      "turnover_m": 7.2
+    },
+    {
+      "code": "3929",
+      "name": "ソーシャルワイヤー",
+      "pct": 6.54,
+      "pct5": 15.9,
+      "turnover_m": 8.8
+    },
+    {
+      "code": "5380",
+      "name": "新東",
+      "pct": 6.0,
+      "pct5": 10.89,
+      "turnover_m": 2.5
+    },
+    {
+      "code": "130A",
+      "name": "Veritas In Silico",
+      "pct": 5.91,
+      "pct5": 6.97,
+      "turnover_m": 6.2
+    },
+    {
+      "code": "5138",
+      "name": "Rebase",
+      "pct": 5.73,
+      "pct5": -1.12,
+      "turnover_m": 1.1
+    },
+    {
+      "code": "3409",
+      "name": "北紡",
+      "pct": 5.49,
+      "pct5": 6.67,
+      "turnover_m": 7.1
+    },
+    {
+      "code": "7837",
+      "name": "アールシーコア",
+      "pct": 5.11,
+      "pct5": 1.16,
+      "turnover_m": 3.5
+    }
+  ],
+  "dropped_mcap": [
+    {
+      "code": "7363",
+      "name": "ベビーカレンダー",
+      "pct": 23.62,
+      "pct5": 27.64,
+      "turnover_m": 35.6,
+      "mcap_oku": 15,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "2323",
+      "name": "fonfun",
+      "pct": 20.0,
+      "pct5": 25.63,
+      "turnover_m": 431.2,
+      "mcap_oku": 74,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "3895",
+      "name": "ハビックス",
+      "pct": 19.56,
+      "pct5": 20.44,
+      "turnover_m": 452.8,
+      "mcap_oku": 40,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "4255",
+      "name": "THECOO",
+      "pct": 18.56,
+      "pct5": 23.7,
+      "turnover_m": 34.9,
+      "mcap_oku": 68,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "7694",
+      "name": "いつも",
+      "pct": 17.86,
+      "pct5": 16.81,
+      "turnover_m": 28.6,
+      "mcap_oku": 31,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "7359",
+      "name": "東京通信グループ",
+      "pct": 14.6,
+      "pct5": 16.67,
+      "turnover_m": 503.7,
+      "mcap_oku": 26,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "2342",
+      "name": "トランスジェニックグループ",
+      "pct": 12.12,
+      "pct5": 21.03,
+      "turnover_m": 481.9,
+      "mcap_oku": 44,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "6276",
+      "name": "シリウスビジョン",
+      "pct": 10.56,
+      "pct5": 15.58,
+      "turnover_m": 44.7,
+      "mcap_oku": 20,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "6969",
+      "name": "松尾電機",
+      "pct": 10.01,
+      "pct5": -12.95,
+      "turnover_m": 527.2,
+      "mcap_oku": 40,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "5870",
+      "name": "ナルネットコミュニケーションズ",
+      "pct": 9.7,
+      "pct5": 10.91,
+      "turnover_m": 111.5,
+      "mcap_oku": 48,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "7069",
+      "name": "サイバー・バズ",
+      "pct": 8.96,
+      "pct5": 5.58,
+      "turnover_m": 28.0,
+      "mcap_oku": 56,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "8798",
+      "name": "アドバンスクリエイト",
+      "pct": 7.63,
+      "pct5": 11.9,
+      "turnover_m": 32.2,
+      "mcap_oku": 32,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "7957",
+      "name": "フジコピアン",
+      "pct": 6.69,
+      "pct5": 30.37,
+      "turnover_m": 495.1,
+      "mcap_oku": 46,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "280A",
+      "name": "TMH",
+      "pct": 6.69,
+      "pct5": 3.05,
+      "turnover_m": 143.0,
+      "mcap_oku": 43,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "6907",
+      "name": "ジオマテック",
+      "pct": 6.48,
+      "pct5": 20.87,
+      "turnover_m": 75.2,
+      "mcap_oku": 74,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "7426",
+      "name": "山大",
+      "pct": 6.14,
+      "pct5": 6.31,
+      "turnover_m": 22.4,
+      "mcap_oku": 8,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "196A",
+      "name": "MFS",
+      "pct": 5.88,
+      "pct5": 6.62,
+      "turnover_m": 32.6,
+      "mcap_oku": 31,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "4167",
+      "name": "ココペリ",
+      "pct": 5.79,
+      "pct5": 10.03,
+      "turnover_m": 30.5,
+      "mcap_oku": 26,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "4976",
+      "name": "東洋ドライルーブ",
+      "pct": 5.54,
+      "pct5": 3.09,
+      "turnover_m": 18.4,
+      "mcap_oku": 54,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "5997",
+      "name": "協立エアテック",
+      "pct": 5.38,
+      "pct5": 4.35,
+      "turnover_m": 26.6,
+      "mcap_oku": 58,
+      "mcap_source": "jquants"
+    },
+    {
+      "code": "3686",
+      "name": "ディー・エル・イー",
+      "pct": 5.08,
+      "pct5": 5.08,
+      "turnover_m": 17.1,
+      "mcap_oku": 27,
+      "mcap_source": "jquants"
+    }
+  ]
+}
