@@ -93,10 +93,17 @@ def prime_price_cache(target_date: date, prices: dict[str, float]) -> None:
 
 
 def _normalize_code(code5: str) -> str:
-    """J-Quants の 5 桁コードを TDnet 表記 (4 桁または末尾英字) に正規化"""
-    if len(code5) == 5 and code5.endswith("0") and code5[:-1].isdigit():
-        return code5[:-1]
-    return code5
+    """J-Quants の 5 桁コードを TDnet 表記 (4 桁または末尾英字) に正規化。
+
+    5 桁コードは「4 桁の証券コード＋予約桁 0」。証券コードは数字 4 桁、または新方式の
+    英数字 4 桁（数字 3 桁＋英字 1 桁、例 285A → J-Quants では 285A0）。末尾 0 を一律で
+    外す（jquants.code4 と同一ロジック。tdnet-monitor には jquants.py を配布しないため複製）。
+    25935 のように末尾が 0 でない 5 桁コード（優先株等）はそのまま返す。
+    """
+    c = str(code5)
+    if len(c) == 5 and c.endswith("0") and c[:4].isalnum():
+        return c[:-1]
+    return c
 
 
 def fetch_tse_codes(target_date: date) -> set[str]:
