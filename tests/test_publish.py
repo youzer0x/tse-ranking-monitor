@@ -408,3 +408,35 @@ def test_send_flag_is_safe_notify_alias(tmp_path, monkeypatch):
         "--send",
     ]) == 0
     assert len(calls) == 1
+
+
+def test_build_prunes_relative_to_the_published_session_not_the_clock(tmp_path):
+    """Retention is measured from the session being published."""
+    docs = tmp_path / "docs"
+    data_dir = docs / "data"
+    data_dir.mkdir(parents=True)
+    for name in ("2026-06-14.json", "2026-06-14_market.json", "2026-06-15.json"):
+        (data_dir / name).write_text("{}", encoding="utf-8")
+
+    pub.build(_ranking("2026-07-15"), docs)
+
+    assert not (data_dir / "2026-06-14.json").exists()
+    assert not (data_dir / "2026-06-14_market.json").exists()
+    assert (data_dir / "2026-06-15.json").exists()
+    manifest = json.loads((data_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["dates"] == ["2026-07-15", "2026-06-15"]
+
+
+def test_build_of_a_session_older_than_retention_keeps_its_own_artifact(tmp_path):
+    """A late publication must never delete itself or anything newer."""
+    docs = tmp_path / "docs"
+    data_dir = docs / "data"
+    data_dir.mkdir(parents=True)
+    (data_dir / "2026-09-10.json").write_text("{}", encoding="utf-8")
+
+    pub.build(_ranking("2026-08-17"), docs)
+
+    assert (data_dir / "2026-08-17.json").exists()
+    assert (data_dir / "2026-09-10.json").exists()
+    manifest = json.loads((data_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["dates"] == ["2026-09-10", "2026-08-17"]

@@ -25,10 +25,13 @@ MARKET_PATH_RE = re.compile(r"^docs/data/(\d{4}-\d{2}-\d{2})_market\.json$")
 MANIFEST_PATH = "docs/data/manifest.json"
 INDEX_PATH = "docs/index.html"
 
-# ``publisher.cleanup_old`` prunes artifacts older than 30 days, so a healthy
-# candidate drops one business day at a time.  A generous ceiling still lets a
-# multi-week publication outage drain in one commit while refusing the mass
-# deletion that a mis-set ``keep_days`` or a broken prune loop would produce.
+# ``publisher.cleanup_old`` prunes artifacts older than 30 days before the
+# published session, so a healthy candidate drops one business day at a time.
+# The gate does not replay a long outage (its catch-up window is one business
+# day; older gaps are abandoned), so the one legitimate mass prune is the first
+# publication after such an outage, which drops the whole retained tail at
+# once.  The ceiling covers that while still refusing the deletion storm a
+# mis-set ``keep_days`` or a broken prune loop would produce.
 MAX_PRUNED_SESSIONS = 15
 
 

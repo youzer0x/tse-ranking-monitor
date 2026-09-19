@@ -8,6 +8,11 @@ J-Quants の当日 `/equities/bars/daily`（四本値）が「確定・ほぼ全
 待つ適応型ゲートにする。通常日は16:30台に確定→即続行、遅延日のみ待機。打ち切りは 18:10 JST
 （＝旧起動時刻）の壁時計で、「現状より遅くしない／現行が配信できた日を取りこぼさない」を保証。
 
+対象日の選び方（日付省略時）: 公開 manifest の high-water mark より後で、直近の完了セッションから
+CATCH_UP_WINDOW_DAYS 営業日以内（既定1＝直近の完了セッションのみ）かつ PUBLICATION_FLOOR 以降の
+未公開営業日を最古から選ぶ。窓より古い未公開営業日は切り捨て、stderr に `WARN 切り捨て=` として
+列挙する（復元しない）。休場日の発火は直近営業日が未公開なら catch-up する（例：土曜に金曜）。
+
 判定（プローブ優先で安価に）:
   1) プローブ（安価）: jquants.last_confirmed_session(D)==D（当日終値 C が確定）。
   2) 件数完全性（bars）: len(bars_by_date(D)) >= ratio * len(bars_by_date(前営業日))。
@@ -48,6 +53,19 @@ JST = timezone(timedelta(hours=9))
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = ROOT / "docs" / "data" / "manifest.json"
 SESSION_CLOSE = wall_time(15, 30)
+
+# catch-up 窓（営業日）。日付省略時のゲートは直近の完了セッションから数えてこの日数だけを
+# 候補にし、それより古い未公開営業日は切り捨てる（WARN で列挙するだけで復元しない）。
+# 1 = 直近の完了セッションのみ。休場日の発火は直近営業日（土曜なら金曜）を拾える。
+CATCH_UP_WINDOW_DAYS = 1
+# 再開下限。2026-08-17〜09-18 は運用停止（25営業日）で欠損とし、復元しない。これより前の
+# セッションは窓に関係なく候補にしない。長期停止から再開するときはこの日付を進める。
+# None で下限なし。
+PUBLICATION_FLOOR = date(2026, 9, 24)
+# 切り捨て日の列挙上限（stderr の1行に収める）。
+ABANDONED_LIST_LIMIT = 10
+# 既定値は呼び出し時にモジュール定数を解決する（定義時に束縛すると monkeypatch が効かない）。
+_UNSET = object()
 
 
 def elog(*a):
@@ -184,23 +202,80 @@ def latest_completed_session(now_jst):
     return business_day.prev_business_day(today)
 
 
-def select_target_session(now_jst, published_dates):
-    """Choose the oldest unpublished, already-completed business session.
+def _resolve_policy(window, floor):
+    """Resolve the catch-up policy at call time so tests can patch the constants."""
+    if window is _UNSET or window is None:
+        window = CATCH_UP_WINDOW_DAYS
+    if floor is _UNSET:
+        floor = PUBLICATION_FLOOR
+    window = int(window)
+    if window < 1:
+        raise ValueError("catch-up window must be at least 1 business day")
+    return window, floor
 
-    Publication history is intentionally treated as a high-water mark.  Gaps
-    older than the latest published date are not rewritten, which preserves
-    the repository's immutable historical publication boundary.
-    """
+
+def _window_start(now_jst, window, floor):
+    """Oldest date the gate may still select: the window start, raised to the floor."""
     completed = latest_completed_session(now_jst)
+    start = completed
+    if window > 1:
+        start = business_day.nth_prev_business_day(completed, window - 1)
+    if floor is not None and start < floor:
+        start = floor
+    return start, completed
+
+
+def _unpublished_business_days(start, end, published_dates):
+    """Business days in ``start..end`` (inclusive) newer than the high-water mark."""
+    latest = max(published_dates, default=None)
+    days = []
+    candidate = start
+    while candidate <= end:
+        if business_day.is_business_day(candidate) and (latest is None or candidate > latest):
+            days.append(candidate)
+        candidate += timedelta(days=1)
+    return days
+
+
+def select_target_session(now_jst, published_dates, *, window=_UNSET, floor=_UNSET):
+    """Choose the oldest unpublished completed session inside the catch-up window.
+
+    Publication history is a high-water mark: nothing older than the newest
+    published date is ever rewritten.  On top of that the window bounds how far
+    back the gate reaches -- only the ``window`` most recent completed business
+    days are candidates (``1`` = the latest completed session only) -- and
+    nothing before ``floor`` is a candidate at all.  Unpublished business days
+    outside that range are abandoned; :func:`abandoned_sessions` names them so
+    they can be reported, never replayed.
+    """
+    window, floor = _resolve_policy(window, floor)
+    start, completed = _window_start(now_jst, window, floor)
+    candidates = _unpublished_business_days(start, completed, published_dates)
+    return candidates[0] if candidates else None
+
+
+def abandoned_sessions(now_jst, published_dates, *, window=_UNSET, floor=_UNSET):
+    """Unpublished completed business days the gate will never select.
+
+    These lie after the newest published date but before the catch-up window
+    (or before ``floor``).  Diagnostic only: the routine's final report and the
+    watchdog name them; selection never depends on this list.  With no
+    publication history there is nothing to abandon.
+    """
+    window, floor = _resolve_policy(window, floor)
+    start, _completed = _window_start(now_jst, window, floor)
     latest = max(published_dates, default=None)
     if latest is None:
-        return completed
-    candidate = latest + timedelta(days=1)
-    while candidate <= completed:
-        if business_day.is_business_day(candidate):
-            return candidate
-        candidate += timedelta(days=1)
-    return None
+        return []
+    return _unpublished_business_days(
+        latest + timedelta(days=1), start - timedelta(days=1), published_dates)
+
+
+def format_abandoned(days, limit=ABANDONED_LIST_LIMIT):
+    """One-line listing for stderr: ``d1, d2, …（他N件）``."""
+    shown = ", ".join(d.isoformat() for d in days[:limit])
+    rest = len(days) - limit
+    return shown + ("（他%d件）" % rest if rest > 0 else "")
 
 
 def resolve_deadline(now_jst, max_wait, not_later_than):
@@ -247,7 +322,8 @@ def main():
         ap.error("対象日は位置引数または --date のどちらか一方だけを指定")
 
     # 1) 明示日付は従来どおり営業日だけを対象にする。省略時は公開済みの
-    # high-water mark から、完了済みセッションの最古の未処理日を選ぶ。
+    # high-water mark より後で catch-up 窓内（既定：直近の完了セッションのみ）の
+    # 未公開営業日を選び、窓より古い未公開日は切り捨てて WARN で列挙する。
     now_jst = datetime.now(JST)
     explicit_date = args.date_option or args.date
     if explicit_date:
@@ -266,8 +342,14 @@ def main():
             elog("[wait_for_data] ERROR 公開manifest不正: %s" % exc)
             return 1
         session_d = select_target_session(now_jst, published_dates)
+        abandoned = abandoned_sessions(now_jst, published_dates)
+        if abandoned:
+            # 復元しない欠損。最終報告に載せるため列挙だけする（判定には影響しない）。
+            elog("[wait_for_data] WARN 切り捨て=%s（catch-up窓%d営業日・下限%s の外にある未公開営業日 %d件。復元しない）"
+                 % (format_abandoned(abandoned), CATCH_UP_WINDOW_DAYS,
+                    PUBLICATION_FLOOR.isoformat() if PUBLICATION_FLOOR else "なし", len(abandoned)))
         if session_d is None:
-            print("SKIP")   # 完了済みの未処理セッションなし
+            print("SKIP")   # 窓内に未公開の完了セッションなし
             return 0
     session_iso = session_d.isoformat()
     catch_up = session_d < now_jst.date()

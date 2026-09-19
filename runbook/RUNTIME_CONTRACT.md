@@ -12,7 +12,7 @@
 
 - `SKIP`：生成・push・通知をせず正常終了。
 - `TIMEOUT`：生成・push・通知をせず非ゼロ終了し、原因を報告。
-- `SESSION=YYYY-MM-DD`：その日付を以後の `<S>` とする。manifestより後の未処理営業日があれば最古日をcatch-upする。過去日は壁時計待機しない。
+- `SESSION=YYYY-MM-DD`：その日付を以後の `<S>` とする。対象はゲートが選ぶ直近の完了セッションのみ（catch-up窓＝1営業日・再開下限あり）。それより古い未公開営業日はゲートが切り捨てて `WARN 切り捨て=` を出すので最終報告に含め、手動で遡らない。過去日は壁時計待機しない。
 
 Stage1の入力整合検証が失敗したら停止する。以後の主要段階は `python .claude/hooks/runtime_telemetry.py stage start|end <name> --session <S>` で囲み、失敗時はendへ `--status failed` を付ける。
 
@@ -75,7 +75,7 @@ python scripts/publish.py --in .work/<S>/ranking.json --docs docs --pages-url "$
 
 ## 5. 最終報告
 
-`<S>`、該当総数/掲載数、主要要因、即確定/待機/catch-up、待機時間とWARN、市場分析の成功/スキップ理由、調査バッチ数・再試行数、validator残件、push/Pages digest/Gmailの結果を1段落で報告する。利用上限に達した場合は最後に完了したstageとtelemetryの保存先も記す。
+`<S>`、該当総数/掲載数、主要要因、即確定/待機/catch-up、切り捨て日、待機時間とWARN、市場分析の成功/スキップ理由、調査バッチ数・再試行数、validator残件、push/Pages digest/Gmailの結果を1段落で報告する。利用上限に達した場合は最後に完了したstageとtelemetryの保存先も記す。
 
 ## 6. 失敗時の通知
 

@@ -107,6 +107,14 @@ def save_data(data, docs_dir):
 
 
 def cleanup_old(docs_dir, keep_days=30, today=None):
+    """Prune dated artifacts (rankings and ``_market`` sidecars) older than the window.
+
+    ``today`` is the reference date; ``build`` passes the session being
+    published so retention is measured from the publication, never from the
+    wall clock.  Publishing a session late (catch-up or a manual replay) then
+    cannot delete its own artifact or anything newer than it.  The wall clock
+    is only a fallback for direct callers that pass nothing.
+    """
     data_dir = Path(docs_dir) / "data"
     if not data_dir.exists():
         return
@@ -289,9 +297,12 @@ def _load_notification_artifact(input_path, docs_dir):
 
 def build(data, docs_dir):
     prepared = prepare_ranking(data)
+    session_day = date.fromisoformat(prepared["session_date"])
     print(f"Publishing {prepared['session_date']} ({len(prepared.get('rows', []))} rows) ...")
     save_data(prepared, docs_dir)
-    cleanup_old(docs_dir, keep_days=30)
+    # Retention is anchored to the published session, not the clock: a session
+    # older than the window must keep its own artifact and the manifest entry.
+    cleanup_old(docs_dir, keep_days=30, today=session_day)
     update_manifest(docs_dir)
     write_index(docs_dir)
 

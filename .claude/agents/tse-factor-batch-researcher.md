@@ -2,7 +2,7 @@
 name: tse-factor-batch-researcher
 description: 東証ランキングのコンパクトな調査バッチ（最大5銘柄）を読み、検証可能な変動要因をJSONで返す。Stage2でresearch_batch.v1を調査するときに使う。ファイルは編集しない。
 tools: WebSearch, WebFetch, Read
-model: sonnet
+model: claude-sonnet-5
 effort: max
 ---
 

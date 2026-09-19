@@ -5,8 +5,10 @@ The GitHub Actions watchdog downloads the live Pages manifest with curl and
 passes the file path via ``--live-manifest``; this script performs no network
 I/O itself.  The decision reuses the routine's own gate logic
 (:func:`tse_ranking_monitor.gate.select_target_session`), so "missing" means
-exactly what the routine would have selected: the oldest unpublished,
-already-completed business session.
+exactly what the routine would have selected: the latest completed business
+session when it is unpublished.  The gate's catch-up window is one business
+day, so older unpublished days are abandoned rather than replayed; they are
+only named on stderr (``gate.abandoned_sessions``), never alarmed on.
 
 Output (stdout is exactly one token; diagnostics go to stderr):
   OK                       nothing missing (exit 0)
@@ -144,6 +146,12 @@ def main(argv=None):
 
     elog("[watchdog] now=%s repo_latest=%s"
          % (now_jst.isoformat(), max(published, default=None)))
+    abandoned = gate.abandoned_sessions(now_jst, published)
+    if abandoned:
+        # Diagnostic only: the gate will never select these, so the alarm must
+        # not either -- but the run log should say what was skipped.
+        elog("[watchdog] 切り捨て=%s（catch-up窓の外・復元しない %d件）"
+             % (gate.format_abandoned(abandoned), len(abandoned)))
     missing = gate.select_target_session(now_jst, published)
     if missing is not None:
         # An unpublished session covers two very different failures: the routine
