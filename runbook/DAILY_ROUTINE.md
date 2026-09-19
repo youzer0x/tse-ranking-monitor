@@ -14,13 +14,13 @@
 
 ## 起動とゲート
 
-- **cron：当日 16:35 JST**（`scripts/wait_for_data.py` が未処理の最古営業日を選ぶ適応型ゲート）。核ランキングの**唯一の必須依存は対象日の `/equities/bars/daily`**。当日分は確定まで待ち、打ち切りは18:10 JSTとする。manifestより新しい処理漏れ営業日がすでに15:30を過ぎている場合は、その過去日をcatch-up対象として一度だけ鮮度確認し、壁時計待機をしない。
+- **cron：当日 16:35 JST**（`scripts/wait_for_data.py` が直近の完了セッションを選ぶ適応型ゲート）。核ランキングの**唯一の必須依存は対象日の `/equities/bars/daily`**。当日分は確定まで待ち、打ち切りは18:10 JSTとする。catch-up窓は1営業日（`gate.CATCH_UP_WINDOW_DAYS`）で、休場日の発火が直近営業日（例：土曜に金曜）を未公開ならその過去日をcatch-up対象として一度だけ鮮度確認し、壁時計待機をしない。窓より古い未公開営業日と再開下限（`gate.PUBLICATION_FLOOR`＝2026-09-24。08-17〜09-18 の停止期間は復元しない）より前は切り捨て、`WARN 切り捨て=` で列挙する。
 - **営業日ゲート＋鮮度ガード**：`wait_for_data.py` が `docs/data/manifest.json` の最新公開日とJST時刻から対象日を決める。処理対象が無ければ `SKIP`、確定済みなら `SESSION=`、当日データが締切までに未到達またはcatch-upデータが不整合なら `TIMEOUT` とし**配信しない**。Stage1 自身も件数比・masterカバー率・日付整合を検証する。
-- 使用モデル：Sonnet 4.6・effort=max（PTS ルーチンに合わせる）。
+- 使用モデル：Sonnet 5（`claude-sonnet-5`）・effort=max。調査サブエージェント（`tse-factor-batch-researcher`）も同じモデルに固定する（2026-09-24 の再開時に Sonnet 4.6 から切替）。
 
 ## フロー
 
-1. **契約とゲート**：`python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json` を最初に実行し、不一致なら停止する。続いて `python scripts/wait_for_data.py` を実行する。`SKIP` なら更新せず終了、`SESSION=YYYY-MM-DD` ならその日付を使い、`TIMEOUT` なら生成・配信せず原因を報告する。当日待機と過去日catch-upの別、待機時間、WARNを最終報告に含める。
+1. **契約とゲート**：`python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json` を最初に実行し、不一致なら停止する。続いて `python scripts/wait_for_data.py` を実行する。`SKIP` なら更新せず終了、`SESSION=YYYY-MM-DD` ならその日付を使い、`TIMEOUT` なら生成・配信せず原因を報告する。当日待機と過去日catch-upの別、切り捨て日、待機時間、WARNを最終報告に含める。
 2. **Stage1（決定的）**：`build_day_ranking.py --date <today> --kabutan-news --out ranking.json` を実行（`JQUANTS_API_KEY` 必須）。
    - 抽出条件：東証個別株のみ／値上がり率≥+5%／売買代金≥¥10M／時価総額≥100億。`rows`/`dropped_turnover`/`dropped_mcap` を得る。
    - **掲載上限＝値上がり率上位30社**（該当が30社超なら上位30社のみ `rows` に入る。`--max-rank` 既定30）。`counts.qualifying`＝該当総数、`counts.ranked`＝掲載数。
@@ -40,7 +40,7 @@
    - **(e) 品質検証**：`python scripts/validate_market_quality.py docs/data/<SESSION>_market.json --format json --repair-targets .work/<SESSION>/market/repair_targets.json`。findingのpath/ruleだけを修復して(c)〜(e)を最大2回再実行する。本文を削って通さず、briefのsource IDを第一に再利用する。
    - **失敗時**：(a)〜(e) のどこで失敗しても市場分析は**スキップして step4 へ進む**（`docs/data/<SESSION>_market.json` が無くても SPA はタブ empty 表示に自然退避する。**ランキング配信は成功として扱う**）。`.work/<SESSION>/` はコミットしない。
 4. **Publish（生成のみ・メールは送らない）**：`publish.py --in .work/<SESSION>/ranking.json --docs docs --pages-url "$PAGES_URL"`
-   - `docs/data/<date>.json` 保存（ランキング＋要因）／`docs/data/manifest.json` 更新／30日より古い JSON を削除。
+   - `docs/data/<date>.json` 保存（ランキング＋要因）／`docs/data/manifest.json` 更新／公開セッション日から30日より古い JSON を削除（壁時計ではなくセッション日基準。過去日の publish が自身や新しい成果物を消さない）。
    - `docs/index.html`（日付選択式 Pages）を更新（体裁は `html_generator.py`＝PTS 版と同一トンマナ・配色）。保存 JSON は rows に開示（pdf_url）を含むフルデータ。
    - メールは送信せず、再生成可能なメールHTMLも公開保存しない。通知時に公開済みランキングJSONから本文を生成する。
 5. **デプロイ（必ず main へ・二重経路）**：`docs/index.html` と `docs/data/` を commit し、まず `git push origin HEAD:main` を実行する。

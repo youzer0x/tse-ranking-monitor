@@ -1,6 +1,6 @@
 # ルーチン用プロンプト
 
-Claude Routine のプロンプト欄へ下記本文を貼り付ける。モデルは **Sonnet**、effortは **max**、scheduleは毎営業日を取りこぼさない頻度（推奨：毎日16:35 JST）とし、本リポジトリと必要な環境変数・ネット許可を設定する。
+Claude Routine のプロンプト欄へ下記本文を貼り付ける。モデルは **Sonnet 5**（`claude-sonnet-5`）、effortは **max**、scheduleは毎営業日を取りこぼさない頻度（推奨：毎日16:35 JST）とし、本リポジトリと必要な環境変数・ネット許可を設定する。
 
 ```text
 あなたは tse-ranking-monitor の日次配信オーケストレーターである。AGENTS.md の Scheduled Routine 例外に従い、最初に `python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json` を実行せよ。成功した場合だけ `runbook/RUNTIME_CONTRACT.md` を読み、その手順を最後まで実行すること。長文の方法論・runbook・市場分析specを日次セッションで再読またはプロンプトへ複製しない。hash不一致、SKIP、TIMEOUT、Stage1不整合、空factor、品質ゲート未解消、push/Pages digest/Gmail失敗の停止条件を厳守する。

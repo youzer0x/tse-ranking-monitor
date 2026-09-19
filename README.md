@@ -10,7 +10,7 @@
 
 ## 日次配信
 
-1. runtime contractのhashを検証し、`scripts/wait_for_data.py` が未処理の最古営業日とbarsの鮮度を確認する。`SKIP` と `TIMEOUT` は無配信。
+1. runtime contractのhashを検証し、`scripts/wait_for_data.py` が直近の完了セッション（catch-up窓＝1営業日）とbarsの鮮度を確認する。窓より古い未公開日は切り捨てて報告する。`SKIP` と `TIMEOUT` は無配信。
 2. `scripts/build_day_ranking.py` がStage1を生成し、bars比率・masterカバー率・日付整合を検証する。
 3. 決定的なcompact research planを最大5銘柄のバッチで調査し、検証済み `evidence.v1` と `factors.json` を生成する。`scripts/merge_factors.py` で反映し、ランキングJSONは手編集しない。
 4. 同じevidenceを再利用したcompact market briefから市場分析をbest-effortで生成し、`scripts/publish.py` で公開成果物だけを `docs/` に生成する。この時点ではメールを送らない。

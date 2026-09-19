@@ -38,14 +38,54 @@ def test_missing_when_completed_session_is_absent(tmp_path, capsys):
     assert capsys.readouterr().out.strip() == "MISSING=2026-07-15"
 
 
-def test_gap_reports_oldest_unpublished_business_day(tmp_path, capsys):
-    # 最新公開が金曜07-10のまま水曜夕方 → 欠落は最古の未公開営業日=月曜07-13。
+def test_gap_older_than_the_window_is_abandoned_and_only_the_latest_is_missing(
+        tmp_path, capsys):
+    # 最新公開が金曜07-10のまま水曜夕方 → 窓は1営業日なので欠落は当日07-15だけ。
+    # 月曜07-13・火曜07-14 はゲートが選ばない＝切り捨てとして名指しするが警報しない。
     manifest = _manifest(tmp_path, ["2026-07-10"])
 
     assert wdc.main([
         "--manifest", str(manifest), "--now", "2026-07-15T19:10:00+09:00",
     ]) == 1
-    assert capsys.readouterr().out.strip() == "MISSING=2026-07-13"
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "MISSING=2026-07-15"
+    assert "切り捨て=2026-07-13, 2026-07-14" in captured.err
+
+
+def _holidays_2026_09(monkeypatch):
+    # 09-21 敬老の日・09-22 国民の休日・09-23 秋分の日（jpholiday の有無に依存させない）。
+    closed = {date(2026, 9, 21), date(2026, 9, 22), date(2026, 9, 23)}
+    monkeypatch.setattr(
+        wdc.business_day, "is_business_day",
+        lambda d: d.weekday() < 5 and d not in closed,
+    )
+
+
+def test_publication_floor_makes_the_abandoned_gap_ok(tmp_path, monkeypatch, capsys):
+    # 2026-09 の再開: 08-14 が最新公開のまま。下限 09-24 より前は欠落扱いしない。
+    _holidays_2026_09(monkeypatch)
+    monkeypatch.setattr(wdc.gate, "PUBLICATION_FLOOR", date(2026, 9, 24))
+    manifest = _manifest(tmp_path, ["2026-08-14"])
+
+    assert wdc.main([
+        "--manifest", str(manifest), "--now", "2026-09-21T19:10:00+09:00",
+    ]) == 0
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "OK"
+    assert "切り捨て=2026-08-17, 2026-08-18" in captured.err
+    assert "（他15件）" in captured.err
+
+
+def test_first_session_after_the_floor_is_missing_when_unpublished(
+        tmp_path, monkeypatch, capsys):
+    _holidays_2026_09(monkeypatch)
+    monkeypatch.setattr(wdc.gate, "PUBLICATION_FLOOR", date(2026, 9, 24))
+    manifest = _manifest(tmp_path, ["2026-08-14"])
+
+    assert wdc.main([
+        "--manifest", str(manifest), "--now", "2026-09-24T19:10:00+09:00",
+    ]) == 1
+    assert capsys.readouterr().out.strip() == "MISSING=2026-09-24"
 
 
 def test_weekend_evening_with_friday_published_is_ok(tmp_path, capsys):

@@ -232,6 +232,19 @@ def test_accepts_pruning_ranking_and_market_sidecar_together(tmp_path):
     )
 
 
+def test_accepts_pruning_the_entire_parent_history(tmp_path):
+    """First publication after a long outage drops every retained session."""
+    repo, base, _head = _repo_with_candidate(
+        tmp_path, history=HISTORY, market_history=HISTORY
+    )
+    head = _prune(repo, HISTORY, ["2026-07-17"])
+
+    candidate = promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+    assert candidate.status == "ready"
+    assert len(candidate.deleted_paths) == 2 * len(HISTORY)
+
+
 def test_rejects_deleting_the_index_page(tmp_path):
     repo, base, _head = _repo_with_candidate(tmp_path, history=HISTORY)
     (repo / "docs" / "index.html").unlink()

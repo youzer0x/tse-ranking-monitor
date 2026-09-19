@@ -42,7 +42,18 @@ def elog(message):
     print("[run-status] %s" % message, file=sys.stderr, flush=True)
 
 
-def _git(repo_root, args, *, env=None, check=True):
+def _tail(text, limit=200):
+    """The part of git's stderr worth putting in an error message."""
+    return " ".join((text or "").split())[:limit]
+
+
+def _git_result(repo_root, args, *, env=None, check=True):
+    """Run git and return the ``CompletedProcess``.
+
+    With ``check`` a non-zero exit raises :class:`StatusError` carrying git's
+    stderr -- ``CalledProcessError`` alone hides it, which is how the fetch-less
+    ``read-tree`` failure went unnoticed in the cloud for weeks.
+    """
     merged = dict(os.environ)
     if env:
         merged.update(env)
@@ -52,13 +63,20 @@ def _git(repo_root, args, *, env=None, check=True):
             cwd=str(repo_root),
             capture_output=True,
             text=True,
-            check=check,
+            check=False,
             timeout=60,
             env=merged,
         )
     except (OSError, subprocess.SubprocessError) as exc:
         raise StatusError("git %s failed: %s" % (" ".join(args), exc)) from exc
-    return completed.stdout
+    if check and completed.returncode != 0:
+        raise StatusError("git %s failed (exit %d): %s"
+                          % (" ".join(args), completed.returncode, _tail(completed.stderr)))
+    return completed
+
+
+def _git(repo_root, args, *, env=None, check=True):
+    return _git_result(repo_root, args, env=env, check=check).stdout
 
 
 def status_path_for(session):
@@ -107,13 +125,30 @@ def collect_status(root, session, *, delivered=False, died_at=None, note=None):
 
 
 def _resolve_tip(repo_root, remote, branch):
-    """Return the remote branch tip sha, or ``None`` when the branch is new."""
-    output = _git(repo_root, ["ls-remote", remote, "refs/heads/%s" % branch], check=False)
-    for line in output.splitlines():
-        parts = line.split()
-        if len(parts) == 2 and len(parts[0]) == 40:
-            return parts[0]
-    return None
+    """Fetch the status branch and return its tip sha, or ``None`` when it is new.
+
+    Knowing the tip is not enough: ``read-tree`` and ``commit-tree -p`` need the
+    tip's objects locally, and the routine runs in a fresh clone of ``main``
+    that has none of them.  The fetch lands in a remote-tracking ref rather
+    than ``FETCH_HEAD`` so a concurrent fetch by the routine in the same repo
+    cannot clobber it between the two calls.
+    """
+    tracking = "refs/remotes/%s/%s" % (remote, branch)
+    fetched = _git_result(
+        repo_root,
+        ["fetch", "--no-tags", remote, "+refs/heads/%s:%s" % (branch, tracking)],
+        check=False,
+    )
+    if fetched.returncode == 0:
+        return _git(repo_root, ["rev-parse", "--verify", "%s^{commit}" % tracking]).strip()
+    # Tell "the branch does not exist yet" apart from a real failure.  ls-remote
+    # raises on a dead remote on purpose: treating that as "new branch" would
+    # mint an orphan commit that the push then rejects.
+    listing = _git(repo_root, ["ls-remote", remote, "refs/heads/%s" % branch])
+    if not listing.strip():
+        return None
+    raise StatusError("git fetch %s %s failed (exit %d): %s"
+                      % (remote, branch, fetched.returncode, _tail(fetched.stderr)))
 
 
 def _write_blob(repo_root, text):

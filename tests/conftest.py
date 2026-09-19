@@ -33,6 +33,19 @@ def isolated_runtime_root(tmp_path, monkeypatch):
     return tmp_path / "runtime-root"
 
 
+@pytest.fixture(autouse=True)
+def no_publication_floor(monkeypatch):
+    """Keep the resumption floor out of tests that model earlier dates.
+
+    ``gate.PUBLICATION_FLOOR`` encodes the 2026-09-24 restart; left in place it
+    would turn every July-2026 fixture into "nothing to do".  Tests that
+    exercise the floor set it explicitly.
+    """
+    from tse_ranking_monitor import gate
+
+    monkeypatch.setattr(gate, "PUBLICATION_FLOOR", None)
+
+
 @pytest.fixture
 def market_golden():
     """docs/data の実出力を凍結した market.json（validate_market の正常系サンプル）。

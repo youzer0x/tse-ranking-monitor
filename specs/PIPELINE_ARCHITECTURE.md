@@ -49,7 +49,7 @@ catch-up gate -> Stage1 ranking + market stats
 - dispatch予算はmanifestの `dispatch_budget`（初期上限12・総予算18・バッチ毎3）が正であり、プランナーが機械判定する。バッチ数の理論上限は `ceil(H/3)+ceil(D/3)+ceil(N/5)`（H=高リスク・D=通常深掘り・N=通常直接）で、日次30銘柄の最悪は12（例: H1+D28+N1）＝初期上限内。12超過（catch-up/replay等の30件超入力）は `build_research_plan.py` が非ゼロ終了する。
 - 全ての委譲（初回・compile再試行・validator修復・再開）は委譲直前に `reserve_dispatch.py` でmanifestへ原子的に予約し、予約なき委譲を行わない。checkpoint済みバッチは予算を消費しない。
 - 通常バッチは最大5銘柄。深掘りrouteまたは高riskは小さく分割する。
-- 親Routineと調査エージェントは初期運用ではSonnet・effort=maxを維持する。モデル変更は構造削減の実測後に別途A/B評価する。
+- 親Routineと調査エージェントは2026-09-24の運用再開からSonnet 5（`claude-sonnet-5`）・effort=maxで固定する（初期運用はSonnet 4.6）。以後のモデル変更は構造削減の実測後に別途A/B評価する。
 - バリデータは `{code,path,rule_ids,severities,messages}` のrepair targetを出し、`repair_research_plan.py` が指摘全文と旧結果の要点（対象=修正ベース `previous`、非対象=再掲用 `carry_forward`）を該当バッチへ注入して `input_digest` を再計算し `pending` に戻す（バッチごと最大2回）。carry_forwardの改変と `requires_edinet` 行の `edinet=na` はstrict compileが拒否する。完了バッチは `input_digest` で再利用し、digest不一致の旧resultは `.stale` へ隔離して `pending` に再キューする。
 - サブスクリプション内実行を前提とし、API課金や外部クレジットへの自動フォールバックは行わない。
 

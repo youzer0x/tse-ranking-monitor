@@ -138,7 +138,7 @@ git push -u origin main
 2. 設定：
    - **リポジトリ**：`tse-ranking-monitor`
    - **環境**：Step 7 の `tse-ranking-monitor`
-   - **モデル**：**Sonnet 4.6**／**effort**：**max**
+   - **モデル**：**Sonnet 5**（`claude-sonnet-5`）／**effort**：**max**
    - **スケジュール（cron）**：毎日 **16:35 JST**（タイムゾーン欄があれば Asia/Tokyo で `35 16 * * *`。UTC 指定なら `35 7 * * *` ＝ 07:35 UTC）
    - **プロンプト**：`runbook/ROUTINE_PROMPT.md` の```で囲んだ本文をそのまま貼り付け。
 3. **Permissions タブ（フォーム最下部・リポジトリ追加後に出る）で「Allow unrestricted branch pushes」を ON推奨**。ONならmainへ直接pushする最短経路、OFFまたは制限時は `claude/*` branchからGitHub Actionsが安全検証してmainへ自動昇格する。
@@ -159,11 +159,11 @@ Step 8 と**同一の環境・プロンプト・モデル・ツール・MCP**で
 
 > **20:35 JST の根拠**：一次の通常完了（実測 17:30〜18:15）より後で、`watchdog.yml` の 22:50 JST recheck（回復していれば issue を自動クローズする）より前に完走できる窓を取る。
 
-> **二重配信しない理由**：一次が成功していれば main の manifest に当日分が入っているため `wait_for_data.py` が `SKIP` を返し、生成・push・通知をせず正常終了する（`gate.select_target_session` は未公開の最古営業日を選び、対象が無ければ `None`）。一次の走行中に衝突した場合も、後発の `git push origin HEAD:main` は non-fast-forward で失敗し、`--notify` は「ローカルHEAD＝`origin/main`」の一致待ちで失敗するため**メールは送られない**。汚い失敗にはなるが二重配信にはならない。
+> **二重配信しない理由**：一次が成功していれば main の manifest に当日分が入っているため `wait_for_data.py` が `SKIP` を返し、生成・push・通知をせず正常終了する（`gate.select_target_session` は直近の完了セッションが未公開ならそれを選び、対象が無ければ `None`）。一次の走行中に衝突した場合も、後発の `git push origin HEAD:main` は non-fast-forward で失敗し、`--notify` は「ローカルHEAD＝`origin/main`」の一致待ちで失敗するため**メールは送られない**。汚い失敗にはなるが二重配信にはならない。
 
 > **cron を平日限定にしない理由**：金曜分の配信が落ちた場合、土曜の発火で金曜セッションを catch-up できる。休場日はゲートが `SKIP` を返すので空振りは安価である。
 
-> **catch-up は1発火あたり1営業日**。複数営業日の欠損は発火回数を重ねて解消する。また `gate.py` は公開済み high-water mark より古い欠落を埋めないため、復旧は必ず古い順に進める。
+> **catch-up は直近の完了セッションのみ**（窓＝1営業日、`gate.CATCH_UP_WINDOW_DAYS`）。翌営業日の15:30を過ぎた時点で前営業日の未公開分は切り捨てられ、`WARN 切り捨て=` として報告されるだけで復元しない。2026-09-24 の運用再開で 08-17〜09-18 を切り捨てたのと同じ設計で、`gate.PUBLICATION_FLOOR` がその下限を記録する。複数営業日を遡って埋めたくなったら窓の定数を上げる（1発火あたり1営業日しか進まない点は変わらない）。
 
 > **`routine-status` ブランチ**：ルーチンが stage 境界ごとに実行位置をpushする専用ブランチで、`docs/` も `main` も汚さない。watchdog がこれを読んで「どの stage で止まったか」を警報に載せる。手で編集・削除する必要はなく、消えても次の実行で作り直される（その間 watchdog は従来の `MISSING` に退化するだけ）。ルーチンの Permissions で `Allow unrestricted branch pushes` が無効の場合はこのpushも拒否されるため、ステータスは残らない。
 
