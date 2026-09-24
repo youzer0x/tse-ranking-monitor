@@ -3,15 +3,14 @@
   J-Quants V2（全銘柄の当日 bars/daily）だけでスクリーニングが完結する：
     - 値上がり率 ＝ 当日 AdjC ÷ 前営業日 AdjC − 1（調整済み終値の連日比＝分割/併合クリーン）
     - 売買代金 ＝ Va（日通し取引代金・実値）
-    - 時価総額 ＝ market_cap_jquants（AdjC×ShOutFY×分割補正/1e8、新規上場は Yahoo）
-  TDnet（前回引け→当日引け直前の開示）と株探（† 最新株数）を結合する。
+    - 時価総額 ＝ market_cap_jquants（J-Quants valuation の MktCap＝当日終値×自己株式控除後株式数、新規上場は Yahoo）
+  TDnet（前回引け→当日引け直前の開示）を結合する。
   **変動要因（[開示]/[報道]/[テーマ]）は含めない**（後段で Claude が裏取りして埋める）。
 
 フィルタ（既定）:
   - 東証個別株のみ（J-Quants ProdCat=011 かつ Mkt∈{0111,0112,0113}）。ETF/REIT/地方上場は除外。
   - 値上がり率 ≥ min_pct（既定 +5%）かつ 売買代金 ≥ min_turnover（既定 ¥10,000,000）。
   - 時価総額 ≥ min_mcap 億円（既定 100）。
-  - 期中の増資・自己株で J-Quants 株数と株探最新株数が >1% 乖離する銘柄は mcap_flag="†"。
   - 上記を満たす銘柄が max_rank（既定 30）社を超える場合は、値上がり率の高い順に上位 max_rank 社のみをランキング対象とする
     （--max-rank 0 で上限なし）。該当総数は counts.qualifying、掲載数は counts.ranked に記録する。
 
@@ -154,7 +153,7 @@ def annotate_sector_clusters(rows, min_cluster=2):
 
 
 def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=100,
-          max_rank=30, do_kabutan_shares=True, do_kabutan_news=False,
+          max_rank=30, do_kabutan_news=False,
           kabutan_news_top=30, verbose=True):
     def log(*a):
         if verbose:
@@ -219,7 +218,7 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
             dropped_turnover.append({"code": c4, "name": name, "pct": round(pct, 2), "pct5": pct5,
                                      "turnover_m": (round(va / 1e6, 1) if va else 0.0)})
             continue
-        mc, shoutfy, period_end, corr, source = mcap.compute_one(api_key, c4, prices, session_d)
+        mc, _shoutfy, _period_end, _corr, source = mcap.compute_one(api_key, c4, prices, session_d)
         time.sleep(0.1)
         if mc is None or mc < min_mcap:
             dropped_mcap.append({"code": c4, "name": name, "pct": round(pct, 2), "pct5": pct5,
@@ -232,12 +231,11 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
             sec17=m.get("S17"), sec17_name=m.get("S17Nm"),
             sec33=m.get("S33"), sec33_name=m.get("S33Nm"),
             scale_cat=m.get("ScaleCat"),
-            mcap_oku=round(mc), mcap_oku_exact=mc, mcap_flag="", mcap_source=source,
+            mcap_oku=round(mc), mcap_oku_exact=mc, mcap_source=source,
             pct=round(pct, 2), pct5=pct5, close=b.get("C"), adj_close=b.get("AdjC"),
             prev_adj_close=(bars_prev.get(c5) or {}).get("AdjC"),
             turnover_yen=round(va), turnover_m=round(va / 1e6, 1),
-            shoutfy_jq=shoutfy, period_end=(period_end.isoformat() if period_end else None),
-            corr=round(corr, 6), disclosures=[], kabutan_news=[],
+            disclosures=[], kabutan_news=[],
             factor="", factor_kind=""))
 
     # 上限：該当総数が max_rank を超えたら値上がり率上位 max_rank 社のみをランキング対象にする。
@@ -266,21 +264,6 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
     #      開示有無を leader 判定に使うため TDnet 付与の直後に実行する。
     theme_clusters = annotate_sector_clusters(qualifying)
     log(f"# sector clusters(size>=2)={len(theme_clusters)}")
-
-    # 5) 株探 最新発行済株式数とのクロスチェック（† 注記。source=='jquants' のみ）
-    if do_kabutan_shares:
-        log(f"# kabutan shares cross-check for {len(qualifying)} names ...")
-        for row in qualifying:
-            if row["mcap_source"] != "jquants" or not row["shoutfy_jq"]:
-                continue
-            shk = kabutan_pts.kabutan_shares(row["code"])
-            time.sleep(0.2)
-            base = (row["shoutfy_jq"] or 0) * (row["corr"] or 1.0)
-            if shk and base > 0 and abs(shk - base) / base > 0.01:
-                row["mcap_flag"] = "†"
-                row["shares_kabutan"] = shk
-                if row["close"]:
-                    row["mcap_kabutan_oku"] = round(row["close"] * shk / 1e8)
 
     # 6) 株探 銘柄ニュース（材料・特集〔レーティング日報〕・5%ルール等）の事前充填（任意）。
     #    変動要因リサーチが「材料未確認」へ落とす前に必ず材料/レーティング見出しを確認できる。
@@ -323,7 +306,6 @@ def main():
     ap.add_argument("--max-rank", type=int, default=30,
                     help="掲載上限（値上がり率上位N社。0で上限なし。既定30）")
     ap.add_argument("--out", help="JSON 出力先パス（省略時は stdout）")
-    ap.add_argument("--no-kabutan-shares", action="store_true")
     ap.add_argument("--kabutan-news", action="store_true",
                     help="株探 銘柄ニュース（材料/特集〔レーティング日報〕/5%%ルール）の見出しを各行に事前充填")
     ap.add_argument("--kabutan-news-top", type=int, default=30,
@@ -343,7 +325,6 @@ def main():
 
     data = build(session_iso, prev_iso, min_pct=args.min_pct, min_turnover=args.min_turnover,
                  min_mcap=args.min_mcap, max_rank=args.max_rank,
-                 do_kabutan_shares=not args.no_kabutan_shares,
                  do_kabutan_news=args.kabutan_news, kabutan_news_top=args.kabutan_news_top)
     text = json.dumps(data, ensure_ascii=False, indent=2)
     if args.out:

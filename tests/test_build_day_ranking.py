@@ -133,7 +133,7 @@ def test_source_validation_rejects_wrong_payload_date():
             "2026-07-15", "2026-07-14", "2026-07-08", master, now, before, before5)
 
 
-def test_build_adds_schema_and_uses_explicit_jst(monkeypatch):
+def _patch_build_sources(monkeypatch):
     master, now, before, before5 = _source_rows()
     monkeypatch.setenv("JQUANTS_API_KEY", "test")
     monkeypatch.setattr(bdr.jquants, "master_by_date", lambda _date: master)
@@ -141,11 +141,15 @@ def test_build_adds_schema_and_uses_explicit_jst(monkeypatch):
         bdr.jquants, "bars_by_date",
         lambda day: {"2026-07-15": now, "2026-07-14": before, "2026-07-08": before5}[day])
     monkeypatch.setattr(bdr.mcap, "prime_price_cache", lambda *_args: None)
+    # market_cap_jquants v2.0.0: valuation の MktCap。株数・期末日は None、corr は 1.0 固定
     monkeypatch.setattr(
-        bdr.mcap, "compute_one",
-        lambda *_args: (200.0, 1_000_000, datetime.date(2026, 3, 31), 1.0, "jquants"))
+        bdr.mcap, "compute_one", lambda *_args: (200.0, None, None, 1.0, "jquants"))
     monkeypatch.setattr(bdr.tdnet, "disclosures_window", lambda *_args: {})
     monkeypatch.setattr(bdr._impl.time, "sleep", lambda _seconds: None)
+
+
+def test_build_adds_schema_and_uses_explicit_jst(monkeypatch):
+    _patch_build_sources(monkeypatch)
 
     real_datetime = datetime.datetime
 
@@ -156,8 +160,7 @@ def test_build_adds_schema_and_uses_explicit_jst(monkeypatch):
             return real_datetime(2026, 7, 15, 17, 0, tzinfo=tz)
 
     monkeypatch.setattr(bdr._impl.datetime, "datetime", SpyDateTime)
-    data = bdr.build(
-        "2026-07-15", "2026-07-14", do_kabutan_shares=False, verbose=False)
+    data = bdr.build("2026-07-15", "2026-07-14", verbose=False)
 
     assert data["schema_version"] == 1
     assert data["generated_at"] == "2026-07-15 17:00 JST"
@@ -165,6 +168,25 @@ def test_build_adds_schema_and_uses_explicit_jst(monkeypatch):
     assert data["counts"]["ranked"] == 1
     assert data["rows"][0]["rank"] == 1
 
+
+
+def test_build_rows_use_valuation_mcap_without_kabutan_shares_check(monkeypatch):
+    # 仕様変更（2026-09-24）: 時価総額は valuation の MktCap（自己株式控除後）に切替え、
+    # 株探最新株数との † クロスチェックを撤去した。株探株数は取得しない。
+    _patch_build_sources(monkeypatch)
+
+    def forbidden(*_args):
+        raise AssertionError("kabutan_shares must not be called")
+    monkeypatch.setattr(bdr._impl.kabutan_pts, "kabutan_shares", forbidden)
+
+    data = bdr.build("2026-07-15", "2026-07-14", verbose=False)
+
+    row = data["rows"][0]
+    assert row["mcap_oku"] == 200 and row["mcap_source"] == "jquants"
+    for key in ("mcap_flag", "shoutfy_jq", "period_end", "corr",
+                "shares_kabutan", "mcap_kabutan_oku"):
+        assert key not in row
+    assert "do_kabutan_shares" not in inspect.signature(bdr.build).parameters
 
 def test_ranking_document_rejects_count_drift():
     data = {

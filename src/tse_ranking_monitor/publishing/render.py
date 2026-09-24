@@ -116,7 +116,7 @@ def generate_email_html(data, pages_url, max_items=25):
 {table_rows}
         </tbody>
       </table>
-      <p style="margin:14px 0 0;font-size:11px;color:#888;">価格・売買代金・終値・市場区分・時価総額＝J-Quants V2（新規上場の時価総額は Yahoo Finance JP）／開示＝TDnet。† は増資・自己株で株探最新株数と乖離。本情報は参考であり投資助言ではない。</p>
+      <p style="margin:14px 0 0;font-size:11px;color:#888;">価格・売買代金・終値・市場区分・時価総額＝J-Quants V2（当日終値×自己株式控除後株式数。新規上場は Yahoo Finance JP）／開示＝TDnet。本情報は参考であり投資助言ではない。</p>
     </div>
     <div style="background:#f6f8fa;padding:11px 20px;font-size:11px;color:#999;text-align:center;">東証 値上がりランキング・モニター｜Claude 定期実行（自動送信）</div>
   </div>

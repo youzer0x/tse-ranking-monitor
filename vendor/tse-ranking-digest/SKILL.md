@@ -7,6 +7,10 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 
 ## 改訂履歴
 
+**v1.5 (2026-09-24)**:
+- **時価総額を J-Quants `/equities/valuation` の `MktCap`（当日終値×自己株式控除後株式数）へ切替**（共有スクリプト `market-scripts-common` v2.0.0）。自前算出（AdjC×ShOutFY×分割補正）を廃止。自己株式を保有する銘柄は従来値より自己株相当分だけ小さくなる（100億円境界付近の採否も変わりうる）。
+- **† 注記（株探最新株数との >1% 乖離）を撤去**。株探の発行済株式数は自己株込みで、自己株控除後の新定義とは系統的に乖離し誤検知となるため。`rows` から `mcap_flag`／`shoutfy_jq`／`period_end`／`corr` を削除し、`build_day_ranking.py` の `--no-kabutan-shares` も廃止した（v1.4 以前の記述中の † は当時の仕様）。
+
 **v1.4 (2026-07-15)**:
 - **掲載上限を50社→30社に削減**。日次無人ルーチン（`tse-ranking-monitor`）の毎回のトークン消費を抑えるため、掲載上限（`build_day_ranking.py --max-rank`、既定値）を30に変更した。31〜50位相当の銘柄は掲載対象外となり、変動要因の裏取り（手順B）も不要になる。
 - **自動化版で確立した要因帰属・出典規律を方法論へ還流**。共起と因果、開示時刻、一次ソース優先、禁止ランディングページ、精密主張の裏付けを恒久ゲートとして統合した。
@@ -57,13 +61,12 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 
 ---
 
-## 3. 時価総額の算出（tdnet-monitor 方式・億円・四捨五入）
+## 3. 時価総額（J-Quants valuation の MktCap・億円・四捨五入）
 
-- **時価総額（億円）＝ 当日 調整済み終値(AdjC) × 期末発行済株式数(ShOutFY) × 分割/併合補正 ÷ 1e8**。算出コードの正本は共有リポ `market-scripts-common`（`market_cap_jquants.py`・算出方式の出自は tdnet-monitor）。本スキルの `scripts/` へは sync.py でベンダリングされる（`scripts/vendor.lock.json` 参照・直接編集禁止）。
+- **時価総額（億円）＝ J-Quants V2 `/equities/valuation` の `MktCap`（百万円）÷ 100**。MktCap は J-Quants が **当日終値 × 自己株式を控除した株式数** で算出した値（分割・併合対応済）で、発行済株式数ベースより自己株式相当分だけ小さい。取得コードの正本は共有リポ `market-scripts-common`（`market_cap_jquants.py`）。本スキルの `scripts/` へは sync.py でベンダリングされる（`scripts/vendor.lock.json` 参照・直接編集禁止）。
 - 表示は**億円単位の整数（四捨五入）**。**1兆円以上でも億円で表示**する。
-- `ShOutFY` は **`CurFYEn`（期末日）を分割補正の起点**にとる。**AdjFactor は株式分割・併合のみ補正**（期中の増資・自己株消却は非対象）。
-- **新規上場等で `fins/summary` に決算が無い銘柄は Yahoo Finance JP にフォールバック**（該当行に「Yahoo参照」を注記）。
-- **† 注記（自動）**：`build_day_ranking.py` は J-Quants 由来の時価総額銘柄について株探の最新発行済株式数を取得し、`ShOutFY×補正` と **>1% 乖離**する銘柄に `mcap_flag="†"` を付け、参考時価総額（`mcap_kabutan_oku`）と株数も格納する。出力では本値に **†** を付し注記で併記する。
+- 株数は J-Quants が決算短信の開示をもとに算出する（翌営業日から反映）。当日分の MktCap が未反映なら前営業日分を採用し、スクリプトが WARN を出す。
+- **MktCap が無い新規上場銘柄（最初の決算短信前）は Yahoo Finance JP にフォールバック**（`mcap_source="yahoo"`。該当行に「Yahoo参照」を注記）。
 
 ---
 
@@ -72,9 +75,8 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 | データ | ソース | 取得手段 |
 | --- | --- | --- |
 | 当日/前営業日の終値・調整済終値・売買代金・市場区分 | **J-Quants V2 API**（`/equities/master`・`/equities/bars/daily`） | `scripts/jquants.py` |
-| 時価総額（終値×株数×分割補正・新規上場は Yahoo 補完） | **J-Quants V2 ＋ Yahoo Finance JP**（tdnet-monitor 方式） | `scripts/market_cap_jquants.py`・`market_cap_yahoo.py` |
+| 時価総額（valuation の MktCap＝終値×自己株控除後株数・新規上場は Yahoo 補完） | **J-Quants V2 ＋ Yahoo Finance JP** | `scripts/market_cap_jquants.py`・`market_cap_yahoo.py` |
 | 適時開示（変動要因の一次情報） | **TDnet** `https://www.release.tdnet.info/...` | `scripts/tdnet.py`（`disclosures_window`） |
-| 最新発行済株式数（† クロスチェック） | **株探（個別ページ）** | `scripts/kabutan_pts.py`（`kabutan_shares`） |
 | 報道（変動要因の裏取り） | **ホワイトリスト主要メディア**（`reference/sources.md`） | WebSearch / WebFetch |
 | 証券会社のレーティング変更（投資判断・目標株価） | **株探 銘柄ニュース「レーティング日報」**＋報道（TDnet 非掲載のため別途確認） | `https://kabutan.jp/stock/news?code=<4桁>`（ブラウザ UA）／WebSearch |
 
@@ -93,8 +95,8 @@ description: 日本株の東証 日中（レギュラー）セッション（当
    python skills/tse-ranking-digest/scripts/build_day_ranking.py --date YYYY-MM-DD --out /tmp/day_ranking.json
    ```
    - `--date` 省略時は**当日が東証営業日ならその日**（`business_day.tse_session_date_for`、休場日は新規セッション無し＝スキップ）。`--prev` 省略時は直近営業日。
-   - 出力 JSON は `rows`（採用銘柄＝rank/code/name/market/mcap_oku/mcap_flag/mcap_source/pct/**pct5**/close/turnover_m/disclosures…・**該当が30社超なら値上がり率上位30社のみ**）、`counts`（`qualifying`＝条件該当の総数／`ranked`＝掲載数／`dropped_*`／`excluded`）、`capped`（上限適用の有無）、`dropped_turnover`（≥+5%だが薄商い）、`dropped_mcap`（<100億）、`excluded` を含む。`pct5` は5営業日前の調整済み終値比で、基準値が無ければ `null`。**この段階に変動要因は無い**。
-   - **掲載上限は値上がり率上位30社**（`--max-rank`、既定30。`--max-rank 0` で上限なし）。TDnet 開示の紐付け・† クロスチェックは掲載対象の上位30社にのみ行う。
+   - 出力 JSON は `rows`（採用銘柄＝rank/code/name/market/mcap_oku/mcap_source/pct/**pct5**/close/turnover_m/disclosures…・**該当が30社超なら値上がり率上位30社のみ**）、`counts`（`qualifying`＝条件該当の総数／`ranked`＝掲載数／`dropped_*`／`excluded`）、`capped`（上限適用の有無）、`dropped_turnover`（≥+5%だが薄商い）、`dropped_mcap`（<100億）、`excluded` を含む。`pct5` は5営業日前の調整済み終値比で、基準値が無ければ `null`。**この段階に変動要因は無い**。
+   - **掲載上限は値上がり率上位30社**（`--max-rank`、既定30。`--max-rank 0` で上限なし）。TDnet 開示の紐付けは掲載対象の上位30社にのみ行う。
 
 ### 手順 B：各銘柄の変動要因を裏取りする（Claude が実施・本スキルの核心）
 
@@ -124,7 +126,7 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 - **チャットには要約（抽出条件・該当社数（30社超なら「該当M社／上位30社を掲載」）・上位数銘柄・主な変動要因）を表示**し、全文はファイル参照を案内する。
 - ランキング表の列：**順位／コード／銘柄／市場／時価総額（億円）／上昇率／終値(円)／売買代金(百万円)**。
 - **銘柄名は省略しない**：`build_day_ranking.py` が J-Quants `CoName`（フルネーム・「株式会社」なし・全角英数は半角化済み）を `rows[].name` に入れているので**そのまま用いる**（例：AGC／KDDI／日本M&Aセンターホールディングス）。株探流の略称（村田製・レーザーテク・SBG 等）や独自の短縮に**置き換えない**。
-- 続けて**各社の変動要因**表（区分 [開示]/[報道]/[テーマ] 付き）、**dropped_turnover（薄商い）／dropped_mcap（参考）**の別表、**注記**（†・Yahoo参照・地合い・検証・出典・免責）を記す。
+- 続けて**各社の変動要因**表（区分 [開示]/[報道]/[テーマ] 付き）、**dropped_turnover（薄商い）／dropped_mcap（参考）**の別表、**注記**（Yahoo参照・地合い・検証・出典・免責）を記す。
 
 ---
 
@@ -151,7 +153,7 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 - [ ] 対象は**東証個別株のみ**で、ETF/REIT・地方単独上場を除外したか（J-Quants `ProdCat=011`＋`Mkt∈{0111,0112,0113}`）。
 - [ ] しきい値（**値上がり率≥+5% かつ 売買代金≥¥10M**）と**時価総額≥100億**を満たす銘柄のみ採用したか。薄商い・小型は別表に回したか。
 - [ ] 該当が**30社超なら値上がり率上位30社のみ**を掲載し、**該当総数（M社）と掲載数（上位30社）**を本文・チャットに明記したか。
-- [ ] 時価総額は **当日終値×発行済株式数×分割補正**（tdnet-monitor 方式）で算出し、**億円・四捨五入・1兆円以上も億円表示**にしたか。**† 乖離・Yahoo参照**を注記したか。
+- [ ] 時価総額は **J-Quants valuation の MktCap（当日終値×自己株式控除後株式数）** を用い、**億円・四捨五入・1兆円以上も億円表示**にしたか。**Yahoo参照**を注記したか。
 - [ ] 各銘柄の変動要因を **[開示]（前日15:30〜当日15:30未満）→[報道]（一次記事＋配信時刻。**証券会社のレーティング変更**は株探レーティング日報で確認）→[セクター連動クロスチェック（手順B 2.5）]→[テーマ]** の順で裏取りし、**材料未確認は正直に**記したか。検索要約を出典にしていないか。
 - [ ] **セクター連動クロスチェック**を実施し、`sector_cluster`/`theme_clusters` を読んで同一テーマの co-mover を leader 名指しで [テーマ]（連鎖）に帰属したか（材料未確認で放置していないか）。**材料未確認の各行は5パス（開示／株探材料・レーティング／急騰検索／セクター連動／EDINET）を確認済み**と注記したか。
 - [ ] `である調`・平易な用語・客観中立・投資助言でない・免責記載。
@@ -164,10 +166,10 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 | ファイル | 役割 |
 | --- | --- |
 | `jquants.py` | J-Quants V2 クライアント（master/bars・東証個別判定・コード変換）。標準ライブラリのみ |
-| `market_cap_jquants.py` | 時価総額算出（AdjC×ShOutFY×分割補正・5日さかのぼり・Yahoo フォールバック）。**tdnet-monitor 由来**・`requests` 必須 |
+| `market_cap_jquants.py` | 時価総額取得（valuation の MktCap・全銘柄一括・5日さかのぼり・Yahoo フォールバック）。`requests` 必須 |
 | `market_cap_yahoo.py` | 新規上場等の時価総額フォールバック。**tdnet-monitor 由来**・`bs4`/`lxml` は任意 |
 | `tdnet.py` | TDnet 適時開示の取得（`disclosures_window`＝前営業日15:30以降 ∪ 当日15:30未満）。標準ライブラリのみ |
-| `kabutan_pts.py` | 株探 個別ページの最新発行済株式数（† クロスチェック用）。標準ライブラリのみ |
+| `kabutan_pts.py` | 株探 銘柄ニュース（`kabutan_news`・`--kabutan-news` 時の事前充填）。標準ライブラリのみ |
 | `business_day.py` | 東証営業日判定・日中セッション日の導出（`tse_session_date_for`）。`jpholiday` 任意 |
 | `build_day_ranking.py` | 上記を結合し Stage1（決定的）ランキング JSON を出力 |
 
@@ -181,4 +183,3 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 - ルーチンは Stage1（`build_day_ranking.py`）→ Claude が変動要因をフル裏取り → `publish.py` で **GitHub Pages（Web）＋ Gmail 通知**を生成。営業日ゲート（当日が東証営業日のときのみ）を持つ。配信実装は on-disk の `tdnet-monitor`（`docs/` Pages＋Gmail）を下敷きにする。
 - 方法論の単一の真実源は本 `SKILL.md` であり、リポ側 `AGENTS.md` はこれに準拠する。雛形は `automation/tse-ranking-monitor/`（歴史的資料・凍結。本番は独立リポ）。
 - データ取得系スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・`market_cap_*.py`）の**コード**の単一の真実源は共有リポ **`market-scripts-common`**。本スキルの `scripts/` と独立リポ `tse-ranking-monitor` の `scripts/` へ同一内容が sync.py でベンダリングされる（手動 `cp` 同期は廃止）。
-

@@ -7,7 +7,7 @@
   （プライム/スタンダード/グロース）。地方単独上場は bars/daily 非収録で自動除外。
 - 東証日中ランキング（tse 系）では bars/daily の日通し終値 C・売買代金 Va・調整済み終値 AdjC を使う。
   値上がり率＝当日 AdjC ÷ 前営業日 AdjC（調整済みの連日比で分割・併合をクリーンに処理）。
-  時価総額の算出は market_cap_jquants.py（tdnet-monitor 由来の算出方式）に委譲する。
+  時価総額は market_cap_jquants.py（valuation API の MktCap・自己株式控除後）に委譲する。
 - PTS ナイトランキング（pts 系）では時価総額を本モジュールで算出する:
   時価総額(億円) = 取引所終値 × 発行済株式数(ShOutFY) × 分割/併合補正(AdjFactor) / 1e8。
   AdjFactor は株式分割・併合のみ補正。増資・自己株消却は非対象 → 株探の最新株数と

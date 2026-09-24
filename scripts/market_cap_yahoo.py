@@ -2,10 +2,10 @@
 # 消費リポジトリでは編集禁止。変更は market-scripts-common で行い sync.py で配布すること。
 """時価総額データの取得 (Yahoo Finance JP)
 
-J-Quants で取得できない新規上場銘柄 (末尾英字コード等) 用のフォールバック。
+J-Quants valuation API の MktCap が無い新規上場銘柄 (最初の決算短信前) 用のフォールバック。
 HTMLスクレイプで「時価総額」値を取得する。
 
-正本は market-scripts-common（算出方式の出自は tdnet-monitor）。tdnet-monitor を含む各消費リポへは
+正本は market-scripts-common。tdnet-monitor を含む各消費リポへは
 sync.py で配布する。bs4/lxml が無い環境では正規表現のみで
 フォールバック動作する（_parse_yahoo_market_cap_text を直接ページテキストに適用）。
 """

@@ -2,18 +2,20 @@
 # 消費リポジトリでは編集禁止。変更は market-scripts-common で行い sync.py で配布すること。
 """時価総額データの取得 (J-Quants V2 API)
 
-J-Quants V2 から終値・発行済株式数・分割係数を取得し、時価総額(億円)を算出する。
-fins/summary に決算データが無い銘柄 (新規上場等) は market_cap_yahoo に委譲する。
+J-Quants V2 のバリュエーション指標 API (/equities/valuation) の MktCap を取得し、億円に換算する。
+MktCap が無い銘柄 (新規上場後、最初の決算短信前等) は market_cap_yahoo に委譲する。
 
-算出方式（要点）:
-  時価総額(億円) = AdjC(調整済み終値) × ShOutFY(期末発行済株式数) × 分割補正 / 1e8
-  - 終値は AdjC を用い、当日に無ければ最大 LOOKBACK_DAYS 営業日さかのぼる。
-  - ShOutFY は CurFYEn(期末日) を分割補正の起点にとる（DiscDate ではなく）。
-  - 分割補正 = (period_end+1 〜 price_date) の AdjFactor 累積積の逆数。
-  - fins/summary に決算が無い銘柄は Yahoo Finance JP にフォールバック。
+取得方式（要点）:
+  時価総額(億円) = MktCap(百万円) / 100（小数1桁に丸め）
+  - MktCap は J-Quants が「当日終値 × 自己株式を控除した株式数」で算出した値（分割・併合対応済）。
+    発行済株式数ベースの時価総額より、自己株式相当分だけ小さくなる。
+  - 全銘柄を日付指定で一括取得し、当日に無ければ最大 LOOKBACK_DAYS 日さかのぼる。
+  - 東証本則の判定は bars/daily の収録有無で行う（fetch_tse_codes / compute_one）。
+  - MktCap が null の東証銘柄は Yahoo Finance JP にフォールバック。valuation API 自体の
+    失敗時はフォールバックしない（全銘柄スクレイプを避け、呼び出し側のキャッシュ等に任せる）。
 
-正本は market-scripts-common（算出方式の出自は tdnet-monitor）。tdnet-monitor を含む各消費リポへは
-sync.py で配布する。Yahoo インポートは遅延（フォールバック時のみ）。
+正本は market-scripts-common。tdnet-monitor を含む各消費リポへは sync.py で配布する。
+Yahoo インポートは遅延（フォールバック時のみ）。
 """
 
 import os
@@ -21,18 +23,17 @@ import time
 import requests
 from datetime import date, timedelta
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 BASE = "https://api.jquants.com/v2"
 TIMEOUT = 20
 MAX_RETRY = 5
 LOOKBACK_DAYS = 5
-RATE_SLEEP = 0.25
-MAX_WORKERS = 3
 
 # (prices, price_date) を target_date ごとにキャッシュ。
 _PRICES_CACHE: dict[date, tuple[dict[str, float], date]] = {}
+# ({Code(5桁): 時価総額(億円)}, 採用日) を target_date ごとにキャッシュ。
+_VALUATION_CACHE: dict[date, tuple[dict[str, float], date]] = {}
 
 
 def _request(api_key: str, path: str, params: dict) -> list[dict]:
@@ -92,6 +93,34 @@ def prime_price_cache(target_date: date, prices: dict[str, float]) -> None:
         _PRICES_CACHE[target_date] = (dict(prices), target_date)
 
 
+def _mktcap_oku(million_yen: float | None) -> float | None:
+    """valuation API の MktCap（百万円）を億円（小数1桁）に換算する。"""
+    if million_yen is None:
+        return None
+    return round(float(million_yen) / 100, 1)
+
+
+def _fetch_valuation_mktcaps(api_key: str, target_date: date) -> tuple[dict[str, float], date]:
+    """target_date から最大 LOOKBACK_DAYS 遡って MktCap が得られる日の全銘柄分を返す。
+    返り値: ({Code(5桁): 時価総額(億円)}, 採用日)。MktCap が null の行は含めない。
+    全日空でも ({}, target_date) をキャッシュし、同一実行内で再取得しない。
+    """
+    if target_date in _VALUATION_CACHE:
+        return _VALUATION_CACHE[target_date]
+    for back in range(LOOKBACK_DAYS + 1):
+        d = target_date - timedelta(days=back)
+        rows = _request(api_key, "/equities/valuation", {"date": d.isoformat()})
+        mcaps = {r["Code"]: _mktcap_oku(r["MktCap"]) for r in rows if r.get("MktCap") is not None}
+        if mcaps:
+            if d != target_date:
+                print(f"  WARN: valuation MktCap for {target_date} not available; using {d} "
+                      "(previous close basis)")
+            _VALUATION_CACHE[target_date] = (mcaps, d)
+            return mcaps, d
+    _VALUATION_CACHE[target_date] = ({}, target_date)
+    return {}, target_date
+
+
 def _normalize_code(code5: str) -> str:
     """J-Quants の 5 桁コードを TDnet 表記 (4 桁または末尾英字) に正規化。
 
@@ -119,79 +148,37 @@ def fetch_tse_codes(target_date: date) -> set[str]:
     return {_normalize_code(c) for c in prices.keys()}
 
 
-def _fetch_latest_shares(api_key: str, code4: str) -> tuple[date, int] | None:
-    """銘柄ごとに最新の (period_end, ShOutFY) を返す。
-
-    period_end は CurFYEn (期末日)。ShOutFY は「期末発行済株式数」なので、
-    期末日を分割補正の起点とするのが正しい (DiscDate ではなく)。
-    CurFYEn が欠落している場合は DiscDate にフォールバック。
-    """
-    rows = _request(api_key, "/fins/summary", {"code": code4})
-    candidates: list[tuple[str, str, str]] = []
-    for r in rows:
-        sh = r.get("ShOutFY")
-        disc = r.get("DiscDate")
-        cur_end = r.get("CurFYEn") or disc
-        if sh in (None, "", 0) or not disc:
-            continue
-        candidates.append((disc, cur_end, sh))
-    if not candidates:
-        return None
-    candidates.sort(key=lambda x: x[0])
-    _disc, cur_end, sh = candidates[-1]
-    try:
-        return date.fromisoformat(cur_end), int(float(sh))
-    except (ValueError, TypeError):
-        return None
-
-
-def _fetch_split_correction(api_key: str, code4: str, since: date, until: date) -> float:
-    """since+1日 〜 until の AdjFactor 累積積の逆数を返す。
-    1:2 分割なら AdjFactor=0.5 → 返り値 2.0 (株数を 2 倍する補正係数)。
-    """
-    if since >= until:
-        return 1.0
-    rows = _request(api_key, "/equities/bars/daily", {
-        "code": code4,
-        "from": (since + timedelta(days=1)).isoformat(),
-        "to": until.isoformat(),
-    })
-    correction = 1.0
-    for r in rows:
-        f = r.get("AdjFactor")
-        if f and float(f) != 1.0:
-            correction /= float(f)
-    return correction
-
-
 def compute_one(api_key: str, code4: str, prices: dict[str, float], price_date: date):
-    """1銘柄の時価総額(億円)と内訳を返す。
+    """1銘柄の時価総額(億円)を返す。
 
-    返り値: (mcap_oku|None, shoutfy|None, period_end|None, corr, source)
+    返り値: (mcap_oku|None, shoutfy, period_end, corr, source)
+      shoutfy / period_end は常に None、corr は常に 1.0（旧・自前算出方式との戻り値互換のため残置）。
       source ∈ {"jquants", "yahoo", "skipped_non_tse", None}
-      - "jquants": ShOutFY×AdjC×corr で算出（† クロスチェック可）
-      - "yahoo"  : 新規上場等で fins/summary 無し → Yahoo フォールバック（shoutfy/corr は None/1.0）
+      - "jquants": valuation API の MktCap（自己株式控除後の株数ベース）
+      - "yahoo"  : MktCap が null（新規上場等）→ Yahoo フォールバック
+      - None     : 取得失敗。valuation API の失敗時・全銘柄空の時は Yahoo へ流さない
+                   （失敗は空としてキャッシュし、同一実行内で再試行しない）
     """
     code5 = (code4 + "0") if len(code4) == 4 else code4
-    close = prices.get(code5) or prices.get(code4)
-    if close is None:
+    if prices.get(code5) is None and prices.get(code4) is None:
         return None, None, None, 1.0, "skipped_non_tse"
 
     try:
-        sh = _fetch_latest_shares(api_key, code4)
-    except Exception:
-        sh = None
+        mcaps, _ = _fetch_valuation_mktcaps(api_key, price_date)
+    except Exception as e:
+        print(f"  !!! Valuation fetch failed: {type(e).__name__}: {e}")
+        _VALUATION_CACHE[price_date] = ({}, price_date)
+        return None, None, None, 1.0, None
+    if not mcaps:
+        return None, None, None, 1.0, None
 
-    if sh is not None:
-        period_end, shoutfy = sh
-        try:
-            corr = _fetch_split_correction(api_key, code4, period_end, price_date)
-        except Exception:
-            corr = 1.0
-        mcap_oku = close * shoutfy * corr / 1e8
-        return round(mcap_oku, 1), shoutfy, period_end, corr, "jquants"
+    mcap = mcaps.get(code5)
+    if mcap is None:
+        mcap = mcaps.get(code4)
+    if mcap is not None:
+        return mcap, None, None, 1.0, "jquants"
 
-    # 東証銘柄だが ShOutFY 取得失敗 → Yahoo フォールバック（遅延インポート）
+    # 東証銘柄だが MktCap 無し → Yahoo フォールバック（遅延インポート）
     try:
         from market_cap_yahoo import fetch_market_cap_yahoo
         yahoo_value = fetch_market_cap_yahoo(code4)
@@ -210,38 +197,36 @@ def fetch_market_caps(codes: set[str], target_date: date) -> dict[str, float]:
         print("  ERROR: JQUANTS_API_KEY not set. Returning empty (cache fallback will run).")
         return {}
 
-    print(f"  Fetching market caps for {len(codes)} codes from J-Quants V2...")
+    print(f"  Fetching market caps for {len(codes)} codes from J-Quants V2 (valuation)...")
     try:
         prices, price_date = _fetch_close_prices(api_key, target_date)
     except Exception as e:
         print(f"  !!! Close prices fetch failed: {type(e).__name__}: {e}")
         prices, price_date = {}, target_date
     print(f"    Close prices: {len(prices)} codes (date={price_date})")
+    try:
+        mcaps, mcap_date = _fetch_valuation_mktcaps(api_key, price_date)
+        print(f"    Valuation MktCap: {len(mcaps)} codes (date={mcap_date})")
+        if not mcaps:
+            print("  !!! Valuation returned no MktCap. Returning empty.")
+            return {}
+    except Exception as e:
+        # 銘柄ごとの再試行で同じ失敗を繰り返さないよう、ここで打ち切る
+        print(f"  !!! Valuation fetch failed: {type(e).__name__}: {e}. Returning empty.")
+        return {}
 
     market_caps: dict[str, float] = {}
     failed: list[tuple[str, str]] = []
-
-    def worker(code4: str):
+    sources: Counter = Counter()
+    for code4 in sorted(codes):
         mcap, _sh, _pe, _corr, source = compute_one(api_key, code4, prices, price_date)
-        return code4, mcap, (None if mcap is not None else (source or "unknown"))
+        if mcap is not None:
+            market_caps[code4] = mcap
+            sources[source] += 1
+        else:
+            failed.append((code4, source or "unknown"))
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
-        futures = {}
-        for c in sorted(codes):
-            futures[ex.submit(worker, c)] = c
-            time.sleep(RATE_SLEEP)
-        done = 0
-        for fut in as_completed(futures):
-            code, mcap, reason = fut.result()
-            done += 1
-            if mcap is not None:
-                market_caps[code] = mcap
-            else:
-                failed.append((code, reason or "unknown"))
-            if done % 50 == 0:
-                print(f"    ... {done}/{len(codes)} processed")
-
-    print(f"  Market caps resolved: {len(market_caps)} / {len(codes)} codes")
+    print(f"  Market caps resolved: {len(market_caps)} / {len(codes)} codes ({dict(sources)})")
     skipped = [f for f in failed if f[1] == "skipped_non_tse"]
     real_failed = [f for f in failed if f[1] != "skipped_non_tse"]
     if skipped:
