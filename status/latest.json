@@ -1,7 +1,11 @@
 {
   "schema_version": 1,
   "session": "2026-09-24",
-  "updated_at": "2026-09-24T07:40:08.138Z",
+  "updated_at": "2026-09-24T08:15:49.330Z",
   "delivered": false,
-  "started_at": "2026-09-24T07:36:09.864Z"
+  "started_at": "2026-09-24T07:36:09.864Z",
+  "last_stage": "build_market_stats",
+  "stages": [
+    "build_market_stats"
+  ]
 }
