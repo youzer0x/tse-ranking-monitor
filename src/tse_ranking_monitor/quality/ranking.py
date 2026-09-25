@@ -30,6 +30,13 @@
      disclosures・kabutan_news・インラインリンク・推定マーカーのいずれの裏付けも無い。
   5. [WARN]  factor_kind が空／{開示,報道,テーマ} 以外／factor が空。
   6. [ERROR] disclosures[].pdf_url または factor 内 Markdown リンクが禁止ランディングページURL。
+  7. [WARN]  factor の表示字数（Markdown リンクはラベルのみ数える）が FACTOR_MAX_CHARS（250）超。
+  8. [WARN]  factor に一般的でない内部用語（材料窓・窓内・窓外）。時点は日付・時刻で書く。
+  9. [WARN]  factor が「適時開示なし」「材料は確認できず」等の不在の記述を含む。開示が無くても
+     値動きの最も有力な理由を推定表現で書く（5パス確認は evidence 側に記録される）。
+  10.[WARN]  factor に業種コード・クラスタID（s33:3650）・入力フィールド名（pct5 等）。
+  11.[WARN]  factor の書き出しが当該銘柄名の主語（「データセクションは…」）。
+  7〜11 は 2026-09-24 配信の編集レビュー由来。修復は出典追加ではなく凝縮で行う。
 
 既知の軽微な誤検知（許容・WARN のため）：check2 は「2026-06-18/19開示」等の**圧縮日付レンジ**の
 後半日（19）を拾えず前半日（18）だけで照合するため、稀に不一致 WARN を出しうる。出典を足すか
@@ -104,7 +111,35 @@ _WARNING_RULES = (
     ("自社決算を上昇要因", "RANK_EARNINGS_OUT_OF_WINDOW"),
     ("自社決算が要因", "RANK_SELF_EARNINGS_HEDGE"),
     ("精密イベント", "RANK_PRECISE_EVENT_SOURCE"),
+    ("字数上限", "RANK_FACTOR_TOO_LONG"),
+    ("非一般用語", "RANK_FACTOR_JARGON"),
+    ("不在の記述", "RANK_FACTOR_ABSENCE"),
+    ("内部コード", "RANK_FACTOR_INTERNAL_CODE"),
+    ("冒頭に銘柄名", "RANK_FACTOR_SELF_NAME_OPENER"),
 )
+
+# 編集レビュー（2026-09-24 配信）由来の執筆規律。factor は要因の本質だけを凝縮する。
+FACTOR_MAX_CHARS = 250
+_JARGON_TERMS = ("材料窓", "窓内", "窓外")
+# 何かが「無い」ことを述べる記述（「材料窓内の適時開示はなし」「新規開示・契約等は確認されず」
+# 「個別開示は無い」型）。既存の _NOT_FOUND_FACTOR_RE（材料未確認・5パス確認済み 等）も併用する。
+_ABSENCE_RE = re.compile(
+    r"(?:適時開示|開示|新規材料|個別材料|固有の材料|材料|IR)[^。]{0,10}?"
+    r"(?:なし|無し|見当たらず|見当たらない|確認されず|確認されない|確認できず|確認できない"
+    r"|特定できず|特定できない|出ていない|(?:は|が)(?:無い|ない))")
+# 業種コード・クラスタID・研究入力のフィールド名（NFKC 後に照合。銘柄コード [3350] は対象外）。
+_INTERNAL_CODE_RE = re.compile(
+    r"(?<![A-Za-z0-9_])[sS](?:17|33):\d+"
+    r"|(?<![A-Za-z0-9_])(?:sec17|sec33|pct5|turnover_m|mcap_oku|leader_code|leader_basis"
+    r"|cluster_id|material_window)(?![A-Za-z0-9_])"
+    r"|業種コード")
+
+
+def factor_display_text(factor):
+    """画面に表示される factor 本文（Markdown リンクはラベルだけ残す）。"""
+    if not isinstance(factor, str):
+        return ""
+    return vmq.MD_LINK_RE.sub(lambda m: m.group(1), factor).strip()
 
 
 def _evidence_items(evidence):
@@ -348,7 +383,31 @@ def check_ranking_warnings(doc):
         elif u.kind not in VALID_KINDS:
             warnings.append("%s: factor_kind='%s' は既定外（[開示/報道/テーマ]のみ）" % (u.path, u.kind))
         if not u.factor.strip():
-            warnings.append("%s: factor が空（材料未確認なら『当日固有の材料は確認できず』等と明記する）" % u.path)
+            warnings.append("%s: factor が空（材料を特定できなくても、値動きの最も有力な理由を"
+                            "推定表現で書く）" % u.path)
+
+        # 7〜11) 執筆規律（字数・内部用語・不在の記述・内部コード・書き出し）
+        display = factor_display_text(u.factor)
+        if len(display) > FACTOR_MAX_CHARS:
+            warnings.append("%s: factor の表示%d字が字数上限%d字を超える（要因の本質＝何が・いつ・"
+                            "なぜ動かしたかに凝縮し、詳細は claims/market_note へ）"
+                            % (u.path, len(display), FACTOR_MAX_CHARS))
+        jargon = [t for t in _JARGON_TERMS if t in norm]
+        if jargon:
+            warnings.append("%s: 非一般用語（%s）を使っている（時点は日付・時刻で書く）"
+                            % (u.path, "・".join(jargon)))
+        absence = _ABSENCE_RE.search(norm) or _NOT_FOUND_FACTOR_RE.search(norm)
+        if absence:
+            warnings.append("%s: 不在の記述（「%s」）を書かない（開示が無くても値動きの最も有力な"
+                            "理由を推定表現で書く）" % (u.path, absence.group(0)))
+        codes = sorted({m.group(0) for m in _INTERNAL_CODE_RE.finditer(norm)})
+        if codes:
+            warnings.append("%s: 内部コード・フィールド名（%s）を書かない（業種に触れるなら業種名のみ）"
+                            % (u.path, "・".join(codes)))
+        name = _nfkc(u.name).strip() if isinstance(u.name, str) else ""
+        if name and re.match(re.escape(name) + r"[はが、]", norm.lstrip()):
+            warnings.append("%s: 冒頭に銘柄名の主語（「%sは」等）を置かない（当該銘柄の記載であることは自明）"
+                            % (u.path, name))
 
         # 2) 開示の日付ドリフト
         if u.kind == "開示" and u.disclosures:

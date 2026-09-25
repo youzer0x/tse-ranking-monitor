@@ -43,6 +43,8 @@ python scripts/repair_research_plan.py --research-dir .work/<S>/research --repai
 
 を実行し、`pending` に戻ったバッチだけをreserve経由で再調査してcompile/merge/validatorを再実行する。exit 3（再調査上限または総予算の超過）なら公開せず停止する。完了バッチを再送しない。`ranking.json` を手編集しない。空のfactor、ERROR、未対応WARNが残れば公開しない。
 
+factorは表示250字以内（リンクはラベルだけ数える）で要因の本質に絞り、書き出しの銘柄名主語、休場日などの自明な背景、業種コード・クラスタID・入力フィールド名、「材料窓」「窓内」「窓外」、「適時開示なし」等の不在の記述を書かない。親が横断検証でfactorを直すときも同じ規律に従う。validatorの字数・書き方の指摘（`RANK_FACTOR_TOO_LONG`・`_JARGON`・`_ABSENCE`・`_INTERNAL_CODE`・`_SELF_NAME_OPENER`）は出典の追加ではなく凝縮で直す。
+
 ## 3. 市場分析（best-effort）
 
 ```text
