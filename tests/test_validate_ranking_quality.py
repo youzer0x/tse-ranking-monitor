@@ -404,3 +404,90 @@ def test_ranking_machine_json_and_targeted_code(ranking_golden, tmp_path, capsys
     payload = json.loads(target_path.read_text(encoding="utf-8"))
     assert any(target["code"] == "3990" for target in payload["files"][0]["targets"])
     assert capsys.readouterr().out == ""
+
+
+# ── check7〜11 [WARN]：執筆規律（2026-09-24 配信の編集レビュー由来）───────
+def _with_factor(golden, factor, index=1):
+    doc = copy.deepcopy(golden)
+    doc["rows"][index]["factor"] = factor
+    return doc
+
+
+def _rules(doc, index=1):
+    """rows[index] の行に付いた WARN の rule_id 集合（golden の他行の指摘を混ぜない）。"""
+    code = doc["rows"][index]["code"]
+    return {f["rule_id"] for f in vrq.audit_ranking_warnings(doc) if f["code"] == code}
+
+
+def test_factor_length_limit_is_inclusive(ranking_golden):
+    ok = _with_factor(ranking_golden, "あ" * vrq.FACTOR_MAX_CHARS)
+    assert "RANK_FACTOR_TOO_LONG" not in _rules(ok)
+    over = _with_factor(ranking_golden, "あ" * (vrq.FACTOR_MAX_CHARS + 1))
+    warns = vrq.check_ranking_warnings(over)
+    assert any("字数上限" in w and "251字" in w for w in warns)
+    assert "RANK_FACTOR_TOO_LONG" in _rules(over)
+
+
+def test_factor_length_counts_link_label_only(ranking_golden):
+    url = "https://example.com/" + "a" * 400
+    doc = _with_factor(ranking_golden, "半導体株高に連れ高したとみられる（[日本経済新聞](%s)）。" % url)
+    assert "RANK_FACTOR_TOO_LONG" not in _rules(doc)
+    assert vrq.factor_display_text("[日経](https://example.com/x) 報道。") == "日経 報道。"
+
+
+@pytest.mark.parametrize("factor", [
+    "材料窓内の新規材料は乏しく、テーマ物色で連れ高したとみられる。",
+    "窓外の旧材料が意識され、半導体株高に連れ高したとみられる。",
+])
+def test_jargon_material_window_warns(ranking_golden, factor):
+    assert "RANK_FACTOR_JARGON" in _rules(_with_factor(ranking_golden, factor))
+
+
+def test_gap_up_wording_is_not_jargon(ranking_golden):
+    doc = _with_factor(ranking_golden, "窓を開けて上昇し、半導体株高に連れ高したとみられる。")
+    assert "RANK_FACTOR_JARGON" not in _rules(doc)
+
+
+@pytest.mark.parametrize("factor", [
+    "材料窓内の適時開示はなし。ビットコイン急騰で同業に連れ高したとみられる。",
+    "自社個別の新規開示・契約等は確認されず、同業に連れ高したとみられる。",
+    "当日15:30前の個別開示は無い。半導体株高に連れ高したとみられる。",
+    "当日固有の材料は確認できず（5パス確認済み）。地合い連動の需給とみられる。",
+])
+def test_absence_statement_warns(ranking_golden, factor):
+    assert "RANK_FACTOR_ABSENCE" in _rules(_with_factor(ranking_golden, factor))
+
+
+@pytest.mark.parametrize("factor", [
+    "9/18引け後の大口受注の開示を好感した買いが入った。",
+    "材料が少ない中、半導体株高に連れ高したとみられる。",
+])
+def test_absence_does_not_flag_positive_statements(ranking_golden, factor):
+    assert "RANK_FACTOR_ABSENCE" not in _rules(_with_factor(ranking_golden, factor))
+
+
+@pytest.mark.parametrize("factor, code", [
+    ("電気機器・半導体関連クラスタ（s33:3650）の中心として連れ高したとみられる。", "s33:3650"),
+    ("週間では大幅高(pct5+69.08%)となり、需給主導の連れ高とみられる。", "pct5"),
+])
+def test_internal_code_warns(ranking_golden, factor, code):
+    doc = _with_factor(ranking_golden, factor)
+    assert "RANK_FACTOR_INTERNAL_CODE" in _rules(doc)
+    assert any(code in w for w in vrq.check_ranking_warnings(doc))
+
+
+def test_stock_code_bracket_is_not_internal_code(ranking_golden):
+    doc = _with_factor(ranking_golden, "メタプラネット[3350]など同業に連れ高したとみられる。")
+    assert "RANK_FACTOR_INTERNAL_CODE" not in _rules(doc)
+
+
+def test_self_name_opener_warns(ranking_golden):
+    name = ranking_golden["rows"][1]["name"]
+    doc = _with_factor(ranking_golden, name + "は半導体株高に連れ高したとみられる。")
+    assert "RANK_FACTOR_SELF_NAME_OPENER" in _rules(doc)
+
+
+def test_self_name_mid_sentence_is_allowed(ranking_golden):
+    name = ranking_golden["rows"][1]["name"]
+    doc = _with_factor(ranking_golden, "半導体株高を受けて%sが連れ高したとみられる。" % name)
+    assert "RANK_FACTOR_SELF_NAME_OPENER" not in _rules(doc)
