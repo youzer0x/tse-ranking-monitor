@@ -1,7 +1,11 @@
 {
   "schema_version": 1,
   "session": "2026-10-01",
-  "updated_at": "2026-10-01T08:03:21.478Z",
+  "updated_at": "2026-10-01T08:03:28.990Z",
   "delivered": false,
-  "started_at": "2026-10-01T07:36:17.217Z"
+  "started_at": "2026-10-01T07:36:17.217Z",
+  "last_stage": "validate_quality_retry",
+  "stages": [
+    "validate_quality_retry"
+  ]
 }
