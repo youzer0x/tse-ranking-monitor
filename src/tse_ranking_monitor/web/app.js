@@ -5,12 +5,13 @@ function fmtPct(p){return p==null?'—':'+'+Number(p).toFixed(2)+'%';}
 function fmtPct5(p){return p==null?'':'('+(p>0?'+':'')+Number(p).toFixed(2)+'%)';}
 function fmtNum(x){return x==null?'—':Number(x).toLocaleString('ja-JP');}
 function fmtTurnover(t){return t==null?'—':Math.round(Number(t)).toLocaleString('ja-JP');}
-function fmtTurnoverOku(r){let v=(r.turnover_yen!=null)?Number(r.turnover_yen)/1e8:(r.turnover_m!=null?Number(r.turnover_m)/100:null);return v==null?'—':Math.round(v).toLocaleString('ja-JP');}
+function fmtTurnoverOku(r){let v=(r.turnover_yen!=null)?Number(r.turnover_yen)/1e8:(r.turnover_m!=null?Number(r.turnover_m)/100:null);return v==null?'—':Math.round(v).toLocaleString('ja-JP')+'億円';}
 function fmtMarket(m){m=m||'';if(m.indexOf('プライム')>=0)return 'Prime';if(m.indexOf('スタンダード')>=0)return 'Standard';if(m.indexOf('グロース')>=0)return 'Growth';return m;}
 function fmtCode(c){c=(c==null?'':String(c));return (c.length===5&&c.endsWith('0'))?c.slice(0,4):c;}
 function fmtMcapCell(o,f){if(o==null)return '—';o=Number(o);var s=o>=10000?(o/10000).toFixed(1)+'兆円':Math.round(o).toLocaleString('ja-JP')+'億円';return s+(f||'');}
 function changeYen(r){if(r==null||r.close==null||r.adj_close==null||r.prev_adj_close==null)return null;var a=Number(r.adj_close);if(!a)return null;return Math.round(Number(r.close)-Number(r.prev_adj_close)*Number(r.close)/a);}
 function fmtSigned(v){if(v==null)return '—';var n=Number(v);return (n>=0?'+':'')+n.toLocaleString('ja-JP');}
+function fmtCloseCell(r){if(r.close==null)return '—';var c=changeYen(r);return fmtNum(r.close)+'円'+(c!=null?'<span class="chg">'+fmtSigned(c)+'円</span>':'');}
 function esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
 function kindBadge(k){k=(k||'').replace(/[\[\]]/g,'');if(!k)return '';return '<span class="kind k'+k+'">'+k+'</span>';}
 function openInfo(){var d=document.getElementById('infoModal');if(d&&d.showModal)d.showModal();}
@@ -50,7 +51,7 @@ function render(){
     '<div class="k">データ対象日時</div><div class="v">'+esc(data.session_window||'—')+'</div>'+
     '<div class="k">生成日時</div><div class="v">'+esc(data.generated_at||'—')+'</div>'+
     '<div class="k">抽出条件</div><div class="v">'+esc('値上がり率≥+'+(c.min_pct??5)+'% かつ 売買代金≥'+((c.min_turnover_yen??1e7)/1e6)+'百万円／東証個別株のみ・時価総額≥'+(c.min_mcap_oku??100)+'億円'+(c.max_rank?'・上昇率上位'+c.max_rank+'社':'')+'。時価総額は J-Quants の当日終値×自己株式控除後株式数（億円・四捨五入）。†（2026-09-24 以前のデータのみ）は旧方式で増資・自己株により株探最新株数と>1%乖離。')+'</div>';
-  let h='<table><thead><tr><th class="r">#</th><th>コード</th><th>銘柄</th><th>市場</th><th class="r">前日比%<br>(5営業日)</th><th class="r">前日比<br>(円)</th><th class="r">終値<br>(円)</th><th class="r">売買代金<br>(億円)</th><th>変動要因</th></tr></thead><tbody>';
+  let h='<table><thead><tr><th class="r">#</th><th>コード</th><th>銘柄</th><th>市場</th><th class="r">前日比%<br>(5営業日)</th><th class="r">終値<br>(前日比)</th><th class="r">売買代金</th><th>変動要因</th></tr></thead><tbody>';
   rows.forEach(r=>{
     let factor=mdInline(r.factor||'（材料未確認）');
     const fk=(r.factor_kind||'').replace(/[\[\]]/g,'');
@@ -62,9 +63,8 @@ function render(){
       '<td class="name" data-code="'+esc(code)+'">'+esc(r.name)+'<span class="code-inline">（'+esc(code)+'）</span><span class="mcap">'+fmtMcapCell(r.mcap_oku,r.mcap_flag)+'</span></td>'+
       '<td class="mkt">'+esc(fmtMarket(r.market))+'</td>'+
       '<td class="pct" data-label="前日比%(5営業日)">'+fmtPct(r.pct)+(r.pct5!=null?'<span class="pct5">'+fmtPct5(r.pct5)+'</span>':'')+'</td>'+
-      '<td class="num" data-label="前日比(円)">'+fmtSigned(changeYen(r))+'</td>'+
-      '<td class="num" data-label="終値(円)">'+fmtNum(r.close)+'</td>'+
-      '<td class="num" data-label="売買代金(億円)">'+fmtTurnoverOku(r)+'</td>'+
+      '<td class="num" data-label="終値(前日比)">'+fmtCloseCell(r)+'</td>'+
+      '<td class="num" data-label="売買代金">'+fmtTurnoverOku(r)+'</td>'+
       '<td class="factor">'+kindBadge(r.factor_kind)+factor+'</td>'+
     '</tr>';
   });

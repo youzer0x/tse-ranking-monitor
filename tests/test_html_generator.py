@@ -82,6 +82,19 @@ def test_pages_ranking_tab_has_no_market_strip():
     assert "renderStrip" not in html
 
 
+def test_pages_ranking_table_merges_close_and_change_with_inline_units():
+    # 終値と前日比(円)は1列「終値（前日比）」に二段で統合し、単位は見出しでなく各セルの
+    # 数値の後ろに付ける（2026-10-01 改修）。列が1つ減った分は変動要因列が自動で受け取る。
+    html = hg.generate_pages_html()
+    assert '<th class="r">終値<br>(前日比)</th><th class="r">売買代金</th><th>変動要因</th>' in html
+    assert "前日比<br>(円)" not in html and "終値<br>(円)" not in html
+    assert '<th class="r">売買代金<br>(億円)</th><th>変動要因</th>' not in html  # セクター表の同見出しは対象外
+    assert "fmtNum(r.close)+'円'+" in html
+    assert "'<span class=\"chg\">'+fmtSigned(c)+'円</span>'" in html
+    assert "toLocaleString('ja-JP')+'億円';}" in html   # fmtTurnoverOku が単位付きで返す
+    assert ".num .chg{display:block;" in html
+
+
 def test_pages_header_has_no_gray_hairline_under_rule():
     # ヘッダー下部の青系ライン直下のグレー薄線（.header::after）は廃止。
     html = hg.generate_pages_html()
