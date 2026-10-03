@@ -42,6 +42,7 @@ effort: max
 - 「材料窓」「窓内」「窓外」という語を使わない。時点は日付・時刻で書く（例：「9/18引け後」「9/24 13:52配信」）。
 - 「適時開示なし」「新規材料は確認されず」「材料未確認」など、何かが無いことを述べる文を書かない。開示が無くても、株価が動いた最も有力な理由（地合い・テーマ・同業の連れ高・需給）に焦点を当てる。
 - 凝縮しても出典規律は守る。因果を述べるときは出典リンクか推定表現（「とみられる」「連れ高」等）を伴わせ、リンクは要となる1〜2本に絞る。
+- **海外企業名は日経など日本の主要経済メディアで定着した表記で書く**（例：米マイクロン・テクノロジー＝略称マイクロン、SKハイニックス、エヌビディア、サムスン電子）。SEC 8-K・英文報道など英語の資料だけを読んだ場合も、社名を自前でカタカナに音訳しない。特に外来語と同じ綴りの社名を外来語の読みにしない（Micron を単位の「ミクロン」と書かない）。定着表記を確認できない社名は英語の正式名のまま書く。
 
 # チェック値
 
@@ -82,4 +83,4 @@ effort: max
 
 ## 再調査（repair_context）
 
-バッチに `repair_context` がある場合は品質指摘の再調査である。`targets[].previous` を修正ベースに、`rule_ids`／`messages` の指摘だけを直す（主張を削らず出典を足す・factor_kindの再タグ・推定表現化を優先する）。ただし執筆規律の指摘（`RANK_FACTOR_TOO_LONG`・`RANK_FACTOR_JARGON`・`RANK_FACTOR_ABSENCE`・`RANK_FACTOR_INTERNAL_CODE`・`RANK_FACTOR_SELF_NAME_OPENER`）は出典の追加ではなく凝縮で直す。要因の事実と要のリンクは残し、冗長な部分・不在の記述・内部用語を削る（削った詳細は `claims`／`market_note` に残してよい）。`carry_forward` の銘柄は再調査せず、その内容を変更せずそのまま出力に含める。返却JSONの `input_digest` は入力バッチの新しい値をそのまま返す。
+バッチに `repair_context` がある場合は品質指摘の再調査である。`targets[].previous` を修正ベースに、`rule_ids`／`messages` の指摘だけを直す（主張を削らず出典を足す・factor_kindの再タグ・推定表現化を優先する）。ただし執筆規律の指摘（`RANK_FACTOR_TOO_LONG`・`RANK_FACTOR_JARGON`・`RANK_FACTOR_ABSENCE`・`RANK_FACTOR_INTERNAL_CODE`・`RANK_FACTOR_SELF_NAME_OPENER`）は出典の追加ではなく凝縮で直す。`RANK_FACTOR_NOTATION` は指摘された社名を示された定着表記に置き換えて直す。要因の事実と要のリンクは残し、冗長な部分・不在の記述・内部用語を削る（削った詳細は `claims`／`market_note` に残してよい）。`carry_forward` の銘柄は再調査せず、その内容を変更せずそのまま出力に含める。返却JSONの `input_digest` は入力バッチの新しい値をそのまま返す。

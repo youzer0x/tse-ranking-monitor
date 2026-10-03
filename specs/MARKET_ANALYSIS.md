@@ -37,6 +37,7 @@
   - **`theme` はワンフレーズに集約する（2026-07-05 恒久化）**：「A→B」の因果連鎖表記（例「米雇用統計下振れ→FRB利上げ観測後退」）は視認性が悪いので避け、**因果・波及の説明は `background` 側に書く**（例：theme「米雇用統計下振れ」＋背景で「→FRB利上げ観測後退→…」）。どうしても `theme` に「→」が必要な場合のみ使用可（SPA が「→」の直前で改行し2行表示する）。
   - **箇条書き**：`thesis`・`overview.flow_conclusion` は論点ごとに配列要素へ分ける（各2〜3件目安）。
   - **数値・略語**：`snapshot` の TOPIX 等は「終値（±%）」の順（例 `"4,064.6（+1.24%）"`）。**英略語は日本語で**（例 NFP→「非農業部門雇用者数」「米雇用統計」）。
+  - **海外企業名は定着表記で書く（2026-10-03 恒久化）**：日経など日本の主要経済メディアの表記に合わせる（例：米マイクロン・テクノロジー＝略称マイクロン、SKハイニックス、エヌビディア、サムスン電子）。英語の資料だけを読んだ場合も社名を自前で音訳せず（Micron を単位の外来語「ミクロン」としない）、定着表記を確認できない社名は英語の正式名のまま書く。既知の誤表記は `validate_market_quality.py` が **WARN**（`MKT_NAME_NOTATION`）を出す。
   - **まとめの整合**：`flow_conclusion` で触れる個別イベントは `points`/`flow` 等で**事前に言及**しておく（未言及なら `flow_conclusion` で触れない）。
 
 - **Claude が書く項目**：`thesis`（市況テーゼ＝市場分析タブ冒頭に表示。要点を配列で箇条書き可）／`overview`（`snapshot` は決定的4行を `{"auto":"topix"|"breadth"|"top_sector"|"top_stock","note":"…"}` で置き、日経平均・為替など J-Quants 外の行のみ `label`/`value` を手書き＋出典明記。`points`/`flow`/`flow_conclusion`）／`theme_matrix`（`{side,theme,stocks,background}` の行）／`news_sources`。`market_stats` の `divergence_flags`（⚠乖離候補）は**執筆ヒント**＝`thesis`/`overview` で言及するかの判断材料（セクター騰落率表の「銘柄」列が主導銘柄を機械表示するため注記義務なし）。個別銘柄movers（値上がり/値下がり）は調査・執筆・出力しない（2026-07-16廃止）。

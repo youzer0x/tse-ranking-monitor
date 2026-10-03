@@ -211,6 +211,25 @@ def test_causal_word_with_own_data_no_warn(market_golden):
     assert vmq.check_warnings(doc) == []
 
 
+def test_nonstandard_foreign_company_name_warns(market_golden):
+    # PTS 2026-10-02 の誤記（英文の決算資料だけを根拠に Micron を「ミクロン」と音訳）
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append("米ミクロンの好決算を受け半導体株に連想買いが入ったとみられる。")
+    doc["theme_matrix"]["rows"][0]["background"] = "SKハイニクス高に連れ高したとみられる。"
+    warns = [f for f in vmq.audit_warnings(doc) if f["rule_id"] == "MKT_NAME_NOTATION"]
+    assert [w["path"].split("[")[0] for w in warns] == ["overview.points", "theme_matrix.rows"]
+    assert "米マイクロン" in warns[0]["message"] and "SKハイニックス" in warns[1]["message"]
+    assert vmq.check_doc(doc) == []   # WARN はエラーに数えない
+
+
+def test_standard_names_and_listed_names_no_notation_warn(market_golden):
+    doc = copy.deepcopy(market_golden)
+    doc["overview"]["points"].append(
+        "米マイクロンの好決算が意識され、[[ホソカワミクロン]]や[[ミクロン精密]]、"
+        "SKハイニックス関連も連れ高したとみられる。")
+    assert not [f for f in vmq.audit_warnings(doc) if f["rule_id"] == "MKT_NAME_NOTATION"]
+
+
 def test_check_warnings_skips_broken_structure(market_golden, capsys):
     # 構造 NG はエラー側（check_doc）が報告するため warnings は出さない
     broken = copy.deepcopy(market_golden)

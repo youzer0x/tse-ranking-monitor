@@ -96,6 +96,11 @@
   不在の記述（開示が無くても、なぜ株価が動いたかに焦点を当てる）。修復は出典の追加ではなく**凝縮**で行い、要因の事実と
   要のリンクは残す（詳細は evidence の claims／market_note に残る）。検査語彙は `validate_ranking_quality.py` の
   `FACTOR_MAX_CHARS`・`_ABSENCE_RE`・`_INTERNAL_CODE_RE` 等。
+- **海外企業名は定着表記で書く（機械検査＝WARN `RANK_FACTOR_NOTATION`・PTS 2026-10-02 の誤記由来）**：日経など日本の
+  主要経済メディアの表記に合わせる（例：米マイクロン・テクノロジー＝略称マイクロン、SKハイニックス、エヌビディア、
+  サムスン電子）。SEC 8-K・英文報道など英語の資料だけを読んだ場合も社名を自前で音訳しない（PTS では英文資料だけを根拠に
+  Micron を単位の外来語「ミクロン」、SK Hynix を「SKハイニクス」と書いて公開した）。定着表記を確認できない社名は英語の
+  正式名のまま書く。検査語彙は `quality/market.py` の `NONSTANDARD_NAMES`（市場分析と共用）。
 - **禁止ランディングページを出典にしない（機械検査＝ERROR）**：`disclosures[].pdf_url`・本文リンクに株探/みんかぶ/
   日経会社情報/Yahoo!quote の銘柄ページを使わない（`specs/MARKET_ANALYSIS.md` の「ランディングページ出典禁止」と同一）。
 - **本文の出典リンク**：`factor` 内に `[出典名](URL)` を書けば Pages・メールとも自動でリンク描画される

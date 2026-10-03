@@ -37,6 +37,8 @@
   10.[WARN]  factor に業種コード・クラスタID（s33:3650）・入力フィールド名（pct5 等）。
   11.[WARN]  factor の書き出しが当該銘柄名の主語（「データセクションは…」）。
   7〜11 は 2026-09-24 配信の編集レビュー由来。修復は出典追加ではなく凝縮で行う。
+  12.[WARN]  factor に海外企業名の非標準カタカナ（ミクロン・ハイニクス等。語彙は vmq.NONSTANDARD_NAMES）。
+     英語の一次情報から社名を自前で音訳すると生じる（PTS 2026-10-02 の誤記由来）。定着表記へ直す。
 
 既知の軽微な誤検知（許容・WARN のため）：check2 は「2026-06-18/19開示」等の**圧縮日付レンジ**の
 後半日（19）を拾えず前半日（18）だけで照合するため、稀に不一致 WARN を出しうる。出典を足すか
@@ -116,6 +118,7 @@ _WARNING_RULES = (
     ("不在の記述", "RANK_FACTOR_ABSENCE"),
     ("内部コード", "RANK_FACTOR_INTERNAL_CODE"),
     ("冒頭に銘柄名", "RANK_FACTOR_SELF_NAME_OPENER"),
+    ("一般的でない社名表記", "RANK_FACTOR_NOTATION"),
 )
 
 # 編集レビュー（2026-09-24 配信）由来の執筆規律。factor は要因の本質だけを凝縮する。
@@ -408,6 +411,9 @@ def check_ranking_warnings(doc):
         if name and re.match(re.escape(name) + r"[はが、]", norm.lstrip()):
             warnings.append("%s: 冒頭に銘柄名の主語（「%sは」等）を置かない（当該銘柄の記載であることは自明）"
                             % (u.path, name))
+        for found, standard in vmq.nonstandard_names(norm):
+            warnings.append("%s: 一般的でない社名表記（「%s」）を書かない。%sと書く（英語社名を自前で音訳しない）"
+                            % (u.path, found, standard))
 
         # 2) 開示の日付ドリフト
         if u.kind == "開示" and u.disclosures:

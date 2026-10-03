@@ -491,3 +491,35 @@ def test_self_name_mid_sentence_is_allowed(ranking_golden):
     name = ranking_golden["rows"][1]["name"]
     doc = _with_factor(ranking_golden, "半導体株高を受けて%sが連れ高したとみられる。" % name)
     assert "RANK_FACTOR_SELF_NAME_OPENER" not in _rules(doc)
+
+
+# ── check12 [WARN]：海外企業名の非標準カタカナ（PTS 2026-10-02 の誤記由来）─────
+@pytest.mark.parametrize("factor, found, standard", [
+    # 英文の SEC 8-K だけを根拠に Micron を単位の外来語で音訳した実例（PTS 2026-10-02）
+    ("9/30発表のミクロン2026年8月期決算を受けた半導体株高に連れ高したとみられる。", "ミクロン", "米マイクロン"),
+    ("ﾐｸﾛﾝの好決算で半導体株高に連れ高したとみられる。", "ミクロン", "米マイクロン"),
+    # 英文記事だけを根拠に SK Hynix を音訳した実例（PTS 2026-07-21）
+    ("SKハイニクス高に連れ高したとみられる。", "ハイニクス", "SKハイニックス"),
+    ("エヌヴィディア株高に連れ高したとみられる。", "エヌヴィディア", "エヌビディア"),
+    ("サムソン電子の増産報道に連れ高したとみられる。", "サムソン電子", "サムスン電子"),
+])
+def test_nonstandard_foreign_company_name_warns(ranking_golden, factor, found, standard):
+    doc = _with_factor(ranking_golden, factor)
+    assert "RANK_FACTOR_NOTATION" in _rules(doc)
+    assert any("「%s」" % found in w and standard in w for w in vrq.check_ranking_warnings(doc))
+
+
+@pytest.mark.parametrize("factor", [
+    "米マイクロン・テクノロジーの好決算で半導体株高に連れ高したとみられる。",
+    "SKハイニックスやエヌビディア、サムスン電子の株高に連れ高したとみられる。",
+    # 国内上場社名（J-Quants CoName）と株探の略称
+    "ミクロン精密など工作機械株に連れ高したとみられる。",
+    "ホソカワミクロンなど全固体電池関連に連れ高したとみられる。",
+    "「ホソミクロンが急速人気化」と報じられ連れ高したとみられる。",
+    # 単位としてのミクロン
+    "線幅0.5ミクロン対応の装置受注期待で買われたとみられる。",
+    "サブミクロン級の研磨技術が評価されたとみられる。",
+    "ミクロン単位の加工精度が評価されたとみられる。",
+])
+def test_standard_names_and_unit_usage_do_not_warn(ranking_golden, factor):
+    assert "RANK_FACTOR_NOTATION" not in _rules(_with_factor(ranking_golden, factor))

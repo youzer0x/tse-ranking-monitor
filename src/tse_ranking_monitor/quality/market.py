@@ -17,6 +17,7 @@ build_market_json.py の validate_market() が「SPA が描画できる形か」
   6. 因果表現の監査 — 「点火」「波及」等の断定的因果語、および直接材料の帰属
                       （「決算/報道/開示/発表を受け」「材料視」）に出典・推定マーカーが
                       無ければ WARN（終了コードには影響しない。check_warnings）
+  7. 社名表記       — 海外企業名の非標準カタカナ（ミクロン・ハイニクス等）を WARN（定着表記へ直す）
 
 検出時の修正方針（重要）：**主張を削って通さない**。Stage2 で収集済みの出典
 （kabutan_news・TDnet・サブエージェント調査）を再利用して文末に `（[出典名](URL)）` を
@@ -83,6 +84,29 @@ OWN_DATA_MARKERS = ("中央値", "加重", "売買代金", "代金シェア", "�
 #     check_doc）が別途文末リンクを強制するため、ここでは重ねて監査しない。
 # 将来課題: 直接材料名詞の拡充（増資・提携 等）は誤検知率を見て候補に留め置き。
 TIER_A_RE = re.compile(r"(?:決算|報道|開示|発表)を受け|材料視")
+
+# 海外企業名の非標準カタカナ表記と、日経など主要メディアの定着表記（WARN）。英語の一次情報だけを
+# 読んで社名を自前で音訳すると生じる（PTS 2026-10-02 Micron→ミクロン、07-21 SK Hynix→ハイニクス）。
+# ランキング factor（validate_ranking_quality.py）も本定義を import 再利用する（唯一の真実源）。
+# ミクロンは単位の外来語と同じ綴りなので、国内上場社名（ミクロン精密・ホソカワミクロン、
+# 株探略称ホソミクロン）と単位の用例は除外する。
+NONSTANDARD_NAMES = (
+    (re.compile(r"(?<!ホソカワ)(?<!ホソ)(?<![0-9.数十百千サブ])ミクロン(?!精密|単位|メートル|オーダー)"),
+     "米マイクロン（Micron Technology）"),
+    (re.compile(r"ハイニクス"), "SKハイニックス"),
+    (re.compile(r"エヌヴィディア|エヌヴィデア|エヌビデア"), "エヌビディア"),
+    (re.compile(r"サムソン電子"), "サムスン電子"),
+)
+
+
+def nonstandard_names(norm):
+    """NFKC 済みテキスト中の非標準社名表記を (検出語, 定着表記) のリストで返す。"""
+    hits = []
+    for pattern, standard in NONSTANDARD_NAMES:
+        found = pattern.search(norm)
+        if found:
+            hits.append((found.group(0), standard))
+    return hits
 
 FIX_HINT = ("主張を削らず出典を足して直す：Stage2 で収集済みの出典・kabutan_news・TDnet/EDINET・"
             "会社IRを同一要素の文末に `（[出典名](URL)）` で付ける。削除・弱体化は裏取り探索を"
@@ -318,6 +342,11 @@ def audit_warnings(doc):
     findings = []
     for path, text, has_adjacent_links in iter_text_units(doc):
         norm = unicodedata.normalize("NFKC", text)
+        for found, standard in nonstandard_names(norm):
+            findings.append(finding(
+                path, "MKT_NAME_NOTATION", "WARN",
+                "一般的でない社名表記（「%s」）。%sと書く（英語社名を自前で音訳しない）"
+                % (found, standard)))
         causal_hits = [w for w in CAUSAL_WORDS if w in norm]
         tier_a_hits = sorted({m.group(0) for m in TIER_A_RE.finditer(norm)})
         if not causal_hits and not tier_a_hits:
