@@ -81,6 +81,7 @@ def _valid_result(entry):
                 "sector_cluster": "na",
                 "edinet": "na",
             },
+            "check_reasons": {"sector_cluster": "クラスタなし", "edinet": "対象なし、または接続不能"},
             "market_note": "テーマ物色と並走。",
         } for code in entry["codes"]],
     }

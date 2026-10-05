@@ -2,17 +2,22 @@
 
 import hashlib
 import json
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
 
 import publish as pub
+from publication_fixtures import research_bundle
+
+def _build(data, docs):
+    return pub.build(data, docs, research_dir=research_bundle(data, docs.parent / "research"))
 
 
 def _ranking(session="2026-07-15", factor="材料を確認"):
     return {
         "session_date": session,
+        "prev_date": (date.fromisoformat(session) - timedelta(days=1)).isoformat(),
         "session_window": f"{session} 09:00–15:30 JST",
         "criteria": {
             "min_pct": 5,
@@ -27,7 +32,7 @@ def _ranking(session="2026-07-15", factor="材料を確認"):
             "code": "7000",
             "name": "テスト銘柄",
             "pct": 8.5,
-            "mcap_oku": 250,
+            "mcap_oku": 250, "mcap_oku_exact": 250, "close": 1000, "turnover_m": 50,
             "factor": factor,
             "factor_kind": "報道",
         }],
@@ -42,7 +47,7 @@ def _write_input(tmp_path, data=None):
 
 def test_build_writes_versioned_digest_manifest_and_no_email_html(tmp_path):
     docs = tmp_path / "docs"
-    pub.build(_ranking(), docs)
+    _build(_ranking(), docs)
 
     ranking_path = docs / "data" / "2026-07-15.json"
     stored = json.loads(ranking_path.read_text(encoding="utf-8"))
@@ -179,7 +184,7 @@ def test_same_date_with_old_digest_times_out_without_fetching_ranking(monkeypatc
 def test_notify_rejects_input_that_differs_from_published_json(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     published_input = _write_input(tmp_path, _ranking(factor="公開済み"))
-    pub.build(_ranking(factor="公開済み"), docs)
+    _build(_ranking(factor="公開済み"), docs)
     requested_input = tmp_path / "changed.json"
     requested_input.write_text(
         json.dumps(_ranking(factor="未公開の訂正"), ensure_ascii=False), encoding="utf-8"
@@ -197,7 +202,7 @@ def test_notify_rejects_input_that_differs_from_published_json(tmp_path, monkeyp
 def test_missing_notification_environment_is_nonzero_and_unsent(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     input_path = _write_input(tmp_path)
-    pub.build(_ranking(), docs)
+    _build(_ranking(), docs)
     for name in pub.NOTIFY_ENV:
         monkeypatch.delenv(name, raising=False)
     live_calls = []
@@ -218,7 +223,7 @@ def test_missing_notification_environment_is_nonzero_and_unsent(tmp_path, monkey
 def test_live_timeout_is_nonzero_and_email_is_not_called(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     input_path = _write_input(tmp_path)
-    pub.build(_ranking(), docs)
+    _build(_ranking(), docs)
     sent = []
     monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
     monkeypatch.setattr(
@@ -245,7 +250,7 @@ def test_live_timeout_is_nonzero_and_email_is_not_called(tmp_path, monkeypatch):
 def test_gmail_api_failure_is_nonzero(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     input_path = _write_input(tmp_path)
-    pub.build(_ranking(), docs)
+    _build(_ranking(), docs)
     monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
     monkeypatch.setattr(
         pub._implementation, "_required_notification_environment", lambda: None
@@ -270,7 +275,7 @@ def test_gmail_api_failure_is_nonzero(tmp_path, monkeypatch):
 def test_notify_sends_when_pushed_head_verification_passes(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     input_path = _write_input(tmp_path)
-    pub.build(_ranking(), docs)
+    _build(_ranking(), docs)
     sent = []
     monkeypatch.setattr(pub._implementation, "_verify_pushed_head", lambda *_a, **_k: None)
     monkeypatch.setattr(
@@ -295,7 +300,7 @@ def test_notify_sends_when_pushed_head_verification_passes(tmp_path, monkeypatch
 def test_notify_refuses_when_head_is_not_pushed(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     input_path = _write_input(tmp_path)
-    pub.build(_ranking(), docs)
+    _build(_ranking(), docs)
     sent = []
     live_calls = []
     monkeypatch.setattr(
@@ -418,7 +423,7 @@ def test_build_prunes_relative_to_the_published_session_not_the_clock(tmp_path):
     for name in ("2026-06-14.json", "2026-06-14_market.json", "2026-06-15.json"):
         (data_dir / name).write_text("{}", encoding="utf-8")
 
-    pub.build(_ranking("2026-07-15"), docs)
+    _build(_ranking("2026-07-15"), docs)
 
     assert not (data_dir / "2026-06-14.json").exists()
     assert not (data_dir / "2026-06-14_market.json").exists()
@@ -434,7 +439,7 @@ def test_build_of_a_session_older_than_retention_keeps_its_own_artifact(tmp_path
     data_dir.mkdir(parents=True)
     (data_dir / "2026-09-10.json").write_text("{}", encoding="utf-8")
 
-    pub.build(_ranking("2026-08-17"), docs)
+    _build(_ranking("2026-08-17"), docs)
 
     assert (data_dir / "2026-08-17.json").exists()
     assert (data_dir / "2026-09-10.json").exists()

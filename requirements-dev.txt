@@ -2,6 +2,4 @@
 #   python -m pip install -r requirements-dev.txt
 # pytest-socket の --disable-socket（pytest.ini）でテスト中の通信を機械的に遮断する
 # （テストが実 API を叩かないことをコードで保証する）。
--r requirements.txt
-pytest>=8.0
-pytest-socket>=0.7
+-r requirements-dev.lock

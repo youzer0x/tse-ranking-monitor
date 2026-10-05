@@ -28,25 +28,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          # Execute only the default-branch revision that supplied this workflow.
+          # Candidate files are read through git show, never checked out.
+          ref: ${{ github.workflow_sha }}
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Fetch current main
-        run: git fetch --no-tags origin main:refs/remotes/origin/main
+      - name: Fetch current main and candidate objects
+        env:
+          CANDIDATE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          [[ "$CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags origin main:refs/remotes/origin/main "$CANDIDATE_SHA"
       - name: Verify runtime contract
         run: python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json
       - name: Verify publication candidate
+        env:
+          CANDIDATE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          CANDIDATE_SHA: ${{ github.event.workflow_run.head_sha }}
         run: >-
           python tools/verify_publish_candidate.py
-          --branch "${{ github.event.workflow_run.head_branch }}"
-          --head "${{ github.event.workflow_run.head_sha }}"
+          --branch "$CANDIDATE_BRANCH"
+          --head "$CANDIDATE_SHA"
           --base origin/main
       - name: Fast-forward main to the exact candidate
+        env:
+          CANDIDATE_SHA: ${{ github.event.workflow_run.head_sha }}
         run: >-
           git push origin
-          "${{ github.event.workflow_run.head_sha }}:refs/heads/main"
+          "$CANDIDATE_SHA:refs/heads/main"
       - name: Request the legacy main/docs Pages build
         env:
           GH_TOKEN: ${{ github.token }}

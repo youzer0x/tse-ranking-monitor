@@ -91,7 +91,7 @@ def test_pages_ranking_table_merges_close_and_change_with_inline_units():
     assert '<th class="r">売買代金<br>(億円)</th><th>変動要因</th>' not in html  # セクター表の同見出しは対象外
     assert "fmtNum(r.close)+'円'+" in html
     assert "'<span class=\"chg\">'+fmtSigned(c)+'円</span>'" in html
-    assert "toLocaleString('ja-JP')+'億円';}" in html   # fmtTurnoverOku が単位付きで返す
+    assert "maximumFractionDigits:1})+'億円';}" in html   # fmtTurnoverOku が単位付きで返す
     assert ".num .chg{display:block;" in html
 
 

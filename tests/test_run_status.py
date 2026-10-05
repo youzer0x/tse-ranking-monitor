@@ -63,6 +63,15 @@ def test_publish_status_lands_on_the_branch_without_disturbing_the_checkout(tmp_
     assert latest == published
 
 
+def test_status_publication_cannot_escape_to_parent_repository(tmp_path, monkeypatch):
+    repo, _remote = _repo_with_remote(tmp_path)
+    nested = repo / ".work/test-run"
+    nested.mkdir(parents=True)
+    monkeypatch.setattr(run_status, "_git", lambda *a, **k: pytest.fail("must reject before running git"))
+    with pytest.raises(run_status.StatusError, match="worktree root"):
+        run_status.publish_status(nested, run_status.build_status("2026-07-15"))
+
+
 def test_second_publish_extends_the_existing_branch(tmp_path):
     repo, remote = _repo_with_remote(tmp_path)
 

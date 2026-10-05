@@ -53,6 +53,15 @@ def _canonical_digest(value: Any) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def ranking_input_digest(ranking):
+    """Bind research to the Stage1 facts, allowing only factors to be merged."""
+    value = {key: item for key, item in ranking.items() if key != "rows"}
+    value.setdefault("schema_version", 1)
+    value["rows"] = [{key: item for key, item in row.items()
+                      if key not in {"factor", "factor_kind"}} for row in ranking["rows"]]
+    return _canonical_digest(value)
+
+
 def _compact_json_size(value: Any) -> int:
     """Return the exact UTF-8 byte count written for a compact JSON batch."""
     raw = json.dumps(
@@ -568,6 +577,7 @@ def build_research_plan(ranking: dict[str, Any]) -> tuple[dict[str, Any], list[d
             }
         ),
         "ranking_codes": codes,
+        "ranking_digest": ranking_input_digest(ranking),
         "clusters": clusters,
         "batches": manifest_batches,
         # initial_pending is filled by write_research_plan once checkpoint

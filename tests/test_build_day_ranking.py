@@ -148,6 +148,23 @@ def _patch_build_sources(monkeypatch):
     monkeypatch.setattr(bdr._impl.time, "sleep", lambda _seconds: None)
 
 
+def test_unavailable_market_cap_stops_instead_of_empty_ranking(monkeypatch):
+    _patch_build_sources(monkeypatch)
+    monkeypatch.setattr(bdr.mcap, "compute_one", lambda *_: (None, None, None, None, None))
+    with pytest.raises(ValueError, match="market cap unavailable"):
+        bdr.build("2026-07-15", "2026-07-14", verbose=False)
+
+
+def test_market_cap_floor_uses_unrounded_value(monkeypatch):
+    _patch_build_sources(monkeypatch)
+    monkeypatch.setattr(bdr.mcap, "compute_one", lambda *_: (99.96, None, None, 1, "jquants"))
+    result = bdr.build("2026-07-15", "2026-07-14", verbose=False)
+    assert result["rows"] == []
+    assert result["dropped_mcap"][0]["reason"] == "below_floor"
+    assert result["dropped_mcap"][0]["mcap_oku_exact"] == 99.96
+    assert result["dropped_mcap"][0]["mcap_date"] == "2026-07-15"
+
+
 def test_build_adds_schema_and_uses_explicit_jst(monkeypatch):
     _patch_build_sources(monkeypatch)
 

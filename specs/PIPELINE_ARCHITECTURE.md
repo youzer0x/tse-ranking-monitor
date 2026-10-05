@@ -1,6 +1,6 @@
 # 日次生成パイプライン・内部アーキテクチャ
 
-Claude Routine のセッション消費を抑えつつ、ランキングと市場分析の品質を維持するための内部設計である。公開するランキングJSONと市場分析JSONはともに既存の `schema_version=1` を維持する。本書の `*.v1` は `.work/<SESSION>/` 内だけで使う非公開契約である。
+Claude Routine のセッション消費を抑えつつ、ランキングと市場分析の品質を維持するための内部設計である。公開するランキングJSONと市場分析JSONはともに既存の `schema_version=1` を維持する。本書の `research_*.v1`・`evidence.v1`・`market_brief.v2` は `.work/<SESSION>/` 内だけで使う非公開契約である。
 
 ## 設計判断
 
@@ -11,7 +11,7 @@ Claude Routine のセッション消費を抑えつつ、ランキングと市�
 - 調査結果を `evidence.v1` に固定し、ランキング要因と市場分析の値上がり側で再利用する。
 - 親オーケストレーターがスキーマ、全コード充足、材料窓、出典、横断因果を検証する。サブエージェントは調査と下書きだけを担う。
 - 再試行は失敗したバッチまたは検証ruleが指す銘柄だけに限定し、完了バッチは `input_digest` で再利用する。
-- 市場分析はbest-effortのまま維持し、決定的な `market_brief.v1` を境界にしてナラティブへ渡す情報を絞る。
+- 市場分析はbest-effortのまま維持し、決定的な `market_brief.v2` を境界にしてナラティブへ渡す情報を絞る。
 
 ## データフロー
 
@@ -22,7 +22,7 @@ catch-up gate -> Stage1 ranking + market stats
               -> research_batch_result.v1
               -> evidence.v1 + factors.json
               -> merge_factors.py -> ranking validator
-              -> market_brief.v1 -> narrative -> market schema v1 -> market validator
+              -> market_brief.v2 -> narrative -> market schema v1 -> market validator
               -> publish -> mainへpush -> Pages digest照合 -> Gmail
 ```
 
@@ -40,9 +40,9 @@ catch-up gate -> Stage1 ranking + market stats
 
 `scripts/compile_research_results.py --strict` が全バッチ結果を検証して原子的に生成する。各銘柄は `factor`、3区分の `factor_kind`、確度、claimsとsource ID、材料窓、5パスの実施状態、`market_note` を持つ。コード重複、欠落、digest不一致、無効URL、未定義の列挙値があればstrictでは `evidence.json` と `factors.json` の双方を書かない。
 
-### market_brief.v1
+### market_brief.v2
 
-`scripts/build_market_brief.py` がranking、evidence、market_statsから作る。値上がり側の重複銘柄はaccepted evidenceを100%再利用し、追加調査しない。値下がり側の文脈、セクター寄与、breadth、乖離候補と、それぞれの出典IDだけをナラティブ入力に残す。
+`scripts/build_market_brief.py` がranking、evidence、market_statsから作る。値上がり側の重複銘柄はaccepted evidenceを100%再利用し、追加調査しない。個別moversは含めず、コード単位のaccepted_evidence（market_note・claims・参照されたsources）、クラスタ、セクター寄与、breadth、乖離候補を渡す。source IDはコードごとに名前空間化する。
 
 ## 実行資源と再試行
 
@@ -72,3 +72,22 @@ catch-up gate -> Stage1 ranking + market stats
 実データ50行では12バッチ、先頭30行では8バッチとなり、いずれも上限内であった。50行の全batch入力は66,951 bytes（最大batch 13,820 bytes）で、旧方式の約268k文字推計から75.0%減である。材料窓分類により、引け後22件とTDnet重複252件を除外し、窓前記事は225件から82件へ縮約した。
 
 Scheduled Routineの貼り付けプロンプトは6,925文字から851文字へ87.7%減らし、日次に読むhash検証済みruntime contractは3,390文字に収めた。これらは構造的な無駄の存在を支持するが、2026-07-14/15の上限到達そのものの直接因果を証明するものではない。運用10営業日のtelemetryで最終判定する。
+
+## 実行・公開境界（2026-10-05）
+
+`pipeline` が start → research → publish → deploy → notify の順序と停止条件を管理する。checkpointは前段ファイルのSHA-256とコード・設定のfingerprintを持つ。調査の再実行は後段の完了を取り消し、Stage1の不変の入力からmergeをやり直す。public buildでも研究結果をstrict compileし直すため、検査済みファイルの後編集を公開できない。
+
+標準インストールは `pip install --no-deps --no-build-isolation .`（先にlockの依存を導入）。本体はsrc、共有モジュールはlock付きscripts、CLIは `tse-ranking`。共有の5要素compute_one APIを維持し、取得状態が必要な本体はcompute_one_detailedを使う。requirements.lock / requirements-dev.lock / requirements-browser.lockを更新時のテスト対象とする。
+
+公開候補のコードは昇格ジョブで実行しない。承認済みworkflow SHAをcheckoutし、候補のGit objectからJSONとHTMLを検査する。日次HTMLは承認済みrendererの出力と完全一致を要求する。画面変更は通常のコード変更として先にmainへ反映する。
+
+## データ契約と過去データ
+
+- 新規公開：ranking schema v1。session_date / prev_dateはISO日付で前後関係を検査。code・name・連続rank・件数・抽出条件、有限のpct / close / mcap_oku / turnover_mを必須検査する。追加されたmcap_oku_exact / turnover_yenは抽出条件との比較に優先使用する。取得不能の時価総額は公開しない。
+- 新規市場分析：schema v1。日付・market / universe / sectors33の型、数値の有限性、騰落銘柄数の整数・非負・合計を共通契約で検査し、既存の文章・出典規律も適用する。
+- 過去の公開物は変換せず読む。SPAは旧items、mcap_flag、任意フィールド欠落の互換表示を維持する。厳しい新規公開契約を過去JSONへ一括適用して書き換えない。
+- 公開物はLFに固定し、Windowsでもbyte digestが変わらないよう.gitattributesで管理する。
+
+## 非公開の監査記録
+
+非公開保存先の既定値は `.work/private`、永続ボリュームは `TSE_PRIVATE_STATE_DIR` で指定する。180日を既定保持期間とする根拠ZIPと、重複送信防止のため期限を設けない送信台帳を分離する。ZIPにはallowlistの根拠・検査・checkpoint・ソースcommitを保存し、環境変数や生ログを収集しない。exportはSQLite backup APIで整合した台帳を含める。外部保存先が未設定の環境では、実行環境の破棄前にexportと退避が必要である。

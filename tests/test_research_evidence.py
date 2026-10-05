@@ -67,6 +67,7 @@ def _theme_result(code):
         "claims": [{"text": "同テーマの物色である", "source_ids": []}],
         "sources": [],
         "checks": dict(CHECKS),
+        "check_reasons": {"sector_cluster": "クラスタなし", "edinet": "対象なし"},
         "market_note": "半導体関連の物色と並走。",
     }
 
@@ -85,6 +86,39 @@ def _write_results(research_dir, manifest, mutate=None):
         path = research_dir / entry["result_path"]
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
+
+
+@pytest.mark.parametrize("timestamp,window,valid", [
+    ("2026-07-14T15:30:00+09:00", "material", True),
+    ("2026-07-15T06:29:59Z", "material", True),
+    ("2026-07-15T06:30:00Z", "material", False),
+    ("2026-07-15T17:00:00+09:00", "material", False),
+    ("2026-07-14T15:29:59+09:00", "material", False),
+    ("2026-07-14T15:29:59+09:00", "prior", True),
+    ("2026-07-15T09:00:00", "material", False),
+])
+def test_source_timestamp_is_compared_to_actual_window(tmp_path, timestamp, window, valid):
+    manifest = write_research_plan(_ranking(), tmp_path)
+    def source(_entry, result):
+        for item in result["items"]:
+            item["sources"] = [{"id": "s1", "label": "記事", "url": "https://example.com/article",
+                                "source_type": "article", "published_at": timestamp, "window": window}]
+    _write_results(tmp_path, manifest, source)
+    if valid:
+        assert compile_research_results(tmp_path, strict=True)[0]["complete"]
+    else:
+        with pytest.raises(ResearchValidationError):
+            compile_research_results(tmp_path, strict=True)
+
+
+def test_required_search_cannot_be_declared_inapplicable(tmp_path):
+    manifest = write_research_plan(_ranking(), tmp_path)
+    def skip(_entry, result):
+        result["items"][0]["checks"]["web_search"] = "na"
+        result["items"][0]["check_reasons"]["web_search"] = "省略"
+    _write_results(tmp_path, manifest, skip)
+    with pytest.raises(ResearchValidationError, match="not applicable"):
+        compile_research_results(tmp_path, strict=True)
 
 
 def test_compile_strict_emits_complete_evidence_and_merge_compatible_factors(tmp_path):

@@ -126,10 +126,12 @@ git push -u origin main
    - **`Custom`**：「Allowed domains」に `api.jquants.com`／`www.release.tdnet.info`／`finance.yahoo.co.jp`／`kabutan.jp`／**`<あなた>.github.io`（または `github.io`）**／報道各社（`nikkei.com`・`asia.nikkei.com`・`reuters.com`・`bloomberg.com`・`wsj.com`・`ft.com`・`cnbc.com`・`jiji.com`・`kyodonews.jp`・`toyokeizai.net`・`diamond.jp` 等）を1行ずつ。**「Also include default list of common package managers」に必ずチェック**（pip と Gmail API `*.googleapis.com` のため）。
    - Gmail API の `gmail.googleapis.com`・`oauth2.googleapis.com` は既定の `*.googleapis.com` に含まれ**追加不要**。
    - **`github.io` は publish の `--notify`（メール前の Pages ライブ確認）で必要**。未許可または5分以内にartifact digestを確認できない場合は、メールを送らず非ゼロ終了する。`Full` なら追加不要。
-4. **セットアップ・スクリプト（Setup script）**：クラウドの setup はリポジトリ外で走るため `-r requirements.txt` は使えない。パッケージ名を直接、PEP668 フォールバック付きで（クォートや `>=` は貼付で化けるので使わない）：
+4. **環境初期化**：Python 3.12を用意する。依存はcheckout後にリポジトリのlockから導入する。リポジトリ外で動くsetup欄に、版を指定しないパッケージ一覧を貼り付けない。
    ```bash
-   pip install requests beautifulsoup4 lxml jpholiday || pip install --break-system-packages requests beautifulsoup4 lxml jpholiday
+   python -m pip install -r requirements.lock
+   python -m pip install --no-deps .
    ```
+   PEP668の制限がある環境ではvenvを作成してから同じコマンドを実行する。Windowsは `python` を `py -3.12` に読み替えられる。
 5. 「Save changes」。
 
 ## Step 8：スケジュール・ルーチンを作る
@@ -145,7 +147,7 @@ git push -u origin main
 4. GitHubの「Settings → Actions → General」でActionsを有効にし、組織ポリシーで書込みが制限されている場合はWorkflow permissionsをRead and writeへ設定する。Claude branch上の検証workflowは `contents: read`、main上の昇格workflowだけが `contents: write` と `pages: write` を要求し、Gmail認証情報は使用しない。
 5. 保存。
 
-> **16:35 JST の根拠**：核ランキングの唯一の必須依存は当日の四本値（J-Quants 公式反映「約16:30」・実際は前後）。銘柄マスタは当日分を日中取得可（約17:30 は"翌営業日"マスタの制約で非ボトルネック）、時価総額は J-Quants valuation API の `MktCap`（四本値と同じ約16:30反映。未反映なら前営業日分を WARN 付きで採用）で、財務速報（約18:00）は不使用。そこで 16:35 に起動し、`wait_for_data.py` が当日四本値の確定をポーリングで待ってから続行する（通常は16:30台に確定→即実行、遅延日のみ待機）。打ち切りは 18:10 JST 壁時計で、旧起動時刻より遅くならず「現行が配信できた日を取りこぼさない」ことを保証する。締切までに未到達なら配信せず障害報告。Stage1 自身も件数比・masterカバー率・日付整合を検証し、ゲート迂回時の部分データを拒否する。PTS 版は前営業日ゲート・朝06:06 で対象セッションが異なる。
+> **16:35 JST の根拠**：ゲートが待つ対象は当日の四本値（J-Quants 公式反映「約16:30」・実際は前後）。銘柄マスタは当日分を日中取得可（約17:30 は"翌営業日"マスタの制約で非ボトルネック）、時価総額は J-Quants valuation API の `MktCap`（四本値と同じ約16:30反映。未反映なら前営業日分を WARN 付きで採用）で、財務速報（約18:00）は不使用。そこで 16:35 に起動し、`wait_for_data.py` が当日四本値の確定をポーリングで待ってから続行する（通常は16:30台に確定→即実行、遅延日のみ待機）。打ち切りは 18:10 JST 壁時計で、旧起動時刻より遅くならず「現行が配信できた日を取りこぼさない」ことを保証する。締切までに未到達なら配信せず障害報告。Stage1 自身も件数比・masterカバー率・日付整合を検証し、ゲート迂回時の部分データを拒否する。PTS 版は前営業日ゲート・朝06:06 で対象セッションが異なる。
 
 ## Step 8.5：バックアップ・ルーチンを作る（セッション死対策・必須）
 
@@ -174,7 +176,7 @@ Step 8 と**同一の環境・プロンプト・モデル・ツール・MCP**で
 3. 確認：
    - Web：`https://<あなた>.github.io/tse-ranking-monitor/` に当日ランキング（該当が30社超なら**上位30社**）と変動要因、サマリ「該当M社（上位30社を掲載）」が出る。
    - メール：`NOTIFY_TO` 宛に「[東証日中ランキング] YYYY-MM-DD｜…社該当（・上位30社）」が届く。
-   - リポジトリ：`docs/data/` に新しい `YYYY-MM-DD.json`（`count_total`／`count`／`capped` 入り）が追加され、**main** に push されている。
+   - リポジトリ：`docs/data/` に新しい `YYYY-MM-DD.json`（`counts.qualifying`／`counts.ranked`／`capped` 入り）が追加され、**main** に push されている。
 
 以上で日次自動が稼働する。以後 毎日 16:35 JST に自動生成し、落ちた場合は 20:35 JST のバックアップが同じ営業日を catch-up する（休場日・既配信日はどちらも `SKIP`）。
 
@@ -185,24 +187,37 @@ Step 8 と**同一の環境・プロンプト・モデル・ツール・MCP**で
 ```bash
 cd /c/Users/YujiroOkawa/project-private/tse-ranking-monitor
 SESSION=YYYY-MM-DD
-python scripts/wait_for_data.py "$SESSION"                         # SESSION=YYYY-MM-DD / SKIP / TIMEOUT
-python scripts/build_day_ranking.py --date "$SESSION" --out ".work/$SESSION/ranking.json"
-# factor/factor_kind は .work/$SESSION/factors.json に書き、ranking.json は手編集しない
-python scripts/merge_factors.py --ranking ".work/$SESSION/ranking.json" --factors ".work/$SESSION/factors.json"
-python scripts/publish.py --in ".work/$SESSION/ranking.json" --docs docs --pages-url "$PAGES_URL"          # 生成のみ
-git add docs/index.html docs/data && git commit -m "Update TSE ..."
-git push origin HEAD:main || git push origin HEAD  # 直接push拒否時はActions fallback
-python scripts/publish.py --in ".work/$SESSION/ranking.json" --docs docs --pages-url "$PAGES_URL" --notify # digest一致後に送信
+python -m tse_ranking_monitor pipeline start --session "$SESSION"
+# pending batchをreserveして調査し、manifestのresult_pathへ結果JSONを保存
+python -m tse_ranking_monitor pipeline research --session "$SESSION"
+# briefから市場分析narrativeを執筆・検証（任意。日次手順書を参照）
+python -m tse_ranking_monitor pipeline publish --session "$SESSION"
+# 公開する場合の後続工程
+python -m tse_ranking_monitor pipeline deploy --session "$SESSION"
+python -m tse_ranking_monitor pipeline notify --session "$SESSION" --pages-url "$PAGES_URL"
 ```
 
 ## トラブルシューティング
 
 | 症状 | 対処 |
 |------|------|
-| 時価総額が「—」 | `JQUANTS_API_KEY` 未設定／Light 未満（Free は当日値なし）。新規上場は Yahoo 側も失敗時に発生 |
+| 時価総額取得で停止 | APIキー・当日valuation・許容された過去日・Yahoo補完の結果を確認。取得不能を基準未満として除外せず公開停止する |
 | 当日データが空 / `TIMEOUT` | `wait_for_data.py` が当日四本値の確定を待つ（通常16:30台に確定・遅延日は待機）。`TIMEOUT`＝締切 18:10 JST までに四本値が未到達＝J-Quants の遅延/障害を疑う（この場合は生成・配信しない）。休場日は `SKIP` |
 | メール不達 | Gmail API の3変数（CLIENT_ID/SECRET/REFRESH_TOKEN）と `GMAIL_ADDRESS` を確認。**OAuth 同意画面を本番公開**したか（テストだと7日で失効） |
 | メールのリンク先が前営業日のまま | `--notify`（step6）を**必ず push の後**に実行しているか／ネット許可に `github.io` が入っているか確認。`--notify` が Pages 上のartifact digest一致を確認してから送る。確認タイムアウト時は未送信で失敗する |
 | Pages が `claude/...` に出て未反映 | Actions「Validate routine publication」と「Promote routine publication」の順に実行結果を確認。候補がmain直系・docs限定・digest一致か、Workflow permissionsが書込み可かを確認。直接経路を使う場合は「Allow unrestricted branch pushes」も確認 |
 | Pages 未表示 | Settings → Pages の Branch=main / Folder=/docs を確認 |
-| pip が `externally-managed` で失敗 | setup script のフォールバック `|| pip install --break-system-packages ...` が入っているか |
+| pip が `externally-managed` で失敗 | venvを作成・有効化してlockから導入する |
+
+## 非公開の保存先と送信履歴
+
+`TSE_PRIVATE_STATE_DIR` には公開されない永続ボリュームを指定する（docs配下は禁止）。未設定時は `.work/private` に保存する。根拠ZIPは180日を目安、送信台帳は期限を設けず保持する。ログ全体・環境変数・認証情報はアーカイブしない。ZIPの各ファイルdigestとコードcommitを `archive.json` に記録する。
+
+```bash
+python -m tse_ranking_monitor private export --destination <非公開の新規保存先>
+python -m tse_ranking_monitor private retention --keep-days 180
+```
+
+export先は既存ディレクトリを上書きしない。クラウド環境が毎回破棄される場合は、終了前にこの保存先を環境外へ退避し、次回実行前に復元する。外部保存先の認証・転送は環境側で設定する。まだ設定していない場合、環境をまたぐ監査記録と重複送信防止は保証できない。
+
+retentionは期限切れ根拠ZIPの一覧のみを表示する。削除は一覧とバックアップを確認し、承認した場合だけ `--apply` を付ける。送信台帳は削除しない。`pending` は送信成否が不明な状態なのでGmailの送信済みを確認し、`private resolve-delivery --key <表示されたキー> --status sent|not-sent --reason "確認した内容"` で確定してから再開する。

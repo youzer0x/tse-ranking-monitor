@@ -6,7 +6,7 @@ J-Quants V2 のバリュエーション指標 API (/equities/valuation) の MktC
 MktCap が無い銘柄 (新規上場後、最初の決算短信前等) は market_cap_yahoo に委譲する。
 
 取得方式（要点）:
-  時価総額(億円) = MktCap(百万円) / 100（小数1桁に丸め）
+  時価総額(億円) = MktCap(百万円) / 100（判定用の精度を保持）
   - MktCap は J-Quants が「当日終値 × 自己株式を控除した株式数」で算出した値（分割・併合対応済）。
     発行済株式数ベースの時価総額より、自己株式相当分だけ小さくなる。
   - 全銘柄を日付指定で一括取得し、当日に無ければ最大 LOOKBACK_DAYS 日さかのぼる。
@@ -21,6 +21,8 @@ Yahoo インポートは遅延（フォールバック時のみ）。
 import os
 import time
 import requests
+import math
+from dataclasses import dataclass
 from datetime import date, timedelta
 from collections import Counter
 
@@ -60,11 +62,13 @@ def _request(api_key: str, path: str, params: dict) -> list[dict]:
                     raise
                 time.sleep(1.5 ** attempt)
         if body is None:
-            break
+            raise RuntimeError("valuation request exhausted retries")
         out.extend(body.get("data", []))
         page_key = body.get("pagination_key")
         if not page_key:
             break
+    if page_key:
+        raise RuntimeError("valuation pagination did not finish")
     return out
 
 
@@ -94,10 +98,13 @@ def prime_price_cache(target_date: date, prices: dict[str, float]) -> None:
 
 
 def _mktcap_oku(million_yen: float | None) -> float | None:
-    """valuation API の MktCap（百万円）を億円（小数1桁）に換算する。"""
+    """Convert without rounding: thresholds must be applied to the raw value."""
     if million_yen is None:
         return None
-    return round(float(million_yen) / 100, 1)
+    value = float(million_yen) / 100
+    if not math.isfinite(value) or value < 0:
+        raise ValueError("MktCap must be finite and non-negative")
+    return value
 
 
 def _fetch_valuation_mktcaps(api_key: str, target_date: date) -> tuple[dict[str, float], date]:
@@ -188,6 +195,31 @@ def compute_one(api_key: str, code4: str, prices: dict[str, float], price_date: 
         return yahoo_value, None, None, 1.0, "yahoo"
 
     return None, None, None, 1.0, None
+
+
+@dataclass(frozen=True)
+class MarketCapResult:
+    value_oku: float | None
+    source: str | None
+    valuation_date: date | None
+    status: str
+
+
+def compute_one_detailed(api_key, code4, prices, price_date):
+    """Expose missing data separately from a valid (possibly below-floor) value.
+
+    The original five-element compute_one API remains available to consumers.
+    Yahoo provides a current quote, not a verified historical valuation date.
+    """
+    value, _shares, _period, _correction, source = compute_one(api_key, code4, prices, price_date)
+    if value is None:
+        return MarketCapResult(None, source, None, "unavailable")
+    if not math.isfinite(value) or value < 0:
+        return MarketCapResult(None, source, None, "unavailable")
+    if source == "yahoo":
+        return MarketCapResult(value, source, None, "yahoo")
+    used = _VALUATION_CACHE.get(price_date, ({}, price_date))[1]
+    return MarketCapResult(value, source, used, "current" if used == price_date else "previous")
 
 
 def fetch_market_caps(codes: set[str], target_date: date) -> dict[str, float]:

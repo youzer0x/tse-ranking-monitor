@@ -17,6 +17,8 @@
 5. `docs/index.html` と `docs/data/` を `main` へpushする。
 6. Pages上の当日artifact digestがローカル公開物と一致したことを確認してからGmailを送る。不一致・タイムアウト・送信失敗時は未送信のままエラーにする。
 
+日次の標準入口は `python -m tse_ranking_monitor pipeline start` です。以後は `research / publish / deploy / notify --session <S>` を使います。中断時は `resume --session <S>` で次の未完了段階へ進みます。詳細は日次ルーチンを参照してください。
+
 既存の `python scripts/*.py` CLIは互換入口であり、本体実装は `src/tse_ranking_monitor/` にあります。方法論は `vendor/tse-ranking-digest/`、共有データ取得コードは `market-scripts-common` のlock付きベンダリングを正本とします。
 
 ## 文書
@@ -29,17 +31,20 @@
 - [セットアップ](runbook/SETUP.md)
 - [ルーチン貼り付けプロンプト](runbook/ROUTINE_PROMPT.md)
 
-起動は毎日16:35 JSTです。当日barsを待つ最終締切は18:10 JSTで、核ランキングの必須依存は当日barsです。
+起動は毎日16:35 JSTです。当日barsを待つ最終締切は18:10 JSTで、ゲートは当日barsを待ち、Stage1は必要な価格・銘柄マスタ・時価総額の取得も検証します。
 
 ## 開発と検証
 
 ```bash
+python -m pip install -r requirements-dev.lock
+python -m pip install --no-build-isolation --no-deps .
+tse-ranking --help
 python scripts/check_vendor.py
 python tools/check_methodology_vendor.py
 python -m pytest
 ```
 
-テストはネットワークを遮断して実行されます。`docs/data/` の日次更新だけではCIを起動しません。
+Pythonテストはネットワークを遮断して実行されます。画面テストは `pip install -r requirements-browser.lock`、`python -m playwright install chromium` の後、`python -m pytest browser_tests` で実行します。Chromiumの通信はテスト内のfixtureへ置き換えます。`docs/data/` の日次更新だけではCIを起動しません。
 
 ## 免責
 

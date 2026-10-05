@@ -23,9 +23,10 @@ from ..contracts import (
     validate_ranking_document,
 )
 from ..runtime import status as run_status
+from ..runtime.private_store import reserve_delivery, finish_delivery
 from . import gmail, render
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path.cwd()
 
 JST = timezone(timedelta(hours=9), name="JST")
 RANKING_FILE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
@@ -84,7 +85,7 @@ def validate_ranking(data):
     if not isinstance(data, dict) or not _valid_session_date(data.get("session_date")):
         raise PublishError("invalid ranking json: session_date must be YYYY-MM-DD")
     try:
-        return validate_ranking_document(data, require_factors=True)
+        return validate_ranking_document(data, require_factors=True, require_numeric_fields=True)
     except ValueError as exc:
         raise PublishError(f"invalid ranking json: {exc}") from exc
 
@@ -295,16 +296,52 @@ def _load_notification_artifact(input_path, docs_dir):
     return published, expected_digest
 
 
-def build(data, docs_dir):
+def build(data, docs_dir, *, research_dir=None, market_path=None):
+    from .validation import require_compiled_evidence, require_market_quality
+
     prepared = prepare_ranking(data)
+    try:
+        evidence = require_compiled_evidence(prepared, research_dir)
+    except ValueError as exc:
+        raise PublishError(str(exc)) from exc
+    session = prepared["session_date"]
+    market_target = Path(docs_dir) / "data" / f"{session}_market.json"
+    market = None
+    market_failure = None
+    if market_path is not None:
+        if Path(market_path).resolve() == market_target.resolve():
+            raise PublishError("market input must be staged outside docs")
+        try:
+            market = _load_json(market_path)
+            require_market_quality(market, session)
+        except (ValueError, PublishError) as exc:
+            market_failure = str(exc)
+            market = None
+            print(f"  WARN market skipped: {market_failure}", file=sys.stderr)
+    # An older failed draft must never be swept into a later git add docs/data.
+    if market_target.exists():
+        if market_path is None:
+            try:
+                market = _load_json(market_target)
+                require_market_quality(market, session)
+            except (ValueError, PublishError) as exc:
+                market_failure, market = str(exc), None
+        if market is None:
+            quarantine = Path(docs_dir).resolve().parent / ".work" / session / "quarantine"
+            quarantine.mkdir(parents=True, exist_ok=True)
+            # Preserve failed drafts privately, including their original bytes.
+            market_target.replace(quarantine / f"market-{time.time_ns()}.json")
     session_day = date.fromisoformat(prepared["session_date"])
     print(f"Publishing {prepared['session_date']} ({len(prepared.get('rows', []))} rows) ...")
     save_data(prepared, docs_dir)
+    if market is not None:
+        _atomic_write_bytes(market_target, _json_bytes(market))
     # Retention is anchored to the published session, not the clock: a session
     # older than the window must keep its own artifact and the manifest entry.
     cleanup_old(docs_dir, keep_days=30, today=session_day)
     update_manifest(docs_dir)
     write_index(docs_dir)
+    return {"session": session, "evidence": evidence, "market_failure": market_failure}
 
 
 def _verify_pushed_head(repo_root=None, timeout=0, interval=10):
@@ -380,7 +417,8 @@ def _verify_pushed_head(repo_root=None, timeout=0, interval=10):
 
 def notify(input_path, docs_dir, pages_url, timeout=300, interval=10,
            main_timeout=300, main_interval=10):
-    _verify_pushed_head(timeout=main_timeout, interval=main_interval)
+    _verify_pushed_head(repo_root=Path(docs_dir).resolve().parent,
+                        timeout=main_timeout, interval=main_interval)
     data, expected_digest = _load_notification_artifact(input_path, docs_dir)
     print(
         f"Notify {data['session_date']} ({len(data.get('rows', []))} rows): "
@@ -395,7 +433,16 @@ def notify(input_path, docs_dir, pages_url, timeout=300, interval=10,
         interval=interval,
     )
     email_html = render.generate_email_html(data, pages_url)
+    key, reserved = reserve_delivery(Path(docs_dir).resolve().parent, data["session_date"],
+                                     expected_digest, os.environ.get("NOTIFY_TO", ""))
+    if not reserved:
+        print("  notification already sent; no duplicate email")
+        mark_delivered(data["session_date"])
+        return
+    # Any crash/error after this point is uncertain. Keep the reservation until
+    # an operator checks Gmail rather than retrying a possibly successful send.
     send_email(data, email_html)
+    finish_delivery(Path(docs_dir).resolve().parent, key)
     mark_delivered(data["session_date"])
 
 
@@ -431,6 +478,8 @@ def make_parser():
     )
     parser.add_argument("--docs", default="docs", help="GitHub Pages の docs ディレクトリ")
     parser.add_argument("--pages-url", default=os.environ.get("PAGES_URL", "./"))
+    parser.add_argument("--research-dir", help="Strict research manifest/batches/results directory")
+    parser.add_argument("--market", help="Validated market draft outside docs (optional)")
     parser.add_argument(
         "--notify",
         action="store_true",
@@ -472,7 +521,8 @@ def main(argv=None):
                 main_interval=args.main_interval,
             )
         else:
-            build(_load_json(args.inp), args.docs)
+            build(_load_json(args.inp), args.docs, research_dir=args.research_dir,
+                  market_path=args.market)
         return 0
     except (PublishError, OSError, ValueError, RuntimeError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

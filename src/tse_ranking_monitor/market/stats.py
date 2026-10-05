@@ -35,12 +35,8 @@ import sys
 import unicodedata
 from datetime import date, datetime, timedelta, timezone
 
-# 共有ベンダーは scripts/ に留める。パッケージ実行は namespace package 経由、
-# 旧CLIを別ディレクトリから実行した場合は従来どおり flat import へ退避する。
-try:
-    from scripts import jquants
-except ModuleNotFoundError:
-    import jquants
+# Installed as flat modules from the locked shared snapshot.
+import jquants
 
 # Windows コンソール(cp932)対策: 標準出力を UTF-8 化。
 for _stream in (sys.stdout, sys.stderr):

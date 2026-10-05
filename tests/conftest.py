@@ -28,8 +28,15 @@ def isolated_runtime_root(tmp_path, monkeypatch):
     running, which the end-of-session guard would act on.
     """
     from tse_ranking_monitor import gate
+    from tse_ranking_monitor.publishing import publisher
 
     monkeypatch.setattr(gate, "ROOT", tmp_path / "runtime-root")
+    monkeypatch.setattr(publisher, "ROOT", tmp_path / "runtime-root")
+    monkeypatch.delenv("TSE_PRIVATE_STATE_DIR", raising=False)
+    # pytest-socket does not cover git subprocesses. Allow only local bare
+    # remotes, and never discover the real checkout by walking up from .work.
+    monkeypatch.setenv("GIT_ALLOW_PROTOCOL", "file")
+    monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(ROOT))
     return tmp_path / "runtime-root"
 
 

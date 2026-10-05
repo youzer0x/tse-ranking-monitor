@@ -1,5 +1,8 @@
 """Fail-closed tests for Claude-branch publication promotion."""
 
+from datetime import date, timedelta
+from publication_fixtures import market_document
+from tse_ranking_monitor.publishing.render import generate_pages_html
 import hashlib
 import json
 import subprocess
@@ -31,6 +34,7 @@ def _write_json(path, value):
 def _ranking(session):
     return {
         "session_date": session,
+        "prev_date": (date.fromisoformat(session) - timedelta(days=1)).isoformat(),
         "session_window": "%s 09:00–15:30 JST" % session,
         "criteria": {
             "min_pct": 5,
@@ -45,7 +49,7 @@ def _ranking(session):
             "code": "7000",
             "name": "テスト銘柄",
             "pct": 8.5,
-            "mcap_oku": 250,
+            "mcap_oku": 250, "mcap_oku_exact": 250, "close": 1000, "turnover_m": 50,
             "factor": "材料を確認",
             "factor_kind": "報道",
         }],
@@ -91,12 +95,9 @@ def _repo_with_candidate(tmp_path, history=("2026-07-16",), market_history=()):
     base = _run(repo, "rev-parse", "HEAD")
 
     _run(repo, "switch", "-c", "claude/test-session")
-    (repo / "docs" / "index.html").write_text("<html>2026-07-17</html>\n", encoding="utf-8")
+    (repo / "docs" / "index.html").write_text(generate_pages_html(), encoding="utf-8", newline="\n")
     _write_json(data_dir / "2026-07-17.json", _ranking("2026-07-17"))
-    _write_json(data_dir / "2026-07-17_market.json", {
-        "schema_version": 1,
-        "session_date": "2026-07-17",
-    })
+    _write_json(data_dir / "2026-07-17_market.json", market_document("2026-07-17"))
     _write_json(
         data_dir / "manifest.json",
         _manifest(data_dir, ["2026-07-17"] + history),
@@ -160,6 +161,23 @@ def test_rejects_non_publication_path(tmp_path):
 
     with pytest.raises(promotion.PromotionError, match="non-publication"):
         promotion.verify_candidate(repo, "claude/test-session", head, base)
+
+
+def test_candidate_cannot_replace_validator_or_browser_program(tmp_path):
+    repo, base, _ = _repo_with_candidate(tmp_path)
+    index = repo / "docs/index.html"
+    index.write_text(index.read_text(encoding="utf-8") + "<script>alert(1)</script>", encoding="utf-8", newline="\n")
+    _run(repo, "add", "docs/index.html")
+    _run(repo, "commit", "--amend", "--no-edit")
+    with pytest.raises(promotion.PromotionError, match="trusted renderer"):
+        promotion.verify_candidate(repo, "claude/test-session", "HEAD", base)
+    checker = repo / "tools/verify_publish_candidate.py"
+    checker.parent.mkdir()
+    checker.write_text("raise Exception('candidate checker executed')")
+    _run(repo, "add", "tools")
+    _run(repo, "commit", "--amend", "--no-edit")
+    with pytest.raises(promotion.PromotionError, match="non-publication"):
+        promotion.verify_candidate(repo, "claude/test-session", "HEAD", base)
 
 
 def test_rejects_candidate_not_based_on_current_main(tmp_path):
@@ -331,5 +349,7 @@ def test_workflow_keeps_promotion_and_pages_build_fail_closed():
     assert "pages: write" in promotion_workflow
     assert "verify_publish_candidate.py" in promotion_workflow
     assert "github.event.workflow_run.head_sha" in promotion_workflow
+    assert "ref: ${{ github.workflow_sha }}" in promotion_workflow
+    assert "ref: ${{ github.event.workflow_run.head_sha }}" not in promotion_workflow
     assert ':refs/heads/main"' in promotion_workflow
     assert '"repos/$GITHUB_REPOSITORY/pages/builds"' in promotion_workflow

@@ -47,6 +47,7 @@ effort: max
 # チェック値
 
 `checks` の全キーに `done` / `na` / `unavailable` のいずれかを入れる。
+`na` / `unavailable` には `check_reasons` の同じキーで具体的な理由を必ず付ける。`na` は下記の適用条件に合う場合だけ使う。公表日時にはタイムゾーンを付ける。compileは日本時間に正規化し、前営業日15:30以上・当日15:30未満の実時刻と `window` を照合する。
 
 - `disclosures`：入力を確認すれば `done`。
 - `kabutan_news`：入力の窓内・priorを確認すれば `done`。取得失敗等で確認不能なら `unavailable`。
@@ -73,6 +74,7 @@ effort: max
       "claims": [{"text": "検証した主張", "source_ids": ["s1"]}],
       "sources": [{"id": "s1", "label": "出典名", "url": "https://example.com/article", "source_type": "article", "published_at": "YYYY-MM-DDTHH:MM:SS+09:00", "window": "material"}],
       "checks": {"disclosures": "done", "kabutan_news": "done", "web_search": "done", "sector_cluster": "na", "edinet": "na"},
+      "check_reasons": {"sector_cluster": "入力にクラスタなし", "edinet": "大量保有・買収関連の調査対象なし"},
       "market_note": "市場分析で再利用できる簡潔な要約"
     }
   ]

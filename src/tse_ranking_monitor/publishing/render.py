@@ -14,6 +14,7 @@ factor_kind）を埋めたもの（rows に disclosures/pdf_url・counts・cappe
 時価総額は要件により **常に億円の整数（カンマ区切り、1兆円以上も億円表示）** とする。
 """
 import re
+from ..text import escape, inline_html, session_url
 
 
 def fmt_mcap(oku, flag=""):
@@ -56,7 +57,7 @@ def _kind_badge(kind):
     k = (kind or "").strip("[]")
     color = {"開示": "#1b7f3b", "報道": "#1a6fd0", "テーマ": "#8a6d00"}.get(k, "#777")
     return (f'<span style="display:inline-block;font-size:10px;color:#fff;background:{color};'
-            f'border-radius:3px;padding:1px 5px;margin-right:4px;white-space:nowrap;">{k or "—"}</span>') if k else ""
+            f'border-radius:3px;padding:1px 5px;margin-right:4px;white-space:nowrap;">{escape(k or "—")}</span>') if k else ""
 
 
 _FACTOR_LINK_RE = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
@@ -65,25 +66,25 @@ _FACTOR_LINK_RE = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 def _factor_html(text):
     """factor 本文中の Markdown リンク [表示名](URL) を <a> に変換する（Pages SPA の mdInline と
     同じ描画）。リンクを含まない既存の factor は素通しで表示挙動は不変（vmq.MD_LINK_RE と同一パターン）。"""
-    return _FACTOR_LINK_RE.sub(
-        r'<a href="\2" target="_blank" rel="noopener">\1</a>', text)
+    return inline_html(text)
 
 
 def generate_email_html(data, pages_url, max_items=25):
     rows = data.get("rows", [])
     display = rows[:max_items] if max_items else rows
-    win = data.get("session_window", "")
-    date_str = data.get("session_date", "")
-    count_label = _count_label(data)
+    win = escape(data.get("session_window", ""))
+    date_str = escape(data.get("session_date", ""))
+    count_label = escape(_count_label(data))
+    pages_url = escape(session_url(pages_url, data.get("session_date", "")))
     trs = []
     for r in display:
         factor = _factor_html((r.get("factor") or "（材料未確認）").strip())
         badge = _kind_badge(r.get("factor_kind"))
         trs.append(f"""<tr>
-          <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-family:Arial,sans-serif;">{r.get('rank','')}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid #eee;font-family:Arial,sans-serif;white-space:nowrap;">{r.get('code','')}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid #eee;white-space:nowrap;">{r.get('name','')}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;font-family:Arial,sans-serif;">{fmt_mcap(r.get('mcap_oku'), r.get('mcap_flag'))}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-family:Arial,sans-serif;">{escape(r.get('rank',''))}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid #eee;font-family:Arial,sans-serif;white-space:nowrap;">{escape(r.get('code',''))}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid #eee;white-space:nowrap;">{escape(r.get('name',''))}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;font-family:Arial,sans-serif;">{escape(fmt_mcap(r.get('mcap_oku'), r.get('mcap_flag')))}{'（Yahoo参照）' if r.get('mcap_source') == 'yahoo' else ''}{'（' + escape(r['mcap_date']) + '時点）' if r.get('mcap_date') and r['mcap_date'] != data.get('session_date') else ''}</td>
           <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;font-family:Arial,sans-serif;color:#c0392b;font-weight:600;">{fmt_pct(r.get('pct'))}</td>
           <td class="col-factor" style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;line-height:1.5;">{badge}{factor}</td>
         </tr>""")
@@ -97,7 +98,7 @@ def generate_email_html(data, pages_url, max_items=25):
     <div style="background:#11243f;color:#fff;padding:18px 22px;">
       <h1 style="margin:0;font-size:19px;font-weight:600;">📈 東証 値上がり率ランキング</h1>
       <p style="margin:6px 0 0;font-size:13px;opacity:0.9;">{date_str}｜{count_label}｜{win}</p>
-      <p style="margin:4px 0 0;font-size:11px;opacity:0.7;">条件：{_criteria_text(data)}</p>
+      <p style="margin:4px 0 0;font-size:11px;opacity:0.7;">条件：{escape(_criteria_text(data))}</p>
     </div>
     <div style="padding:16px 20px;">
       <div style="text-align:center;margin:0 0 14px;">

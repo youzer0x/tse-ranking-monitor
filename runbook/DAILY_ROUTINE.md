@@ -12,9 +12,25 @@
   単一の真実源（ベンダリング。各配布先の `vendor.lock.json` 参照・直接編集禁止）。
 - 配信実装（Pages の体裁・Gmail）は on-disk の `tdnet-monitor`（`html_generator.py`・`gmail_sender.py`・`docs/`）を下敷きにしている。
 
+## 実行を管理するCLI
+
+環境準備後は `python -m tse_ranking_monitor pipeline` を標準入口とする。決定的な処理を次の順序で実行し、AIは調査結果JSONと市場分析ナラティブを作成する。各段階で契約・前段の成果物digest・コード版を検査し、`.work/<S>/checkpoint.json` を更新する。
+
+| 段階 | コマンド | 完了後の作業 |
+|---|---|---|
+| ゲート・Stage1・調査計画 | `python -m tse_ranking_monitor pipeline start` | 出力されたセッションのpendingバッチをreserve経由で調査 |
+| 根拠集約・要因反映・品質・市場brief | `python -m tse_ranking_monitor pipeline research --session <S>` | findingの修復。成功後はbriefからnarrativeを執筆 |
+| 公開物生成 | `python -m tse_ranking_monitor pipeline publish --session <S>` | 市場分析の結果を確認 |
+| commit・push・fallback | `python -m tse_ranking_monitor pipeline deploy --session <S>` | 同じcommitがmainへ到達するまで待機 |
+| Pages照合・通知 | `python -m tse_ranking_monitor pipeline notify --session <S>` | 最終報告 |
+
+`resume --session <S>` は最初の未完了段階を一つ実行する。AI調査が未完ならそのJSONを保存してから再開する。`research` / `publish` の明示再実行は後段の完了記録を無効にして再検査する。コード・設定を変えた実行は既存のチェックポイントを流用しない。旧CLIは障害調査用に残すが、公開入口自身もstrict compileと品質合格を強制する。
+
+`stage1.json` は取得時の不変の入力、`ranking.json` は共有 `merge_factors.py` で要因を反映する出力である。段階単位の排他制御で同時実行を防ぐ。根拠・検査・処理結果は非公開アーカイブへ保存する（保存先・保持期間は `SETUP.md`）。以下は各段階の詳細な処理契約である。
+
 ## 起動とゲート
 
-- **cron：当日 16:35 JST**（`scripts/wait_for_data.py` が直近の完了セッションを選ぶ適応型ゲート）。核ランキングの**唯一の必須依存は対象日の `/equities/bars/daily`**。当日分は確定まで待ち、打ち切りは18:10 JSTとする。catch-up窓は1営業日（`gate.CATCH_UP_WINDOW_DAYS`）で、休場日の発火が直近営業日（例：土曜に金曜）を未公開ならその過去日をcatch-up対象として一度だけ鮮度確認し、壁時計待機をしない。窓より古い未公開営業日と再開下限（`gate.PUBLICATION_FLOOR`＝2026-09-24。08-17〜09-18 の停止期間は復元しない）より前は切り捨て、`WARN 切り捨て=` で列挙する。
+- **cron：当日 16:35 JST**（`scripts/wait_for_data.py` が直近の完了セッションを選ぶ適応型ゲート）。ゲートで待つ対象は対象日の `/equities/bars/daily`。Stage1では銘柄マスタ・比較日の価格・必要な時価総額の取得も検証する。当日分は確定まで待ち、打ち切りは18:10 JSTとする。catch-up窓は1営業日（`gate.CATCH_UP_WINDOW_DAYS`）で、休場日の発火が直近営業日（例：土曜に金曜）を未公開ならその過去日をcatch-up対象として一度だけ鮮度確認し、壁時計待機をしない。窓より古い未公開営業日と再開下限（`gate.PUBLICATION_FLOOR`＝2026-09-24。08-17〜09-18 の停止期間は復元しない）より前は切り捨て、`WARN 切り捨て=` で列挙する。
 - **営業日ゲート＋鮮度ガード**：`wait_for_data.py` が `docs/data/manifest.json` の最新公開日とJST時刻から対象日を決める。処理対象が無ければ `SKIP`、確定済みなら `SESSION=`、当日データが締切までに未到達またはcatch-upデータが不整合なら `TIMEOUT` とし**配信しない**。Stage1 自身も件数比・masterカバー率・日付整合を検証する。
 - 使用モデル：Sonnet 5（`claude-sonnet-5`）・effort=max。調査サブエージェント（`tse-factor-batch-researcher`）も同じモデルに固定する（2026-09-24 の再開時に Sonnet 4.6 から切替）。
 
@@ -31,25 +47,25 @@
    - 親は `python scripts/compile_research_results.py --research-dir .work/<SESSION>/research --strict` を実行する。欠落、重複、digest不一致、材料窓・出典・5パスの契約違反があれば出力せず、該当バッチだけ最大2回再調査する。成功時は `evidence.v1` と既存形式の `factors.json` を得る。
    - `python scripts/merge_factors.py --ranking .work/<SESSION>/ranking.json --factors .work/<SESSION>/research/factors.json` で反映する。`ranking.json` は手編集しない。
    - 親オーケストレーターが全行と `theme_clusters` を横断検証する。異質な33業種を機械的に同一テーマへ結ばず、開示内容、時系列、定量寄与、代替要因が揃う範囲だけを帰属する。修正はbatch resultまたはfactorsへ戻し、compile/mergeを再実行する。
-   - `python scripts/validate_ranking_quality.py .work/<SESSION>/ranking.json --evidence .work/<SESSION>/research/evidence.json --format json --repair-targets .work/<SESSION>/research/repair_targets.json` を実行し、findingが指すコードだけを修復する。再調査は `python scripts/repair_research_plan.py --research-dir .work/<SESSION>/research --repair-targets .work/<SESSION>/research/repair_targets.json` が `repair_context`（rule_ids・messages・旧結果の要点）を該当バッチへ注入して `pending` に戻す（digest更新で旧結果は自動失効。非対象銘柄は `carry_forward` として再掲され、改変はcompileが拒否する。バッチごと最大2回・exit 3は公開停止）。空のfactor、ERROR、未対応WARNを残したまま公開しない。詳細な出典・因果規律は本書後半とvendor正本に従う。
+   - `python scripts/validate_ranking_quality.py .work/<SESSION>/ranking.json --evidence .work/<SESSION>/research/evidence.json --strict --format json --repair-targets .work/<SESSION>/research/repair_targets.json` を実行し、findingが指すコードだけを修復する。再調査は `python scripts/repair_research_plan.py --research-dir .work/<SESSION>/research --repair-targets .work/<SESSION>/research/repair_targets.json` が `repair_context`（rule_ids・messages・旧結果の要点）を該当バッチへ注入して `pending` に戻す（digest更新で旧結果は自動失効。非対象銘柄は `carry_forward` として再掲され、改変はcompileが拒否する。バッチごと最大2回・exit 3は公開停止）。空のfactor、ERROR、未対応WARNを残したまま公開しない。詳細な出典・因果規律は本書後半とvendor正本に従う。
 3.5. **市場分析タブのデータ生成（best-effort・ランキング配信をブロックしない）**：ランキングと**同一の push** に載せるため Publish（step4）の前に生成する。16:35 起動では当日 `/fins/summary`（速報~18:00頃）は未反映だが、**市場分析タブに表示されるのは bars/master/topix 由来の要素のみ**（セクター騰落・breadth・TOPIX）で、当日決算開示は配信物に出ないため影響しない。手順の詳細は `specs/MARKET_ANALYSIS.md` に従う。要点のみ：
    - **(a) 決定的データ**：`python scripts/build_market_stats.py --date <SESSION> --out-dir .work/<SESSION>/market`。`.work/<SESSION>/market/` に `sector_return_<SESSION>.csv`（sector_analysis.py 移植版）と `market_stats_<SESSION>.json`（TOPIX 前日比・breadth・最大代金セクター/銘柄〔全ユニバース真値〕・セクター騰落率表「銘柄」列の主導銘柄 `sector_drivers`〔寄与順1〜2銘柄〕・**⚠乖離フラグ候補 `divergence_flags`**〔執筆ヒント〕）を出力。
    - **(b) 根拠パック**：`python scripts/build_market_brief.py --ranking .work/<SESSION>/ranking.json --evidence .work/<SESSION>/research/evidence.json --stats .work/<SESSION>/market/market_stats_<SESSION>.json --out .work/<SESSION>/market/market_brief_<SESSION>.json`。クラスタ・セクター寄与・乖離候補に加え、Stage2 accepted evidenceのうち出典を持つ行を `accepted_evidence[]`（`code`・`market_note`・claim・参照先source）としてコード単位でまとめる。source IDは `<code>:<item-local-id>` に名前空間化し、記事本文は含めない（個別銘柄movers抽出は行わない）。
    - **(c) ナラティブ・フラグメント執筆**：`market_brief.v2` だけを根拠パックとして `.work/<SESSION>/market/narrative_<SESSION>.json`（**コミットしない**）を `specs/MARKET_ANALYSIS.md` の品質要件で執筆する。
-   - **(d) 結合**：`python scripts/build_market_json.py --date <SESSION> --csv-dir .work/<SESSION>/market --stats .work/<SESSION>/market/market_stats_<SESSION>.json --defaults scripts/market_fragment_defaults.json --narrative .work/<SESSION>/market/narrative_<SESSION>.json --out docs/data/<SESSION>_market.json`。
-   - **(e) 品質検証**：`python scripts/validate_market_quality.py docs/data/<SESSION>_market.json --format json --repair-targets .work/<SESSION>/market/repair_targets.json`。findingのpath/ruleだけを修復して(c)〜(e)を最大2回再実行する。本文を削って通さず、briefのsource IDを第一に再利用する。
+   - **(d) 結合**：`python scripts/build_market_json.py --date <SESSION> --csv-dir .work/<SESSION>/market --stats .work/<SESSION>/market/market_stats_<SESSION>.json --defaults scripts/market_fragment_defaults.json --narrative .work/<SESSION>/market/narrative_<SESSION>.json --out .work/<SESSION>/market/<SESSION>_market.json`。
+   - **(e) 品質検証**：`python scripts/validate_market_quality.py .work/<SESSION>/market/<SESSION>_market.json --strict --format json --repair-targets .work/<SESSION>/market/repair_targets.json`。findingのpath/ruleだけを修復して(c)〜(e)を最大2回再実行する。本文を削って通さず、briefのsource IDを第一に再利用する。
    - **失敗時**：(a)〜(e) のどこで失敗しても市場分析は**スキップして step4 へ進む**（`docs/data/<SESSION>_market.json` が無くても SPA はタブ empty 表示に自然退避する。**ランキング配信は成功として扱う**）。`.work/<SESSION>/` はコミットしない。
-4. **Publish（生成のみ・メールは送らない）**：`publish.py --in .work/<SESSION>/ranking.json --docs docs --pages-url "$PAGES_URL"`
+4. **Publish（生成のみ・メールは送らない）**：`publish.py --in .work/<SESSION>/ranking.json --research-dir .work/<SESSION>/research --market .work/<SESSION>/market/<SESSION>_market.json --docs docs --pages-url "$PAGES_URL"`
    - `docs/data/<date>.json` 保存（ランキング＋要因）／`docs/data/manifest.json` 更新／公開セッション日から30日より古い JSON を削除（壁時計ではなくセッション日基準。過去日の publish が自身や新しい成果物を消さない）。
    - `docs/index.html`（日付選択式 Pages）を更新（体裁は `html_generator.py`＝PTS 版と同一トンマナ・配色）。保存 JSON は rows に開示（pdf_url）を含むフルデータ。
    - メールは送信せず、再生成可能なメールHTMLも公開保存しない。通知時に公開済みランキングJSONから本文を生成する。
 5. **デプロイ（必ず main へ・二重経路）**：`docs/index.html` と `docs/data/` を commit し、まず `git push origin HEAD:main` を実行する。
    `docs/data/` には step4 のランキング JSON に加え、step3.5 が成功していれば `<SESSION>_market.json`（市場分析）も含まれ、**同一 push** で配信される（`git add docs/index.html docs/data` が両方を拾う）。
    - 直接pushが成功すれば従来どおり次へ進む。失敗した場合、その時点では停止・失敗通知せず、`git push origin HEAD` で現在の `claude/*` branchへ同じcommitをpushする。
-   - fallbackは2段階とする。`validate-routine-publication.yml` はClaude branch上で読み取り専用検証を行い、成功時だけmain上の信頼済み `promote-routine-publication.yml` が同じ候補を再検証する。候補が現行mainの直系かつ単一commit、変更が `docs/index.html`／`docs/data/*.json` 限定、ランキングJSONとmanifest digestが一致する場合だけ、同じcommitをmainへfast-forwardする。force push・PR・別commitの生成は行わない。不合格またはmain競合は昇格しない。
+   - fallbackは2段階とする。`validate-routine-publication.yml` はClaude branch上で読み取り専用検証を行い、成功時だけmain上の信頼済み `promote-routine-publication.yml` が同じ候補を再検証する。信頼済みworkflow SHAの検査コードが候補をgit objectとして読み、候補が現行mainの直系かつ単一commit、変更が `docs/index.html`／`docs/data/*.json` 限定、ランキング・市場分析の品質が合格し、HTMLが信頼済みrendererと一致し、ランキングJSONとmanifest digestが一致する場合だけ、同じcommitをmainへfast-forwardする。force push・PR・別commitの生成は行わない。不合格またはmain競合は昇格しない。
    - Actionsの `GITHUB_TOKEN` によるmain pushはPages buildを自動発火しないため、workflowがPages Build APIを明示的に要求する。Gmail認証情報はActionsへ渡さず、通知は引き続きClaude Routineだけが行う。
    GitHub Pages は **main/docs** を配信する。`Allow unrestricted branch pushes` は高速な直接経路として推奨するが、無効でもfallbackで配信を完遂できる。`.work/<SESSION>/` はコミットしない。
-6. **メール通知（Pages 反映後に送信）**：`publish.py --in .work/<SESSION>/ranking.json --docs docs --pages-url "$PAGES_URL" --notify`
+6. **メール通知（Pages 反映後に送信）**：`publish.py --in .work/<SESSION>/ranking.json --research-dir .work/<SESSION>/research --market .work/<SESSION>/market/<SESSION>_market.json --docs docs --pages-url "$PAGES_URL" --notify`
    - まずローカルHEADと `origin/main` が一致するまでキャッシュなしで**最大5分ポーリング**する。直接push成功なら即一致し、fallback時はActionsの昇格を待つ。一致しなければ未送信で非ゼロ終了する。
    - 続いて**GitHub Pages 上の当日ランキングartifact digestがローカル公開物と一致する**まで、manifestとランキングJSONを
      キャッシュ無効化付きで**最大5分ポーリング**し、一致確認後にメール HTML を **Gmail API（HTTPS）送信**（`gmail_sender.send_gmail`）。
@@ -122,3 +138,11 @@
 - 方法論：`vendor/tse-ranking-digest/SKILL.md`
 - 配信下敷き：`project-private/tdnet-monitor`（Pages＋Gmail）
 - ルーチン方式の先行例：`pts-ranking-monitor`（PTS ナイト版・cron 06:06 JST）
+
+## 公開直前の検証と通知履歴
+
+- 時価総額の取得失敗は基準未満と区別して停止する。判定は丸める前の `mcap_oku_exact` を使い、`mcap_status` / `mcap_date` に取得状態と評価日を残す。Yahoo補完は評価日不明として表示で明示する。
+- 出典の `published_at` はタイムゾーン必須。日本時間に正規化し、前営業日15:30以上・当日15:30未満かを実日時で照合する。`na` / `unavailable` は `check_reasons` 必須で、適用条件外の `na` を拒否する。
+- buildは元のbatch結果をstrict compileし直す。Stage1の数値・日付・コードのdigestと、全行のfactor / factor_kindを公開予定JSONと比較する。ERROR/WARNは1件でも公開停止。
+- 市場分析は `.work/` で結合・検査する。不合格なら公開場所へコピーしない。既に公開場所に残っている不合格の当日ドラフトは `.work/<S>/quarantine/` に移して保持する。
+- 通知は日付・ランキングdigest・宛先集合からキーを作り、SQLiteで送信枠を予約する。送信済みなら再送しない。予約後に異常終了した場合は `pending` とし、Gmailで履歴を確認してから `private resolve-delivery` で確定する。APIが失敗して見えても送信済みの可能性があるため、自動で再送しない。

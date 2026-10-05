@@ -179,7 +179,7 @@ description: 日本株の東証 日中（レギュラー）セッション（当
 
 ## 8. 自動化（別リポ `tse-ranking-monitor`）との関係
 
-- 本スキルと**同一の方法論**を、独立リポ `tse-ranking-monitor` が **Claude クラウドルーチン**で日次・無人実行する（**cron 16:35 JST**・使用モデル Sonnet 4.6・effort=max）。当日四本値の公式反映目安16:30後に起動し、適応型ゲートが `/equities/bars/daily` の確定を待つ。締切は18:10 JSTで、未到達なら生成・配信しない（[[reference-jquants-data-update-timing]]）。
+- 本スキルと**同一の方法論**を、独立リポ `tse-ranking-monitor` が **Claude クラウドルーチン**で日次・無人実行する。起動時刻・待機締切・使用モデルは `tse-ranking-monitor/runbook/DAILY_ROUTINE.md` を正本とする。適応型ゲートが当日四本値の確定を待ち、締切時に必要データが未到達なら生成・配信しない（[[reference-jquants-data-update-timing]]）。
 - ルーチンは Stage1（`build_day_ranking.py`）→ Claude が変動要因をフル裏取り → `publish.py` で **GitHub Pages（Web）＋ Gmail 通知**を生成。営業日ゲート（当日が東証営業日のときのみ）を持つ。配信実装は on-disk の `tdnet-monitor`（`docs/` Pages＋Gmail）を下敷きにする。
 - 方法論の単一の真実源は本 `SKILL.md` であり、リポ側 `AGENTS.md` はこれに準拠する。雛形は `automation/tse-ranking-monitor/`（歴史的資料・凍結。本番は独立リポ）。
 - データ取得系スクリプト（`jquants.py`・`business_day.py`・`kabutan_pts.py`・`tdnet.py`・`market_cap_*.py`）の**コード**の単一の真実源は共有リポ **`market-scripts-common`**。本スキルの `scripts/` と独立リポ `tse-ranking-monitor` の `scripts/` へ同一内容が sync.py でベンダリングされる（手動 `cp` 同期は廃止）。

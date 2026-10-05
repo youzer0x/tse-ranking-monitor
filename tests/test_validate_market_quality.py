@@ -107,6 +107,8 @@ def test_fullwidth_trigger_normalized():
         "news_sources": [{"topic": "t", "links": [{"label": "l", "url": "https://example.com/news"}]}],
         "disclaimer": [],
     }
+    from publication_fixtures import market_document
+    doc = {**market_document("2026-07-15"), **doc}
     errs = vmq.check_doc(doc)
     assert any("TOB" in e and "リンク付きの言及が1箇所も無い" in e for e in errs)
 

@@ -8,31 +8,26 @@
 
 ## 1. セッションゲート
 
-`python scripts/wait_for_data.py` を実行する。
+契約成功後、checkoutしたリポジトリで `python -m pip install -r requirements.lock`、`python -m pip install --no-deps .` を実行する。既に同じlock・コード版を導入済みなら再導入は不要。続いて `python -m tse_ranking_monitor pipeline start` を実行する（ゲート・Stage1・調査計画まで自動実行）。
 
 - `SKIP`：生成・push・通知をせず正常終了。
 - `TIMEOUT`：生成・push・通知をせず非ゼロ終了し、原因を報告。
 - `SESSION=YYYY-MM-DD`：その日付を以後の `<S>` とする。対象はゲートが選ぶ直近の完了セッションのみ（catch-up窓＝1営業日・再開下限あり）。それより古い未公開営業日はゲートが切り捨てて `WARN 切り捨て=` を出すので最終報告に含め、手動で遡らない。過去日は壁時計待機しない。
 
-Stage1の入力整合検証が失敗したら停止する。以後の主要段階は `python .claude/hooks/runtime_telemetry.py stage start|end <name> --session <S>` で囲み、失敗時はendへ `--status failed` を付ける。
+Stage1の入力整合検証・時価総額取得が失敗したら停止する。pipelineは前段の成果物とコード版を照合し、stageの開始・終了・失敗を記録する。途中からは `pipeline resume --session <S>` で最初の未完了段階を一つ実行できる。調査JSONとナラティブはAIが作成する。
 
 ## 2. Stage1と調査計画
 
-```text
-python scripts/build_day_ranking.py --date <S> --kabutan-news --out .work/<S>/ranking.json
-python scripts/build_research_plan.py --ranking .work/<S>/ranking.json --out-dir .work/<S>/research
-```
+`pipeline start` が `.work/<S>/stage1.json` と `research/manifest.json` を生成する。Stage1の数値は不変の入力として保存し、要因は後段で `ranking.json` へmergeする。
 
 `build_research_plan.py` が非ゼロ終了（dispatch予算超過等）なら調査を開始せず、設計逸脱として報告して停止する。エージェント上限はmanifestの `dispatch_budget` とreserve判定だけを正とする。
 
 `research/manifest.json` の `pending` バッチだけを、`.claude/agents/tse-factor-batch-researcher.md` を使って並列調査する。各バッチの委譲直前に `python scripts/reserve_dispatch.py --research-dir .work/<S>/research --batch <batch_id>` を実行し、exit 0以外なら委譲せず停止して報告する。1タスクには `batch_id` と `batch_path` だけを渡し、ranking row、plan、長文仕様を貼り付けない。各返却JSONをmanifestの `result_path` に保存する。
 
-全結果を次で検証・集約する。
+全結果を次でstrict compile・merge・品質検査し、市場stats / briefまで生成する。公表時刻のタイムゾーンと実際の材料窓、`check_reasons` と省略条件も検査する。
 
 ```text
-python scripts/compile_research_results.py --research-dir .work/<S>/research --strict
-python scripts/merge_factors.py --ranking .work/<S>/ranking.json --factors .work/<S>/research/factors.json
-python scripts/validate_ranking_quality.py .work/<S>/ranking.json --evidence .work/<S>/research/evidence.json --format json --repair-targets .work/<S>/research/repair_targets.json
+python -m tse_ranking_monitor pipeline research --session <S>
 ```
 
 親は全コードの一意性・充足、材料窓、出典、クラスタ横断因果を検証する。compile失敗は該当バッチだけをreserve経由で再調査する。validatorのfindingは
@@ -47,16 +42,13 @@ factorは表示250字以内（リンクはラベルだけ数える）で要因�
 
 ## 3. 市場分析（best-effort）
 
-```text
-python scripts/build_market_stats.py --date <S> --out-dir .work/<S>/market
-python scripts/build_market_brief.py --ranking .work/<S>/ranking.json --evidence .work/<S>/research/evidence.json --stats .work/<S>/market/market_stats_<S>.json --out .work/<S>/market/market_brief_<S>.json
-```
+`pipeline research` が市場statsと `market_brief.v2` を生成済み。市場分析だけの失敗はcheckpointに記録され、ランキング公開を止めない。
 
 `market_brief_<S>.json` だけを根拠パックとして `.work/<S>/market/narrative_<S>.json` をである調で執筆する。`accepted_evidence[]` は `code` ごとの `market_note`・claim・参照先sourceの対応であり、claimの `source_ids` が指す同一要素内のsourceだけを根拠に使う（コードをまたいで出典を推測しない）。個別銘柄movers（値上がり/値下がり）は調査・執筆・出力しない（2026-07-16廃止）。個人発信、検索要約、銘柄トップ等のlanding pageは出典にしない。当日15:30以降の材料を日中要因にしない。
 
 ```text
-python scripts/build_market_json.py --date <S> --csv-dir .work/<S>/market --stats .work/<S>/market/market_stats_<S>.json --defaults scripts/market_fragment_defaults.json --narrative .work/<S>/market/narrative_<S>.json --out docs/data/<S>_market.json
-python scripts/validate_market_quality.py docs/data/<S>_market.json --format json --repair-targets .work/<S>/market/repair_targets.json
+python scripts/build_market_json.py --date <S> --csv-dir .work/<S>/market --stats .work/<S>/market/market_stats_<S>.json --defaults scripts/market_fragment_defaults.json --narrative .work/<S>/market/narrative_<S>.json --out .work/<S>/market/<S>_market.json
+python scripts/validate_market_quality.py .work/<S>/market/<S>_market.json --strict --format json --repair-targets .work/<S>/market/repair_targets.json
 ```
 
 findingがあれば指されたpath/ruleだけ最大2回修復する。出典追加・evidence再利用を優先し、本文削除で通さない。市場分析だけが失敗した場合は理由を記録して次へ進み、ランキング公開は止めない。
@@ -64,14 +56,16 @@ findingがあれば指されたpath/ruleだけ最大2回修復する。出典追
 ## 4. 公開・通知
 
 ```text
-python scripts/publish.py --in .work/<S>/ranking.json --docs docs --pages-url "$PAGES_URL"
-git add docs/index.html docs/data
-git commit -m "Update TSE day gainers <S>"
-git push origin HEAD:main
-python scripts/publish.py --in .work/<S>/ranking.json --docs docs --pages-url "$PAGES_URL" --notify
+python -m tse_ranking_monitor pipeline publish --session <S>
+python -m tse_ranking_monitor pipeline deploy --session <S>
+python -m tse_ranking_monitor pipeline notify --session <S> --pages-url "$PAGES_URL"
 ```
 
-`git push origin HEAD:main` がクラウドのbranch制限を含む理由で失敗した場合、その失敗だけでは停止・失敗通知せず、`git push origin HEAD` で現在の `claude/*` branchへ同じcommitをpushする。読み取り専用の `.github/workflows/validate-routine-publication.yml` が候補を検証し、main上の信頼済み `.github/workflows/promote-routine-publication.yml` が同じ候補を再検証する。現行mainの直系・単一commit、公開パス限定、manifest digest一致の場合だけmainへfast-forwardしてPages buildを要求する。`--notify` はローカルHEADがorigin/mainへ到達するまで最大5分、その後Pages上の当日artifact digest一致まで最大5分待つ。
+deployは公開物をcommitして `git push origin HEAD:main` を試し、拒否された場合は `git push origin HEAD` で現在の `claude/*` branchへ同じcommitをpushする。読み取り専用の `.github/workflows/validate-routine-publication.yml` が候補を検証し、main上の信頼済み `.github/workflows/promote-routine-publication.yml` が同じ候補を再検証する。候補をcheckoutせず、信頼済みworkflow SHAのコードでGit objectを読む。現行mainの直系・単一commit、公開パス限定、品質合格、信頼済みHTMLとの一致、manifest digest一致の場合だけmainへfast-forwardしてPages buildを要求する。`--notify` はローカルHEADがorigin/mainへ到達するまで最大5分、その後Pages上の当日artifact digest一致まで最大5分待つ。
+
+buildは元のbatch結果をstrict compileし直し、Stage1のdigestとfactorの完全一致、ERROR/WARNなしを必須にする。市場分析は作業場所で検査し、合格分だけdocsへコピーする。市場分析失敗は最終報告へ残す。
+
+通知は日付・公開内容・宛先集合で冪等化する。`pending` で止まった送信は、Gmailで履歴を確認して `python -m tse_ranking_monitor private resolve-delivery --key <key> --status sent|not-sent --reason "確認内容"` を実行するまで再送しない。送信済みは自動でスキップする。
 
 `.work/`、reports、認証情報をcommitしない。push前に通知しない。直接pushとfallbackの両方が未達、Pages digest不一致、Gmail認証不足またはAPI失敗の場合は未送信のまま非ゼロ終了する。直接push拒否後にfallbackが成功した場合は正常配信として扱う。
 
@@ -94,3 +88,7 @@ python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"
 `.delivered` は `publish.py --notify` の送信成功時にコードが書く。stage名は自由に付けてよいが、**完走の判定はこのセンチネルだけを根拠にする**。
 
 各stage境界の `stage start|end` は `routine-status` ブランチへ実行位置をpushする（best-effort）。これは基盤都合でセッションが強制終了され、フックすら走らない場合に外部watchdogが「どのstageで止まったか」を知る唯一の経路である。push失敗は警告のみで配信を止めない。
+
+## 7. 非公開記録の保存
+
+`TSE_PRIVATE_STATE_DIR` に永続的な非公開ボリュームを指定する。未設定なら `.work/private` に保存されるため、環境終了前に `python -m tse_ranking_monitor private export --destination <非公開の新規保存先>` で書き出し、実行環境の外へ退避する。次回は保存したディレクトリを復元してから通知する。送信台帳を失うと二重送信防止も失われる。根拠ZIPは180日保持を目安とし、`private retention` で期限切れ一覧を確認できる。削除には運用者の承認後に `--apply` を付ける。送信台帳は保持する。

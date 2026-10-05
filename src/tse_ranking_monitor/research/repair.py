@@ -63,7 +63,8 @@ MESSAGE_MAX_CHARS = 500
 # agent to reuse a conclusion verbatim (factor text, tag, confidence, sources,
 # market note) while bounding injected batch size; claims/checks/status are
 # re-derived by the agent on re-research.
-REPAIR_CARRY_FIELDS = ("code", "factor", "factor_kind", "confidence", "sources", "market_note")
+REPAIR_CARRY_FIELDS = ("code", "factor", "factor_kind", "confidence", "sources", "market_note",
+                       "status", "claims", "checks", "check_reasons")
 
 
 class RepairBudgetError(RuntimeError):

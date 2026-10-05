@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools==81.0.0", "wheel==0.47.0", "packaging==26.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tse-ranking-monitor"
+version = "0.2.0"
+description = "Daily TSE gainers research and publication pipeline"
+requires-python = ">=3.12"
+dependencies = ["requests>=2.31", "beautifulsoup4>=4.12", "lxml>=5.0", "jpholiday>=1.0"]
+
+[project.scripts]
+tse-ranking = "tse_ranking_monitor.__main__:main"
+
+[tool.setuptools]
+package-dir = {"" = "scripts", "tse_ranking_monitor" = "src/tse_ranking_monitor"}
+py-modules = ["jquants", "business_day", "kabutan_pts", "tdnet", "market_cap_jquants", "market_cap_yahoo", "merge_factors"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"tse_ranking_monitor.web" = ["*.html", "*.css", "*.js"]

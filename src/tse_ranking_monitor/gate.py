@@ -40,17 +40,13 @@ import time
 from datetime import date, datetime, time as wall_time, timedelta, timezone
 from pathlib import Path
 
-# 共有ベンダーは scripts/ 配置を維持する。パッケージを直接 import した場合も解決できるようにする。
-SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
 import business_day
 import jquants
 
 from tse_ranking_monitor.runtime import telemetry
 
 JST = timezone(timedelta(hours=9))
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path.cwd()
 DEFAULT_MANIFEST = ROOT / "docs" / "data" / "manifest.json"
 SESSION_CLOSE = wall_time(15, 30)
 

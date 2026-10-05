@@ -2,7 +2,4 @@
 # publish.py / gmail_sender.py / get_gmail_token.py は標準ライブラリのみ
 # （Gmail API は HTTPS=urllib で送る。クラウドは SMTP 不可のため app password は使わない）。
 # 営業日判定に jpholiday（任意。無くても土日のみ休場として動作）。
-requests>=2.31
-beautifulsoup4>=4.12
-lxml>=5.0
-jpholiday>=0.1
+-r requirements.lock

@@ -27,6 +27,8 @@ import json
 import os
 import sys
 import unicodedata
+from ..text import http_url
+from ..contracts import validate_market_numbers
 
 SCHEMA_VERSION = 1
 
@@ -84,7 +86,7 @@ def require(cond, msg):
 
 
 def check_url(u, ctx):
-    if not isinstance(u, str) or not (u.startswith("http://") or u.startswith("https://")):
+    if not http_url(u):
         die("URL は http(s) のみ許可（%s）: %r" % (ctx, u))
 
 
@@ -202,6 +204,12 @@ def validate_market(out):
     フラグメントの複数の型崩れを1回の修正で直せるようにする）。
     """
     errors = []
+    try:
+        validate_market_numbers(out)
+    except ValueError as exc:
+        errors.append(str(exc))
+    if not isinstance(out, dict):
+        die("market root must be an object")
 
     def bad(field, expected, got):
         errors.append("  - %s は %s であるべき（実際: %s）" % (field, expected, got))

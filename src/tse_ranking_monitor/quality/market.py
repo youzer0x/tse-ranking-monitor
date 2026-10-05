@@ -380,6 +380,7 @@ def check_warnings(doc):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="市場分析 JSON の出典品質検証（構造検証 validate_market も内包）")
     ap.add_argument("paths", nargs="+", help="docs/data/<date>_market.json（複数可）")
+    ap.add_argument("--strict", action="store_true", help="WARNも未解決なら非ゼロ終了")
     ap.add_argument("--format", choices=("human", "json"), default="human",
                     dest="output_format", help="出力形式（既定 human）")
     ap.add_argument("--repair-targets", nargs="?", const="-", default=None, metavar="PATH",
@@ -438,7 +439,7 @@ def main(argv=None):
             json.dump(payload, sys.stdout, ensure_ascii=False, indent=2)
             sys.stdout.write("\n")
 
-    if all_errors:
+    if all_errors or (args.strict and any(result["findings"] for result in file_results)):
         if args.output_format == "human" and not args.repair_targets:
             sys.stderr.write("[validate_market_quality] ERROR: %d件\n%s\n修正方針: %s\n"
                              % (len(all_errors), "\n".join("  - " + e for e in all_errors), FIX_HINT))

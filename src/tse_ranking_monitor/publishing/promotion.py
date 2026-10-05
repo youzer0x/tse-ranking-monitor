@@ -17,6 +17,7 @@ from datetime import date
 from pathlib import Path
 
 from . import publisher
+from .validation import require_ranking_quality, require_market_quality
 
 
 CLAUDE_BRANCH_RE = re.compile(r"^claude/[A-Za-z0-9._/-]+$")
@@ -270,7 +271,8 @@ def verify_candidate(repo_root, branch, head, base="origin/main"):
     ranking, ranking_bytes = _json_at(repo_root, head_sha, ranking_path)
     try:
         prepared = publisher.prepare_ranking(ranking)
-    except publisher.PublishError as exc:
+        require_ranking_quality(prepared)
+    except (publisher.PublishError, ValueError) as exc:
         raise PromotionError("candidate ranking is not publishable: %s" % exc) from exc
     if prepared.get("session_date") != session:
         raise PromotionError("candidate ranking session_date does not match commit message")
@@ -291,6 +293,21 @@ def verify_candidate(repo_root, branch, head, base="origin/main"):
             raise PromotionError("candidate market sidecar schema_version must be 1")
         if market.get("session_date") != session:
             raise PromotionError("candidate market sidecar session_date is incorrect")
+        try:
+            require_market_quality(market, session)
+        except ValueError as exc:
+            raise PromotionError(str(exc)) from exc
+
+    # The candidate may contain data, never a replacement browser program.
+    index = _git(repo_root, ["show", f"{head_sha}:{INDEX_PATH}"], binary=True)
+    if index != publisher.render.generate_pages_html().encode("utf-8"):
+        raise PromotionError("candidate index differs from the trusted renderer")
+    for path, change in changed.items():
+        if change == "D":
+            continue
+        mode = _git(repo_root, ["ls-tree", head_sha, "--", path]).split()[0]
+        if mode != "100644":
+            raise PromotionError(f"candidate artifact must be a regular file: {path}")
 
     return PromotionCandidate(
         branch=branch,

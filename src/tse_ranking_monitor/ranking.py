@@ -22,10 +22,6 @@ import sys, os, json, time, argparse, datetime
 from datetime import date, timedelta, timezone
 from pathlib import Path
 
-# 共有ベンダーは scripts/ 配置を維持する。パッケージを直接 import した場合も解決できるようにする。
-SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
 import jquants, kabutan_pts, tdnet, business_day, market_cap_jquants as mcap
 
 from .contracts import validate_ranking_document as _validate_ranking_contract
@@ -218,13 +214,19 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
             dropped_turnover.append({"code": c4, "name": name, "pct": round(pct, 2), "pct5": pct5,
                                      "turnover_m": (round(va / 1e6, 1) if va else 0.0)})
             continue
-        mc, _shoutfy, _period_end, _corr, source = mcap.compute_one(api_key, c4, prices, session_d)
+        valuation = mcap.compute_one_detailed(api_key, c4, prices, session_d)
+        mc, source = valuation.value_oku, valuation.source
         time.sleep(0.1)
-        if mc is None or mc < min_mcap:
+        if mc is None:
+            raise ValueError(f"market cap unavailable for {c4}; ranking publication is stopped")
+        if mc < min_mcap:
             dropped_mcap.append({"code": c4, "name": name, "pct": round(pct, 2), "pct5": pct5,
                                  "turnover_m": round(va / 1e6, 1),
                                  "mcap_oku": (round(mc) if mc is not None else None),
-                                 "mcap_source": source})
+                                 "mcap_oku_exact": mc, "mcap_source": source,
+                                 "mcap_status": valuation.status,
+                                 "mcap_date": valuation.valuation_date.isoformat() if valuation.valuation_date else None,
+                                 "reason": "below_floor"})
             continue
         qualifying.append(dict(
             code=c4, name=name, market=m.get("MktNm"),
@@ -232,6 +234,8 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
             sec33=m.get("S33"), sec33_name=m.get("S33Nm"),
             scale_cat=m.get("ScaleCat"),
             mcap_oku=round(mc), mcap_oku_exact=mc, mcap_source=source,
+            mcap_status=valuation.status,
+            mcap_date=valuation.valuation_date.isoformat() if valuation.valuation_date else None,
             pct=round(pct, 2), pct5=pct5, close=b.get("C"), adj_close=b.get("AdjC"),
             prev_adj_close=(bars_prev.get(c5) or {}).get("AdjC"),
             turnover_yen=round(va), turnover_m=round(va / 1e6, 1),
@@ -293,7 +297,7 @@ def build(session_iso, prev_iso, min_pct=5.0, min_turnover=10_000_000, min_mcap=
         "dropped_turnover": sorted(dropped_turnover, key=lambda x: -x["pct"]),
         "dropped_mcap": sorted(dropped_mcap, key=lambda x: -x["pct"]),
     }
-    return validate_ranking_document(result)
+    return _validate_ranking_contract(result, require_stage1_counts=True, require_numeric_fields=True)
 
 
 def main():

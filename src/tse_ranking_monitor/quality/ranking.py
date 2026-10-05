@@ -478,6 +478,7 @@ def main(argv=None):
     ap.add_argument("paths", nargs="+", help="docs/data/<date>.json（複数可）")
     ap.add_argument("--evidence", default=None,
                     help="private evidence.v1。指定時のみ not_found 5パスを厳格検査")
+    ap.add_argument("--strict", action="store_true", help="WARNも未解決なら非ゼロ終了")
     ap.add_argument("--format", choices=("human", "json"), default="human",
                     dest="output_format", help="出力形式（既定 human）")
     ap.add_argument("--repair-targets", nargs="?", const="-", default=None, metavar="PATH",
@@ -506,7 +507,15 @@ def main(argv=None):
             all_errors.append("%s: %s" % (name, vmq._human_finding(item)))
             file_results.append({"file": p, "findings": [item]})
             continue
-        errors = ([evidence_error] if evidence_error else audit_ranking(doc, evidence=evidence))
+        errors = []
+        if args.strict:
+            from ..contracts import validate_ranking_document
+            try:
+                validate_ranking_document(doc, require_factors=True, require_numeric_fields=True)
+            except ValueError as exc:
+                errors.append(vmq.finding("$", "RANK_CONTRACT", "ERROR", str(exc)))
+        if not errors:
+            errors = ([evidence_error] if evidence_error else audit_ranking(doc, evidence=evidence))
         warnings = audit_ranking_warnings(doc) if (
             not errors or args.output_format == "json" or args.repair_targets) else []
         file_results.append({"file": p, "findings": errors + warnings})
@@ -547,7 +556,7 @@ def main(argv=None):
         json.dump(payload, sys.stdout, ensure_ascii=False, indent=2)
         sys.stdout.write("\n")
 
-    if all_errors:
+    if all_errors or (args.strict and any(result["findings"] for result in file_results)):
         if args.output_format == "human" and not args.repair_targets:
             sys.stderr.write("[validate_ranking_quality] ERROR: %d件\n%s\n修正方針: %s\n"
                              % (len(all_errors), "\n".join("  - " + e for e in all_errors), FIX_HINT))

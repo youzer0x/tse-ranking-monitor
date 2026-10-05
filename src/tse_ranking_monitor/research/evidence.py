@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import json
 import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
+from ..text import http_url
 
 from .plan import (
     BATCH_SCHEMA_VERSION,
@@ -16,6 +17,7 @@ from .plan import (
     PLAN_SCHEMA_VERSION,
     RESULT_SCHEMA_VERSION,
     _atomic_write_json,
+    _canonical_digest,
 )
 from .repair import trim_carry_item
 
@@ -27,6 +29,7 @@ VALID_CONFIDENCE = {"high", "medium", "low"}
 VALID_CHECK_STATES = {"done", "na", "unavailable"}
 VALID_SOURCE_TYPES = {"tdnet", "company_ir", "edinet", "article"}
 VALID_SOURCE_WINDOWS = {"material", "prior"}
+JST = timezone(timedelta(hours=9))
 
 
 class ResearchValidationError(ValueError):
@@ -44,19 +47,18 @@ def _required_text(value: Any, label: str) -> str:
 
 
 def _valid_http_url(value: Any) -> bool:
-    if not isinstance(value, str):
-        return False
-    parsed = urlparse(value.strip())
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    return http_url(value)
 
 
 def _validate_published_at(value: Any, label: str) -> str:
     raw = _required_text(value, label)
     try:
-        datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
     except ValueError as exc:
         raise ValueError(f"{label} must be ISO-8601") from exc
-    return raw
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise ValueError(f"{label} must include a timezone")
+    return parsed.astimezone(JST).isoformat(timespec="seconds")
 
 
 def _safe_child(root: Path, relative: Any, label: str) -> Path:
@@ -82,7 +84,7 @@ def _read_json(path: Path, label: str) -> Any:
         raise ValueError(f"cannot read {label}: {path}: {exc}") from exc
 
 
-def _validate_source(source: Any, label: str) -> dict[str, Any]:
+def _validate_source(source: Any, label: str, window_bounds) -> dict[str, Any]:
     if not isinstance(source, dict):
         raise ValueError(f"{label} must be an object")
     source_id = _required_text(source.get("id"), f"{label}.id")
@@ -99,15 +101,21 @@ def _validate_source(source: Any, label: str) -> dict[str, Any]:
     url = _required_text(source.get("url"), f"{label}.url")
     if not _valid_http_url(url):
         raise ValueError(f"{label}.url must be http(s)")
+    published_at = _validate_published_at(source.get("published_at"), f"{label}.published_at")
+    published = datetime.fromisoformat(published_at)
+    start, end = window_bounds
+    if published >= end:
+        raise ValueError(f"{label}.published_at is at/after the session close")
+    actual_window = "material" if published >= start else "prior"
+    if window != actual_window:
+        raise ValueError(f"{label}.window disagrees with published_at (expected {actual_window})")
     return {
         "id": source_id,
         "label": _required_text(source.get("label"), f"{label}.label"),
         "url": url,
         "source_type": source_type,
-        "published_at": _validate_published_at(
-            source.get("published_at"), f"{label}.published_at"
-        ),
-        "window": window,
+        "published_at": published_at,
+        "window": actual_window,
     }
 
 
@@ -132,7 +140,7 @@ def _validate_claim(claim: Any, label: str, source_ids: set[str]) -> dict[str, A
 
 
 def _validate_result_item(
-    raw: Any, input_item: dict[str, Any], label: str
+    raw: Any, input_item: dict[str, Any], label: str, window_bounds
 ) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise ValueError(f"{label} must be an object")
@@ -156,7 +164,7 @@ def _validate_result_item(
     if not isinstance(raw_sources, list):
         raise ValueError(f"{label}.sources must be an array")
     sources = [
-        _validate_source(source, f"{label}.sources[{index}]")
+        _validate_source(source, f"{label}.sources[{index}]", window_bounds)
         for index, source in enumerate(raw_sources)
     ]
     source_ids = [source["id"] for source in sources]
@@ -189,6 +197,9 @@ def _validate_result_item(
     if set(checks) != set(CHECK_NAMES):
         raise ValueError(f"{label}.checks must contain exactly {list(CHECK_NAMES)}")
     normalized_checks = {}
+    reasons = raw.get("check_reasons", {})
+    if not isinstance(reasons, dict):
+        raise ValueError(f"{label}.check_reasons must be an object")
     for name in CHECK_NAMES:
         value = checks[name]
         if value not in VALID_CHECK_STATES:
@@ -196,6 +207,16 @@ def _validate_result_item(
                 f"{label}.checks.{name} must be one of {sorted(VALID_CHECK_STATES)}"
             )
         normalized_checks[name] = value
+        if value != "done":
+            _required_text(reasons.get(name), f"{label}.check_reasons.{name}")
+        if value == "na":
+            permitted = (
+                (name == "web_search" and status == "complete" and factor_kind == "開示")
+                or (name == "sector_cluster" and not input_item.get("cluster_id"))
+                or (name == "edinet" and not input_item.get("requires_edinet"))
+            )
+            if not permitted:
+                raise ValueError(f"{label}.checks.{name}=na is not applicable (requires_edinet={bool(input_item.get('requires_edinet'))})")
     # requires_edinet items (M&A risk) may not skip the EDINET pass: "done"
     # proves the check ran, "unavailable" records honest inaccessibility.
     if input_item.get("requires_edinet") and normalized_checks["edinet"] == "na":
@@ -215,6 +236,8 @@ def _validate_result_item(
         "claims": claims,
         "sources": sources,
         "checks": normalized_checks,
+        "check_reasons": {name: reasons[name].strip() for name, value in normalized_checks.items()
+                          if value != "done"},
         "market_note": _required_text(raw.get("market_note"), f"{label}.market_note"),
         "route": input_item.get("route"),
         "risk": input_item.get("risk"),
@@ -264,6 +287,17 @@ def compile_research_results(
     if structural_errors:
         raise ResearchValidationError(structural_errors)
 
+    try:
+        window = manifest["window"]
+        start = datetime.fromisoformat(_validate_published_at(window["start"], "window.start"))
+        end = datetime.fromisoformat(_validate_published_at(window["end_exclusive"], "window.end_exclusive"))
+        expected_start = f"{manifest['prev_date']}T15:30:00+09:00"
+        expected_end = f"{manifest['session_date']}T15:30:00+09:00"
+        if start >= end or start.isoformat() != expected_start or end.isoformat() != expected_end:
+            raise ValueError("manifest window must match previous/session close")
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ResearchValidationError([f"invalid material window: {exc}"]) from exc
+
     errors: list[str] = []
     compiled_by_code: dict[str, dict[str, Any]] = {}
     seen_batch_ids: set[str] = set()
@@ -295,6 +329,10 @@ def compile_research_results(
             digest = _required_text(entry.get("input_digest"), f"{batch_label}.input_digest")
             if batch.get("input_digest") != digest:
                 raise ValueError(f"input batch {batch_id} digest differs from manifest")
+            if _canonical_digest({key: value for key, value in batch.items() if key != "input_digest"}) != digest:
+                raise ValueError(f"input batch {batch_id} content digest mismatch")
+            if batch.get("window") != window or batch.get("session_date") != manifest.get("session_date"):
+                raise ValueError(f"input batch {batch_id} window/session mismatch")
             input_items = batch.get("items")
             if not isinstance(input_items, list):
                 raise ValueError(f"input batch {batch_id}.items must be an array")
@@ -354,7 +392,7 @@ def compile_research_results(
                 continue
             try:
                 validated = _validate_result_item(
-                    raw, input_item, f"result {batch_id}.{code}"
+                    raw, input_item, f"result {batch_id}.{code}", (start, end)
                 )
             except ValueError as exc:
                 errors.append(str(exc))
@@ -396,7 +434,10 @@ def compile_research_results(
     evidence = {
         "schema_version": EVIDENCE_SCHEMA_VERSION,
         "session_date": manifest.get("session_date"),
+        "prev_date": manifest.get("prev_date"),
+        "window": window,
         "input_digest": manifest.get("input_digest"),
+        "ranking_digest": manifest.get("ranking_digest"),
         "complete": complete,
         "items": ordered_items,
         "missing_codes": missing_codes,

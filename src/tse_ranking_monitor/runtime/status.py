@@ -213,7 +213,9 @@ def publish_status(root, status, *, remote="origin", branch=STATUS_BRANCH, attem
 
     Raises :class:`StatusError`; callers downgrade it to a warning.
     """
-    repo_root = Path(root)
+    repo_root = Path(root).resolve()
+    if not (repo_root / ".git").exists():
+        raise StatusError("status root must be a Git worktree root; refusing parent repository discovery")
     session = status.get("session")
     if not session:
         raise StatusError("status document has no session")
