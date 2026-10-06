@@ -1,0 +1,837 @@
+{
+  "schema_version": 1,
+  "kind": "market_analysis",
+  "session_date": "2026-10-06",
+  "prev_date": "2026-10-05",
+  "generated_at": "2026-10-06 18:11 JST",
+  "title": "東京株式市場 セクター/テーマ 騰落率分析",
+  "universe": {
+    "description": "東証プライム/スタンダード/グロースの内国普通株のうち当日売買代金1億円以上",
+    "min_turnover_yen": 100000000,
+    "n_liquid": 1540
+  },
+  "market": {
+    "topix_pct": 0.92,
+    "breadth": {
+      "up": 1096,
+      "down": 397,
+      "flat": 47
+    },
+    "top_sector_by_turnover": {
+      "name": "電気機器",
+      "turnover_oku": 30453.4
+    },
+    "top_stock_by_turnover": {
+      "code": "6857",
+      "name": "アドバンテスト",
+      "turnover_oku": 6748.5
+    }
+  },
+  "thesis": [
+    "東京株式市場は値上がりが値下がりを大きく上回る全面高の一日となり、TOPIXは+0.92%で終えた。",
+    "大手企業の個人情報漏えい公表が相次いだことを受けたサイバーセキュリティ関連株の急伸と、AIサーバー向け電子部品・半導体関連株への物色継続が相場を支えたとみられる。"
+  ],
+  "overview": {
+    "snapshot": [
+      {
+        "label": "TOPIX（終値ベース）",
+        "value": "+0.92% 4,183.56"
+      },
+      {
+        "label": "値上がり / 値下がり / 変わらず",
+        "value": "1,096 / 397 / 47"
+      },
+      {
+        "label": "最大売買代金セクター",
+        "value": "電気機器 約3.0兆円"
+      },
+      {
+        "label": "最大売買代金銘柄",
+        "value": "アドバンテスト 6,748億円"
+      }
+    ],
+    "points": [
+      "値上がり1,096・値下がり397・変わらず47（売買代金1億円以上の対象1,540銘柄）と、33業種中30業種が値上がりする全面高の地合いとなった。マイナスだったのは不動産業・建設業・空運業の3業種のみ。",
+      "ガラス･土石製品は加重平均+4.06%と全33業種で最大の上昇率となったが、中央値は+1.28%に留まり、売買代金シェア39.2%を占める日東紡績(3110)の+8.33%を除くと加重+1.31%に縮小するなど、同社主導の上昇だった。非鉄金属も加重+3.83%（中央値+1.48%）とフジクラ(5803)の+5.19%（シェア42.1%）が押し上げたが、除外後も加重+2.84%と相対的に裾野の広い上昇だった。",
+      "下落で目立ったのは不動産業で、加重平均-0.64%と全33業種中最下位。値上がり30・値下がり17で中央値は+0.29%と底堅かったものの、霞ヶ関キャピタル(3498)の-4.45%（シェア10.5%）とランド(8918)の-9.09%（シェア3.8%）の下落が加重平均を押し下げた。"
+    ],
+    "flow": [
+      "10/5以降、大和証券（個人情報22万件）や物語コーポレーション（会員情報1078万件超）、ムラウチドットコム（771万件超）など大手企業の不正アクセス・個人情報漏えいが相次いで公表された。10/1施行の能動的サイバー防御関連法を背景にセキュリティ投資への関心が高まっていたところへこれらの事案が重なり、サイバーセキュリティ関連の中小型株へ買いが広がり複数銘柄がストップ高気配となった（詳細は後述のテーマ別解説を参照）。",
+      "AIサーバー向け電子部品・半導体関連株への物色も継続し、電気機器セクターは売買代金で全業種トップ（約3.0兆円）となった。太陽誘電(6976)は前日に心理的な節目の1万円を上抜けショートカバーも入ったとされ続伸、日東紡績(3110)はAIサーバー向け基板材料の台湾PCB展示会出展を発表するなど、AI需要拡大を見据えたテーマ性が相場の支えとなった。"
+    ],
+    "flow_conclusion": "情報漏えい多発を受けたサイバーセキュリティ関連株の物色と、AI・半導体関連株への継続的な資金流入という2つのテーマ性が相場全体を押し上げた一因とみられる一方、不動産業など一部セクターは個別銘柄の急落が重荷となり、業種間で明暗が分かれた一日と言える。"
+  },
+  "sectors33": [
+    {
+      "name": "ガラス･土石製品",
+      "n": 24,
+      "up": 21,
+      "down": 2,
+      "flat": 1,
+      "w_pct": 4.06,
+      "mean_pct": 1.66,
+      "median_pct": 1.28,
+      "turnover_oku": 915.2,
+      "drivers": [
+        {
+          "code": "3110",
+          "name": "日東紡績",
+          "pct": 8.33
+        }
+      ]
+    },
+    {
+      "name": "非鉄金属",
+      "n": 19,
+      "up": 16,
+      "down": 3,
+      "flat": 0,
+      "w_pct": 3.83,
+      "mean_pct": 1.56,
+      "median_pct": 1.48,
+      "turnover_oku": 5844.9,
+      "drivers": [
+        {
+          "code": "5803",
+          "name": "フジクラ",
+          "pct": 5.19
+        }
+      ]
+    },
+    {
+      "name": "金属製品",
+      "n": 25,
+      "up": 19,
+      "down": 5,
+      "flat": 1,
+      "w_pct": 2.59,
+      "mean_pct": 1.15,
+      "median_pct": 0.74,
+      "turnover_oku": 527.5,
+      "drivers": [
+        {
+          "code": "3436",
+          "name": "SUMCO",
+          "pct": 2.11
+        },
+        {
+          "code": "5991",
+          "name": "日本発條",
+          "pct": 6.5
+        }
+      ]
+    },
+    {
+      "name": "医薬品",
+      "n": 42,
+      "up": 34,
+      "down": 7,
+      "flat": 1,
+      "w_pct": 2.23,
+      "mean_pct": 1.87,
+      "median_pct": 1.05,
+      "turnover_oku": 1532.1,
+      "drivers": [
+        {
+          "code": "4588",
+          "name": "オンコリスバイオファーマ",
+          "pct": 5.24
+        },
+        {
+          "code": "4507",
+          "name": "塩野義製薬",
+          "pct": 3.83
+        }
+      ]
+    },
+    {
+      "name": "銀行業",
+      "n": 72,
+      "up": 71,
+      "down": 1,
+      "flat": 0,
+      "w_pct": 2.06,
+      "mean_pct": 2.53,
+      "median_pct": 2.54,
+      "turnover_oku": 4546.3,
+      "drivers": [
+        {
+          "code": "8306",
+          "name": "三菱UFJフィナンシャル・グループ",
+          "pct": 1.55
+        },
+        {
+          "code": "8411",
+          "name": "みずほフィナンシャルグループ",
+          "pct": 2.18
+        }
+      ]
+    },
+    {
+      "name": "鉄鋼",
+      "n": 19,
+      "up": 19,
+      "down": 0,
+      "flat": 0,
+      "w_pct": 1.9,
+      "mean_pct": 1.72,
+      "median_pct": 1.56,
+      "turnover_oku": 374.6,
+      "drivers": [
+        {
+          "code": "5401",
+          "name": "日本製鉄",
+          "pct": 1.8
+        },
+        {
+          "code": "5471",
+          "name": "大同特殊鋼",
+          "pct": 4.0
+        }
+      ]
+    },
+    {
+      "name": "保険業",
+      "n": 10,
+      "up": 9,
+      "down": 1,
+      "flat": 0,
+      "w_pct": 1.89,
+      "mean_pct": 1.33,
+      "median_pct": 1.33,
+      "turnover_oku": 1265.5,
+      "drivers": [
+        {
+          "code": "8766",
+          "name": "東京海上ホールディングス",
+          "pct": 2.51
+        }
+      ]
+    },
+    {
+      "name": "電気機器",
+      "n": 144,
+      "up": 102,
+      "down": 37,
+      "flat": 5,
+      "w_pct": 1.61,
+      "mean_pct": 0.93,
+      "median_pct": 0.8,
+      "turnover_oku": 30453.4,
+      "drivers": [
+        {
+          "code": "6857",
+          "name": "アドバンテスト",
+          "pct": 3.85
+        },
+        {
+          "code": "6976",
+          "name": "太陽誘電",
+          "pct": 6.15
+        }
+      ]
+    },
+    {
+      "name": "精密機器",
+      "n": 33,
+      "up": 25,
+      "down": 8,
+      "flat": 0,
+      "w_pct": 1.5,
+      "mean_pct": 0.87,
+      "median_pct": 1.38,
+      "turnover_oku": 1084.7,
+      "drivers": [
+        {
+          "code": "7741",
+          "name": "HOYA",
+          "pct": 3.27
+        }
+      ]
+    },
+    {
+      "name": "サービス業",
+      "n": 112,
+      "up": 76,
+      "down": 32,
+      "flat": 4,
+      "w_pct": 1.49,
+      "mean_pct": 1.29,
+      "median_pct": 0.66,
+      "turnover_oku": 1828.0,
+      "drivers": [
+        {
+          "code": "6098",
+          "name": "リクルートホールディングス",
+          "pct": 2.04
+        }
+      ]
+    },
+    {
+      "name": "その他製品",
+      "n": 35,
+      "up": 28,
+      "down": 7,
+      "flat": 0,
+      "w_pct": 1.44,
+      "mean_pct": 0.39,
+      "median_pct": 0.93,
+      "turnover_oku": 1245.1,
+      "drivers": [
+        {
+          "code": "7936",
+          "name": "アシックス",
+          "pct": 3.74
+        }
+      ]
+    },
+    {
+      "name": "情報･通信業",
+      "n": 184,
+      "up": 126,
+      "down": 54,
+      "flat": 4,
+      "w_pct": 1.18,
+      "mean_pct": 2.11,
+      "median_pct": 0.74,
+      "turnover_oku": 6626.1,
+      "drivers": [
+        {
+          "code": "4493",
+          "name": "サイバーセキュリティクラウド",
+          "pct": 23.61
+        }
+      ]
+    },
+    {
+      "name": "繊維製品",
+      "n": 14,
+      "up": 12,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 1.11,
+      "mean_pct": 1.07,
+      "median_pct": 0.98,
+      "turnover_oku": 121.6,
+      "drivers": [
+        {
+          "code": "3402",
+          "name": "東レ",
+          "pct": 0.84
+        },
+        {
+          "code": "3569",
+          "name": "セーレン",
+          "pct": 4.2
+        }
+      ]
+    },
+    {
+      "name": "証券･商品先物取引業",
+      "n": 22,
+      "up": 20,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 1.06,
+      "mean_pct": 0.57,
+      "median_pct": 0.91,
+      "turnover_oku": 346.9,
+      "drivers": [
+        {
+          "code": "8473",
+          "name": "SBIホールディングス",
+          "pct": 1.95
+        },
+        {
+          "code": "8601",
+          "name": "大和証券グループ本社",
+          "pct": 0.97
+        }
+      ]
+    },
+    {
+      "name": "機械",
+      "n": 109,
+      "up": 71,
+      "down": 34,
+      "flat": 4,
+      "w_pct": 1.04,
+      "mean_pct": 0.63,
+      "median_pct": 0.48,
+      "turnover_oku": 4687.8,
+      "drivers": [
+        {
+          "code": "6146",
+          "name": "ディスコ",
+          "pct": 2.78
+        }
+      ]
+    },
+    {
+      "name": "海運業",
+      "n": 7,
+      "up": 6,
+      "down": 0,
+      "flat": 1,
+      "w_pct": 1.02,
+      "mean_pct": 1.19,
+      "median_pct": 0.83,
+      "turnover_oku": 348.2,
+      "drivers": [
+        {
+          "code": "9104",
+          "name": "商船三井",
+          "pct": 1.38
+        },
+        {
+          "code": "9101",
+          "name": "日本郵船",
+          "pct": 0.83
+        }
+      ]
+    },
+    {
+      "name": "輸送用機器",
+      "n": 48,
+      "up": 39,
+      "down": 7,
+      "flat": 2,
+      "w_pct": 1.01,
+      "mean_pct": 1.0,
+      "median_pct": 0.81,
+      "turnover_oku": 2011.2,
+      "drivers": [
+        {
+          "code": "7203",
+          "name": "トヨタ自動車",
+          "pct": 1.28
+        }
+      ]
+    },
+    {
+      "name": "石油･石炭製品",
+      "n": 5,
+      "up": 5,
+      "down": 0,
+      "flat": 0,
+      "w_pct": 0.94,
+      "mean_pct": 1.14,
+      "median_pct": 0.58,
+      "turnover_oku": 225.8,
+      "drivers": [
+        {
+          "code": "5020",
+          "name": "ENEOSホールディングス",
+          "pct": 1.32
+        }
+      ]
+    },
+    {
+      "name": "鉱業",
+      "n": 5,
+      "up": 4,
+      "down": 1,
+      "flat": 0,
+      "w_pct": 0.9,
+      "mean_pct": 0.56,
+      "median_pct": 0.29,
+      "turnover_oku": 201.1,
+      "drivers": [
+        {
+          "code": "1605",
+          "name": "INPEX",
+          "pct": 1.01
+        }
+      ]
+    },
+    {
+      "name": "化学",
+      "n": 104,
+      "up": 86,
+      "down": 17,
+      "flat": 1,
+      "w_pct": 0.83,
+      "mean_pct": 0.95,
+      "median_pct": 0.83,
+      "turnover_oku": 3021.6,
+      "drivers": [
+        {
+          "code": "4063",
+          "name": "信越化学工業",
+          "pct": 1.66
+        },
+        {
+          "code": "4980",
+          "name": "デクセリアルズ",
+          "pct": 4.75
+        }
+      ]
+    },
+    {
+      "name": "パルプ・紙",
+      "n": 8,
+      "up": 6,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 0.65,
+      "mean_pct": 0.59,
+      "median_pct": 0.18,
+      "turnover_oku": 68.3,
+      "drivers": [
+        {
+          "code": "3891",
+          "name": "ニッポン高度紙工業",
+          "pct": 3.34
+        }
+      ]
+    },
+    {
+      "name": "卸売業",
+      "n": 96,
+      "up": 74,
+      "down": 19,
+      "flat": 3,
+      "w_pct": 0.61,
+      "mean_pct": 0.53,
+      "median_pct": 0.46,
+      "turnover_oku": 1838.5,
+      "drivers": [
+        {
+          "code": "8136",
+          "name": "サンリオ",
+          "pct": 1.95
+        }
+      ]
+    },
+    {
+      "name": "ゴム製品",
+      "n": 9,
+      "up": 7,
+      "down": 2,
+      "flat": 0,
+      "w_pct": 0.57,
+      "mean_pct": 0.97,
+      "median_pct": 0.7,
+      "turnover_oku": 252.4,
+      "drivers": [
+        {
+          "code": "5101",
+          "name": "横浜ゴム",
+          "pct": 1.1
+        }
+      ]
+    },
+    {
+      "name": "小売業",
+      "n": 133,
+      "up": 63,
+      "down": 58,
+      "flat": 12,
+      "w_pct": 0.45,
+      "mean_pct": 0.13,
+      "median_pct": 0.0,
+      "turnover_oku": 2778.0,
+      "drivers": [
+        {
+          "code": "9983",
+          "name": "ファーストリテイリング",
+          "pct": 1.2
+        }
+      ]
+    },
+    {
+      "name": "陸運業",
+      "n": 34,
+      "up": 25,
+      "down": 9,
+      "flat": 0,
+      "w_pct": 0.25,
+      "mean_pct": 0.46,
+      "median_pct": 0.46,
+      "turnover_oku": 660.6,
+      "drivers": [
+        {
+          "code": "9072",
+          "name": "ニッコンホールディングス",
+          "pct": 3.78
+        },
+        {
+          "code": "9042",
+          "name": "阪急阪神ホールディングス",
+          "pct": 0.58
+        }
+      ]
+    },
+    {
+      "name": "倉庫･運輸関連業",
+      "n": 8,
+      "up": 5,
+      "down": 3,
+      "flat": 0,
+      "w_pct": 0.21,
+      "mean_pct": 0.11,
+      "median_pct": 0.19,
+      "turnover_oku": 46.0,
+      "drivers": [
+        {
+          "code": "9301",
+          "name": "三菱倉庫",
+          "pct": 0.24
+        },
+        {
+          "code": "9364",
+          "name": "上組",
+          "pct": 0.15
+        }
+      ]
+    },
+    {
+      "name": "電気･ガス業",
+      "n": 23,
+      "up": 19,
+      "down": 4,
+      "flat": 0,
+      "w_pct": 0.16,
+      "mean_pct": 0.71,
+      "median_pct": 0.79,
+      "turnover_oku": 720.4,
+      "drivers": [
+        {
+          "code": "642A",
+          "name": "キューデンホールディングス",
+          "pct": 1.03
+        },
+        {
+          "code": "603A",
+          "name": "アイ・グリッド・ソリューションズ",
+          "pct": 4.04
+        }
+      ]
+    },
+    {
+      "name": "その他金融業",
+      "n": 24,
+      "up": 19,
+      "down": 5,
+      "flat": 0,
+      "w_pct": 0.14,
+      "mean_pct": 0.78,
+      "median_pct": 0.57,
+      "turnover_oku": 448.1,
+      "drivers": [
+        {
+          "code": "8697",
+          "name": "日本取引所グループ",
+          "pct": 0.87
+        },
+        {
+          "code": "8591",
+          "name": "オリックス",
+          "pct": 0.34
+        }
+      ]
+    },
+    {
+      "name": "水産・農林業",
+      "n": 5,
+      "up": 3,
+      "down": 1,
+      "flat": 1,
+      "w_pct": 0.06,
+      "mean_pct": 0.1,
+      "median_pct": 0.04,
+      "turnover_oku": 29.3,
+      "drivers": [
+        {
+          "code": "1332",
+          "name": "ニッスイ",
+          "pct": 0.23
+        }
+      ]
+    },
+    {
+      "name": "食料品",
+      "n": 51,
+      "up": 29,
+      "down": 19,
+      "flat": 3,
+      "w_pct": 0.03,
+      "mean_pct": 0.15,
+      "median_pct": 0.13,
+      "turnover_oku": 1071.7,
+      "drivers": [
+        {
+          "code": "2802",
+          "name": "味の素",
+          "pct": 0.96
+        }
+      ]
+    },
+    {
+      "name": "空運業",
+      "n": 2,
+      "up": 0,
+      "down": 2,
+      "flat": 0,
+      "w_pct": -0.26,
+      "mean_pct": -0.29,
+      "median_pct": -0.29,
+      "turnover_oku": 127.5,
+      "drivers": [
+        {
+          "code": "9202",
+          "name": "ANAホールディングス",
+          "pct": -0.44
+        }
+      ]
+    },
+    {
+      "name": "建設業",
+      "n": 66,
+      "up": 27,
+      "down": 36,
+      "flat": 3,
+      "w_pct": -0.32,
+      "mean_pct": -0.2,
+      "median_pct": -0.11,
+      "turnover_oku": 1160.6,
+      "drivers": [
+        {
+          "code": "1801",
+          "name": "大成建設",
+          "pct": -1.36
+        },
+        {
+          "code": "1803",
+          "name": "清水建設",
+          "pct": -1.16
+        }
+      ]
+    },
+    {
+      "name": "不動産業",
+      "n": 48,
+      "up": 30,
+      "down": 17,
+      "flat": 1,
+      "w_pct": -0.64,
+      "mean_pct": -0.16,
+      "median_pct": 0.29,
+      "turnover_oku": 847.9,
+      "drivers": [
+        {
+          "code": "3498",
+          "name": "霞ヶ関キャピタル",
+          "pct": -4.45
+        },
+        {
+          "code": "8918",
+          "name": "ランド",
+          "pct": -9.09
+        }
+      ]
+    }
+  ],
+  "theme_matrix": {
+    "character": "値上がりは、大手企業の情報漏えい公表を受けたサイバーセキュリティ関連株の急伸を中心に、AI・半導体関連の電子部品株、個別の好決算・事業提携に関する開示が重なった。",
+    "rows": [
+      {
+        "side": "buy",
+        "theme": "サイバーセキュリティ関連株の物色（能動的サイバー防御法10/1施行、大手の情報漏えい相次ぐ）",
+        "stocks": "サイバーセキュリティクラウド(4493)・カウリス(153A)・ZenmuTech(338A)・サイバーソリューションズ(436A)・セグエグループ(3968)・グローバルセキュリティエキスパート(4417)・サイバートラスト(4498)・FFRIセキュリティ(3692)等",
+        "background": "10/1に能動的サイバー防御関連法が施行され関心が高まる中、10/5-6に大和証券（個人情報22万件）・物語コーポレーション（会員情報1078万件超）・ムラウチドットコム（771万件超）の不正アクセス・個人情報漏えいが相次いで公表され、サイバーセキュリティ関連の中小型株へ買いが集中し複数銘柄がストップ高気配まで急伸した（[株探](https://s.kabutan.jp/news/n202610060344/)、[Security NEXT](https://www.security-next.com/191068)）。サイバーソリューションズは自社の「AIでメールセキュリティ強化キャンペーン」発表も重なりIPO以来の高値を更新した（[トレーダーズ・ウェブ](https://finance.yahoo.co.jp/news/detail/17fb81977910b082134ff2c9634675b621a85b1e)）。"
+      },
+      {
+        "side": "buy",
+        "theme": "AI・半導体関連の電子部品株への物色継続",
+        "stocks": "太陽誘電(6976)・メイコー(6787)・日東紡績(3110)・santec Holdings(6777)・精工技研(6834)・アライドテレシスホールディングス(6835)等",
+        "background": "電気機器セクターは売買代金で全業種トップとなり、太陽誘電は前日に心理的な節目の1万円を上抜けショートカバーも入ったとされ続伸（[株探](https://s.kabutan.jp/news/n202610060086/)）。日東紡績はAIサーバー向け半導体パッケージ基板用の特殊ガラスクロス大手で、台湾PCB展示会「TPCA Show TAIPEI 2026」への出展を発表した（[日東紡ニュースリリース](https://www.nittobo.co.jp/news/pdf/20261006_newsrelease.pdf)）。NTTの「IOWN」構想を見据えた光関連のsantec・精工技研にも資金が向かった（[日経](https://www.nikkei.com/article/DGXZQOUC2126E0R20C26A6000000/)）。"
+      },
+      {
+        "side": "buy",
+        "theme": "個別の好決算・事業提携等に基づく上昇",
+        "stocks": "ヘリオス(4593)・サンバイオ(4592)・KeePer技研(6036)・共和コーポレーション(6570)・新日本科学(2395)・ヘッドウォータース(4011)・GMOグローバルサイン・ホールディングス(3788)・AIメカテック(6227)・HENNGE(4475)",
+        "background": "ヘリオスはアルフレッサの韓国子会社JENECELLへ培養上清製品の初回発注分を出荷・売上計上したと開示（[TDnet](https://www.release.tdnet.info/inbs/140120261005545901.pdf)）。サンバイオは再生医療等製品「アクーゴ脳内移植用注」の市販後第1例となる投与実施が伝わった（[株探](https://kabutan.jp/news/marketnews/?b=n202610060275)）。KeePer技研は9月の月次売上が前年同月比12.6%増と開示（[TDnet](https://www.release.tdnet.info/inbs/140120261005546082.pdf)）。ヘッドウォータースはソフトバンクのAIエージェント基盤「AGENTIC STAR」統合パートナーへの参画・MOU締結を発表した（[同社IR](https://www.headwaters.co.jp/news/SoftBank_AGENTIC_STAR_Integration_Partner_Alliance.html)）。"
+      },
+      {
+        "side": "buy",
+        "theme": "HDD需要拡大・上場来高値更新銘柄への継続テーマ",
+        "stocks": "日本発條(5991)・サンコール(5985)",
+        "background": "日本発條は9/18発表のデータセンター向け高容量HDD用サスペンション増産投資（50億円規模）を背景に上昇基調が継続（[株探](https://kabutan.jp/news/marketnews/?b=n202609180252)）。サンコールも9月下旬以降、株探「上場来高値銘柄」特集で複数回取り上げられ上昇が続いている（[株探](https://kabutan.jp/news/marketnews/?b=n202610030115)）。"
+      }
+    ]
+  },
+  "methodology": {
+    "lines": [
+      "**データ** ▶ [J-Quants API V2](https://jpx-jquants.com/)（Lightプラン）。エンドポイント= /equities/bars/daily（四本値）／/equities/master（業種・区分）／/indices/bars/daily/topix（TOPIX）。取得・集計は本リポジトリの build_market_stats.py（sector_analysis.py 移植版・決定的）。",
+      "**対象** ▶ 東証プライム/スタンダード/グロースの内国普通株（ProdCat=011・Mkt∈{0111,0112,0113}・コード末尾0）。",
+      "**流動性フィルタ** ▶ 当日売買代金1億円以上（薄商いの小型・低位株による騰落率上位の歪みを排除）＝ 1,540銘柄。",
+      "**騰落率** ▶ 調整済み終値(AdjC)ベースの前日比。セクター代表値は**売買代金加重平均**。表の「銘柄」列は当該セクターの騰落を最も主導した銘柄（売買代金加重寄与の上位、最大2銘柄）。"
+    ]
+  },
+  "news_sources": [
+    {
+      "topic": "大手企業の情報漏えい相次ぐ・サイバーセキュリティ関連株急騰",
+      "links": [
+        {
+          "label": "株探",
+          "url": "https://s.kabutan.jp/news/n202610060344/"
+        },
+        {
+          "label": "Security NEXT",
+          "url": "https://www.security-next.com/191068"
+        },
+        {
+          "label": "ScanNetSecurity",
+          "url": "https://scan.netsecurity.ne.jp/article/2026/10/06/56391.html"
+        }
+      ]
+    },
+    {
+      "topic": "太陽誘電・AI半導体関連株の上昇",
+      "links": [
+        {
+          "label": "株探",
+          "url": "https://s.kabutan.jp/news/n202610060086/"
+        }
+      ]
+    },
+    {
+      "topic": "日東紡績、台湾PCB展示会への出展",
+      "links": [
+        {
+          "label": "日東紡ニュースリリース",
+          "url": "https://www.nittobo.co.jp/news/pdf/20261006_newsrelease.pdf"
+        }
+      ]
+    },
+    {
+      "topic": "ヘリオス・サンバイオの個別開示",
+      "links": [
+        {
+          "label": "TDnet開示（ヘリオス）",
+          "url": "https://www.release.tdnet.info/inbs/140120261005545901.pdf"
+        },
+        {
+          "label": "株探（サンバイオ）",
+          "url": "https://kabutan.jp/news/marketnews/?b=n202610060275"
+        }
+      ]
+    },
+    {
+      "topic": "ヘッドウォータース、ソフトバンクとのAIエージェント基盤提携",
+      "links": [
+        {
+          "label": "ヘッドウォータースIR",
+          "url": "https://www.headwaters.co.jp/news/SoftBank_AGENTIC_STAR_Integration_Partner_Alliance.html"
+        }
+      ]
+    }
+  ],
+  "sources_accessed": "2026-10-06",
+  "disclaimer": [
+    "本レポートは J-Quants API のデータと公開情報に基づく市場分析であり、**投資勧誘・投資助言を目的としたものではありません**。",
+    "個別銘柄の騰落要因のうち、決算・開示以外（テーマ・需給・地合い）に帰属する部分は報道・状況からの**推定**を含みます。",
+    "売買代金1億円未満の薄商い銘柄は分析対象外です。数値は取得時点のデータに基づき、事後修正・再集計により変動する可能性があります。"
+  ]
+}
