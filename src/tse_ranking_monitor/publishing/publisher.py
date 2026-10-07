@@ -24,6 +24,7 @@ from ..contracts import (
 )
 from ..runtime import status as run_status
 from ..runtime.private_store import reserve_delivery, finish_delivery
+from ..runtime.telemetry import delivered_marker_path
 from . import gmail, render
 
 ROOT = Path.cwd()
@@ -457,7 +458,7 @@ def mark_delivered(session, root=None):
     """
     root = Path(root) if root else ROOT
     try:
-        path = root / ".work" / str(session) / "telemetry" / ".delivered"
+        path = delivered_marker_path(root, session)
         path.parent.mkdir(parents=True, exist_ok=True)
         _atomic_write_text(path, run_status.utc_now() + "\n")
     except OSError as exc:

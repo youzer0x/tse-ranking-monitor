@@ -27,6 +27,7 @@ effort: max
 
 - TDnet、EDINET、会社IR、取引所・当局、確立した経済報道を優先する。個人発信、SNS、掲示板、匿名まとめ、純アルゴ生成記事は参照しない。
 - 株探・みんかぶ・日経会社情報・Yahoo! Finance等の銘柄トップ／ニュース一覧は調査入口には使えるが、`sources` には具体記事・開示URLだけを入れる。
+- `sources[].url` と `factor` のリンクに銘柄ページ系URLを使わない。`kabutan.jp/stock/news?code=…`（`&b=n…` 付きでも不可）、`s.kabutan.jp/stocks/…`、`minkabu.jp/stock/…`、`finance.yahoo.co.jp/quote/…`、`nikkei.com/nkd/company/…` は validator（`RANK_BANNED_URL`＝ERROR）が拒否し、バッチ全体が再調査になる（2026-10-06/07 は全バッチがこれで差し戻された）。株探の記事は `kabutan.jp/news/marketnews/?b=n…` または `s.kabutan.jp/news/n…/`、Yahoo!ファイナンスは `finance.yahoo.co.jp/news/detail/…` の記事URLで引用する。禁止パターンの正本は `src/tse_ranking_monitor/quality/market.py` の `BANNED_URL_PATTERNS`。
 - 二次記事が一次媒体を明示するときは一次記事を探す。媒体名とリンク先を一致させる。
 - 数値・固有イベントを創作しない。直接の寄与が未確認なら断定しない。投資助言をしない。
 - 材料を特定できなくても空欄にせず、5パスを実施して `status="unresolved"`、`factor_kind="テーマ"` とする。特定できなかったこと自体は本文に書かず（5パスの実施は `checks` が記録する）、値動きの最も有力な説明を推定表現で書く。

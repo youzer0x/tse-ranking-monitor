@@ -59,13 +59,57 @@ def test_missing_market_does_not_prevent_publication(run):
     ranking = _ranking()
     path = run.work / "ranking.json"
     _atomic_write_json(path, ranking)
-    research_bundle(ranking, run.research)
+    research_bundle(ranking, run.research_dir)
     run.save("research", [path], market_failure=None)
     run.execute("publish", "./")
     assert run.completed("publish")
     assert run.state["completed"]["publish"]["market_failure"]
     assert (run.root / "docs/data/2026-07-15.json").exists()
     assert not (run.root / "docs/data/2026-07-15_market.json").exists()
+
+
+@pytest.mark.parametrize("phase", pipeline.PHASES)
+def test_every_phase_name_resolves_to_a_bound_method(run, phase):
+    """2026-10-06/07: ``self.research`` (a Path) shadowed ``research()`` and
+    ``execute("research")`` raised TypeError on two consecutive routine runs.
+    Any future attribute named after a phase must fail here, not in production."""
+    attribute = getattr(run, phase)
+    assert callable(attribute), f"{phase} is shadowed by a {type(attribute).__name__}"
+
+
+def test_research_phase_dispatches_to_method_not_directory_attribute(run, monkeypatch):
+    stage1 = run.work / "stage1.json"
+    _atomic_write_json(stage1, _ranking())
+    run.save("start", [stage1])
+    monkeypatch.setattr(run, "script", lambda *a, **k: subprocess.CompletedProcess([], 0, "{}", ""))
+    monkeypatch.setattr(pipeline, "require_compiled_evidence", lambda *a, **k: None)
+    run.execute("research", "./")
+    assert run.completed("research")
+    assert run.state["completed"]["research"]["market_failure"] is None
+
+
+def test_notify_stage_records_delivery_in_the_durable_status(run, monkeypatch):
+    """The notify stage's end-of-stage status used to overwrite the
+    ``delivered: true`` that ``mark_delivered`` had just pushed (2026-10-06)."""
+    stage1 = run.work / "stage1.json"
+    _atomic_write_json(stage1, _ranking())
+    ranking = run.work / "ranking.json"
+    _atomic_write_json(ranking, _ranking())
+    run.save("start", [stage1])
+    run.save("research", [ranking], market_failure=None)
+    run.save("publish", [])
+    run.save("deploy", revision="abc")
+    monkeypatch.setattr(run, "run", lambda args, **k: subprocess.CompletedProcess(args, 0, "abc\n", ""))
+    monkeypatch.setattr(pipeline.publisher, "notify",
+                        lambda input_path, docs_dir, pages_url: pipeline.publisher.mark_delivered(run.session, run.root))
+    statuses = []
+    monkeypatch.setattr(pipeline.run_status, "publish_status_quietly",
+                        lambda root, status, **k: statuses.append(status))
+
+    run.execute("notify", "./")
+
+    assert run.completed("notify")
+    assert [status["delivered"] for status in statuses] == [False, True, True]
 
 
 def test_runtime_contract_failure_blocks_all_stages(tmp_path, monkeypatch):
@@ -87,7 +131,7 @@ def test_deploy_resumes_after_commit_and_preserves_exact_candidate(tmp_path, mon
     flow = pipeline.Pipeline(repo, "2026-07-17")
     ranking = json.loads((repo / "docs/data/2026-07-17.json").read_text(encoding="utf-8"))
     _atomic_write_json(flow.work / "ranking.json", ranking)
-    research_bundle(ranking, flow.research)
+    research_bundle(ranking, flow.research_dir)
     flow.save("publish", list((repo / "docs/data").glob("*.json")) + [repo / "docs/index.html"])
     real_run = flow.run
     pushes = []

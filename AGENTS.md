@@ -28,6 +28,7 @@ Scheduled Routineの日次実行だけは、`python tools/runtime_contract.py ch
 - 市場分析はbest-effortであり、その生成失敗だけでランキング公開を止めない。失敗理由は最終報告する。
 - 公開ファイルをpushする前にメールを送らない。Pages上の当日artifact digestがローカル公開物と一致しない限り通知しない。
 - Pages確認のタイムアウト、Gmail認証不足、Gmail API失敗時は未送信のまま非ゼロ終了し、失敗を報告する。
+- pipeline CLI や scripts がコード起因の例外で停止した場合は、コードを修正・commitせず、checkpointの手編集やgit plumbingによる回避もせず、失敗通知を送って停止する（修正は対話セッションで行う）。
 
 ## 編集禁止・公開境界
 
