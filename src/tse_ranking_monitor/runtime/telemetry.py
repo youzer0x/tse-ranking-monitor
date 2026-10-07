@@ -79,6 +79,16 @@ def read_session_pointer(root):
     return payload
 
 
+def delivered_marker_path(root, session):
+    """The sentinel ``publisher.notify`` writes once Gmail confirmed the send.
+
+    It is the only machine-checked evidence of an end-to-end delivery: the
+    end-of-session guard, the durable run status and the watchdog all key on
+    it, so its location is defined exactly once here.
+    """
+    return Path(root).resolve() / ".work" / str(session) / "telemetry" / ".delivered"
+
+
 def _json_size(value):
     if value is None:
         return 0

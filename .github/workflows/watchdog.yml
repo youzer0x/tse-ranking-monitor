@@ -2,6 +2,7 @@ name: Delivery watchdog
 
 # 日次配信の欠落検知（Layer A）。ルーチンが沈黙して失敗した営業日を 19:10 JST に検知し、
 # 常設の delivery-watchdog issue で通知する。22:50 JST の再確認で回復していれば自動クローズ。
+# 公開は済んだがメールが出なかった日（UNNOTIFIED）も routine-status の delivered で検知する。
 on:
   schedule:
     - cron: "10 10 * * 1-5"   # 19:10 JST main check
@@ -80,6 +81,7 @@ jobs:
             MISSING=*)     problems+=("delivery missing: ${TOKEN}") ;;
             STALLED=*)     problems+=("routine died mid-run: ${TOKEN}") ;;
             PAGES_STALE=*) problems+=("live Pages stale: ${TOKEN}") ;;
+            UNNOTIFIED=*)  problems+=("published but notification not confirmed: ${TOKEN}") ;;
           esac
           if [ "$CHECK_CODE" != "0" ] && [ "$CHECK_CODE" != "1" ]; then
             problems+=("checker error (exit ${CHECK_CODE})")

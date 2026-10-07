@@ -8,13 +8,22 @@
 
 ## 1. セッションゲート
 
-契約成功後、checkoutしたリポジトリで `python -m pip install -r requirements.lock`、`python -m pip install --no-deps .` を実行する。既に同じlock・コード版を導入済みなら再導入は不要。続いて `python -m tse_ranking_monitor pipeline start` を実行する（ゲート・Stage1・調査計画まで自動実行）。
+契約成功後、checkoutしたリポジトリで Python 3.12 の仮想環境を作って有効化し、lockから導入する。既定の `python` が3.11の環境では仮想環境なしの導入が `requires-python>=3.12` で失敗するため、必ずこの手順で入れる。既に同じlock・コード版を導入済みの `.venv` があれば有効化だけでよい。以後の `python` コマンドはすべてこの仮想環境で実行し、システムの `python` や `/usr/local/bin` のリンクを付け替えない。
+
+```text
+python3.12 -m venv .venv && . .venv/bin/activate
+python -m pip install -r requirements.lock && python -m pip install --no-deps .
+```
+
+続いて `python -m tse_ranking_monitor pipeline start` を実行する（ゲート・Stage1・調査計画まで自動実行）。
 
 - `SKIP`：生成・push・通知をせず正常終了。
 - `TIMEOUT`：生成・push・通知をせず非ゼロ終了し、原因を報告。
 - `SESSION=YYYY-MM-DD`：その日付を以後の `<S>` とする。対象はゲートが選ぶ直近の完了セッションのみ（catch-up窓＝1営業日・再開下限あり）。それより古い未公開営業日はゲートが切り捨てて `WARN 切り捨て=` を出すので最終報告に含め、手動で遡らない。過去日は壁時計待機しない。
 
 Stage1の入力整合検証・時価総額取得が失敗したら停止する。pipelineは前段の成果物とコード版を照合し、stageの開始・終了・失敗を記録する。途中からは `pipeline resume --session <S>` で最初の未完了段階を一つ実行できる。調査JSONとナラティブはAIが作成する。
+
+日次実行では追跡対象のコード・設定（`src/`、`scripts/`、`tools/`、`tests/`、`runbook/`、`.claude/`、`pyproject.toml`、`requirements*` 等）を編集・commit・pushしない。pipeline CLI や scripts がコード起因の例外（Traceback）や想定外の `ERROR` で停止した場合は、修復や回避を試みず §6 の失敗通知を実行して非ゼロ終了する。checkpoint（`.work/<S>/checkpoint.json`・`pipeline.sqlite3`）の手編集・削除、git plumbing による `main` への直接push、インタプリタのリンク付け替えも回避策として行わない。修正は開発者が対話セッションで行い、必要なら手動で再発火する（2026-10-07：実行中のコード修正commitが日次公開commitに混入し、deployの単一commit検証とcheckpointの整合が崩れてGmail未送信のまま終了した）。
 
 ## 2. Stage1と調査計画
 
@@ -75,7 +84,7 @@ buildは元のbatch結果をstrict compileし直し、Stage1のdigestとfactor�
 
 ## 6. 失敗時の通知
 
-契約ゲート成功後にSKIP以外で停止する場合（TIMEOUT、Stage・検証・公開・通知の失敗）、終了前に次を実行し、送信可否に関わらず当初の非ゼロ終了と失敗報告を維持する。
+契約ゲート成功後にSKIP以外で停止する場合（TIMEOUT、Stage・検証・公開・通知の失敗、§1のコード起因の停止）、終了前に次を実行し、送信可否に関わらず当初の非ゼロ終了と失敗報告を維持する。
 
 ```text
 python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"

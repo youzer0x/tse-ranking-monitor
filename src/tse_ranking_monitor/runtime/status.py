@@ -25,6 +25,7 @@ from pathlib import Path
 from .telemetry import (
     TELEMETRY_SCHEMA_VERSION,
     TelemetryWriter,
+    delivered_marker_path,
     read_session_pointer,
     utc_now,
 )
@@ -107,9 +108,19 @@ def build_status(session, *, delivered=False, last_stage=None, died_at=None,
     return status
 
 
-def collect_status(root, session, *, delivered=False, died_at=None, note=None):
-    """Assemble the status for ``session`` from on-disk telemetry."""
+def collect_status(root, session, *, delivered=None, died_at=None, note=None):
+    """Assemble the status for ``session`` from on-disk telemetry.
+
+    ``delivered`` defaults to the presence of the ``.delivered`` sentinel.  The
+    notify stage's own end-of-stage status used to pass ``False`` here and
+    overwrite the ``delivered: true`` that ``mark_delivered`` had just pushed
+    (every 2026-10 status on the branch read ``false`` even after the email
+    went out), which left the watchdog unable to tell a delivered run from a
+    published-but-unnotified one.
+    """
     writer = TelemetryWriter(root)
+    if delivered is None:
+        delivered = delivered_marker_path(root, session).exists()
     unfinished = [stage for stage, _started in writer.unfinished_stages(session)]
     pointer = read_session_pointer(root) or {}
     return build_status(

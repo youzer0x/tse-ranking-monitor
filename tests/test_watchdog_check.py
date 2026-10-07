@@ -241,13 +241,62 @@ def test_unreadable_status_degrades_to_missing(tmp_path, capsys):
     assert "実行ステータスを読めない" in out.err
 
 
-def test_status_is_ignored_when_nothing_is_missing(tmp_path, capsys):
-    manifest = _manifest(tmp_path, ["2026-07-15"])
+def test_published_but_undelivered_status_is_unnotified(tmp_path, capsys):
+    """2026-10-07: main and Pages were current, the email never went out, the
+    backup SKIPped on the manifest and no session-end hook fired."""
+    manifest = _manifest(tmp_path, ["2026-07-15", "2026-07-14"])
+    live = _manifest(tmp_path, ["2026-07-15"], name="live-manifest.json")
     status = _status(tmp_path, {
-        "session": "2026-07-15", "delivered": False, "died_at": "stage2",
+        "session": "2026-07-15", "delivered": False,
+        "started_at": "2026-07-15T07:36:00Z",
     })
 
+    code = wdc.main(["--manifest", str(manifest), "--live-manifest", str(live),
+                     "--status", status, "--now", "2026-07-15T19:10:00+09:00"])
+
+    assert code == 1
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "UNNOTIFIED=2026-07-15"
+    assert "decision=UNNOTIFIED" in captured.err
+
+
+def test_delivered_status_keeps_a_current_publication_ok(tmp_path, capsys):
+    manifest = _manifest(tmp_path, ["2026-07-15"])
+    status = _status(tmp_path, {"session": "2026-07-15", "delivered": True})
+
     assert wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 0
+    assert capsys.readouterr().out.strip() == "OK"
+
+
+def test_status_of_an_older_session_does_not_alarm_a_newer_publication(tmp_path, capsys):
+    """A stale status (the branch was last written days ago) proves nothing
+    about today's publication, which may have delivered without status."""
+    manifest = _manifest(tmp_path, ["2026-07-15", "2026-07-14"])
+    status = _status(tmp_path, {"session": "2026-07-14", "delivered": False})
+
+    assert wdc.main(["--manifest", str(manifest), "--status", status,
+                     "--now", "2026-07-15T19:10:00+09:00"]) == 0
+    assert capsys.readouterr().out.strip() == "OK"
+
+
+def test_pages_stale_outranks_unnotified(tmp_path, capsys):
+    """Pages lagging explains the missing email; report the cause, not the symptom."""
+    manifest = _manifest(tmp_path, ["2026-07-15"])
+    live = _manifest(tmp_path, ["2026-07-14"], name="live-manifest.json")
+    status = _status(tmp_path, {"session": "2026-07-15", "delivered": False})
+
+    assert wdc.main(["--manifest", str(manifest), "--live-manifest", str(live),
+                     "--status", status, "--now", "2026-07-15T19:10:00+09:00"]) == 1
+    assert capsys.readouterr().out.strip() == "PAGES_STALE=2026-07-15"
+
+
+def test_unreadable_status_does_not_alarm_a_current_publication(tmp_path, capsys):
+    manifest = _manifest(tmp_path, ["2026-07-15"])
+    broken = tmp_path / "broken.json"
+    broken.write_text("{not json", encoding="utf-8")
+
+    assert wdc.main(["--manifest", str(manifest), "--status", str(broken),
                      "--now", "2026-07-15T19:10:00+09:00"]) == 0
     assert capsys.readouterr().out.strip() == "OK"
 
@@ -291,6 +340,12 @@ def test_workflow_treats_stalled_as_a_problem():
     text = WORKFLOW.read_text(encoding="utf-8")
 
     assert "STALLED=*)" in text
+
+
+def test_workflow_treats_unnotified_as_a_problem():
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "UNNOTIFIED=*)" in text
 
 
 def test_workflow_emits_annotations_so_detail_reaches_the_failure_mail():

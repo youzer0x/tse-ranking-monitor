@@ -18,6 +18,9 @@ Output (stdout is exactly one token; diagnostics go to stderr):
                            started and never delivered -- i.e. it died part-way
                            rather than never firing (exit 1)
   PAGES_STALE=YYYY-MM-DD   repo is current but the live Pages manifest is behind (exit 1)
+  UNNOTIFIED=YYYY-MM-DD    repo and Pages are current but the durable run status
+                           for that session never recorded a confirmed email --
+                           the 2026-10-07 shape, invisible to every other token (exit 1)
   (no token)               unreadable/malformed manifest or bad --now (exit 2)
 
 usage:
@@ -114,6 +117,33 @@ def read_stalled_stage(path, session):
     return _STAGE_SAFE_RE.sub("-", str(stage))[:64] or "unknown"
 
 
+def read_unnotified_session(path, latest_published):
+    """Return ``latest_published`` when its run status says the email never went out.
+
+    ``delivered: true`` is pushed only after Gmail confirmed the send
+    (``publisher.mark_delivered``).  A status for the newest published session
+    that still reads ``false`` means ``main`` and Pages are current but nobody
+    received the email: MISSING and PAGES_STALE stay silent, the 20:35 backup
+    sees the manifest and SKIPs, and the session-end guard does not fire in
+    the cloud (2026-10-07).  Fails soft like :func:`read_stalled_stage`; a
+    status for an older session says nothing about this publication.
+    """
+    if not path or latest_published is None:
+        return None
+    try:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        elog("[watchdog] WARN 実行ステータスを読めない（通知確認を省略）: %s" % exc)
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("session") != latest_published.isoformat():
+        return None
+    if payload.get("delivered"):
+        return None
+    return latest_published
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="日次配信の欠落判定（watchdog・ネット無し）")
     parser.add_argument("--manifest", default=str(gate.DEFAULT_MANIFEST),
@@ -179,6 +209,12 @@ def main(argv=None):
             elog("[watchdog] decision=PAGES_STALE（repoは最新だがPages側が古い）")
             print("PAGES_STALE=%s" % stale.isoformat())   # ← stdout
             return 1
+
+    unnotified = read_unnotified_session(args.status, max(published, default=None))
+    if unnotified is not None:
+        elog("[watchdog] decision=UNNOTIFIED（公開済みだが通知完了の記録が無い）")
+        print("UNNOTIFIED=%s" % unnotified.isoformat())   # ← stdout
+        return 1
 
     elog("[watchdog] decision=OK")
     print("OK")   # ← stdout

@@ -126,12 +126,13 @@ git push -u origin main
    - **`Custom`**：「Allowed domains」に `api.jquants.com`／`www.release.tdnet.info`／`finance.yahoo.co.jp`／`kabutan.jp`／**`<あなた>.github.io`（または `github.io`）**／報道各社（`nikkei.com`・`asia.nikkei.com`・`reuters.com`・`bloomberg.com`・`wsj.com`・`ft.com`・`cnbc.com`・`jiji.com`・`kyodonews.jp`・`toyokeizai.net`・`diamond.jp` 等）を1行ずつ。**「Also include default list of common package managers」に必ずチェック**（pip と Gmail API `*.googleapis.com` のため）。
    - Gmail API の `gmail.googleapis.com`・`oauth2.googleapis.com` は既定の `*.googleapis.com` に含まれ**追加不要**。
    - **`github.io` は publish の `--notify`（メール前の Pages ライブ確認）で必要**。未許可または5分以内にartifact digestを確認できない場合は、メールを送らず非ゼロ終了する。`Full` なら追加不要。
-4. **環境初期化**：Python 3.12を用意する。依存はcheckout後にリポジトリのlockから導入する。リポジトリ外で動くsetup欄に、版を指定しないパッケージ一覧を貼り付けない。
+4. **環境初期化**：Python 3.12を用意する。クラウドの既定 `python` は3.11で、`requires-python>=3.12` の本体導入はそのままでは失敗する（`python3.12` は同梱されているが PEP668 でシステムへの pip install も拒否される）。依存はcheckout後にリポジトリのlockから **3.12の仮想環境へ** 導入する。リポジトリ外で動くsetup欄に、版を指定しないパッケージ一覧を貼り付けない。
    ```bash
+   python3.12 -m venv .venv && . .venv/bin/activate
    python -m pip install -r requirements.lock
    python -m pip install --no-deps .
    ```
-   PEP668の制限がある環境ではvenvを作成してから同じコマンドを実行する。Windowsは `python` を `py -3.12` に読み替えられる。
+   契約（`runbook/RUNTIME_CONTRACT.md` §1）も毎回同じ手順で `.venv` を作るので、setup欄を空にしても動く。Windowsは `python3.12` を `py -3.12` に読み替える。
 5. 「Save changes」。
 
 ## Step 8：スケジュール・ルーチンを作る
@@ -207,7 +208,8 @@ python -m tse_ranking_monitor pipeline notify --session "$SESSION" --pages-url "
 | メールのリンク先が前営業日のまま | `--notify`（step6）を**必ず push の後**に実行しているか／ネット許可に `github.io` が入っているか確認。`--notify` が Pages 上のartifact digest一致を確認してから送る。確認タイムアウト時は未送信で失敗する |
 | Pages が `claude/...` に出て未反映 | Actions「Validate routine publication」と「Promote routine publication」の順に実行結果を確認。候補がmain直系・docs限定・digest一致か、Workflow permissionsが書込み可かを確認。直接経路を使う場合は「Allow unrestricted branch pushes」も確認 |
 | Pages 未表示 | Settings → Pages の Branch=main / Folder=/docs を確認 |
-| pip が `externally-managed` で失敗 | venvを作成・有効化してlockから導入する |
+| pip が `externally-managed` で失敗／本体導入が `requires-python>=3.12` で失敗 | 契約§1どおり `python3.12 -m venv .venv` を作成・有効化してlockから導入する。システムの `python` のリンクを付け替えない |
+| Pages は更新済みなのにメールが届かない（watchdog `UNNOTIFIED`） | `routine-status` の `status/<S>.json` が `delivered: false` のまま。Gmail認証とPAGES_URLがある環境で、HEAD を `origin/main` に合わせてから `python scripts/publish.py --in docs/data/<S>.json --docs docs --pages-url "$PAGES_URL" --notify` を実行して再送する（送信台帳が未予約なら二重送信にならない。`pending` が残っていれば先に `private resolve-delivery`） |
 
 ## 非公開の保存先と送信履歴
 

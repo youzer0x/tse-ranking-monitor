@@ -63,7 +63,7 @@ class Pipeline:
             raise ValueError("session must be YYYY-MM-DD")
         self.session = session
         self.work = self.root / ".work" / session
-        self.research = self.work / "research"
+        self.research_dir = self.work / "research"
         self.market = self.work / "market"
         self.checkpoint = self.work / "checkpoint.json"
         failures = verify_contract_lock(self.root)
@@ -152,26 +152,26 @@ class Pipeline:
         self.script("build_day_ranking.py", "--date", self.session, "--kabutan-news", "--out", stage1)
         data = read_json(stage1)
         validate_ranking_document(data, require_stage1_counts=True, require_numeric_fields=True)
-        self.script("build_research_plan.py", "--ranking", stage1, "--out-dir", self.research)
+        self.script("build_research_plan.py", "--ranking", stage1, "--out-dir", self.research_dir)
         self.save("start", [stage1])
-        print(f"Research inputs: {self.research / 'manifest.json'}")
+        print(f"Research inputs: {self.research_dir / 'manifest.json'}")
 
     def research(self, _):
-        self.script("compile_research_results.py", "--research-dir", self.research, "--strict")
+        self.script("compile_research_results.py", "--research-dir", self.research_dir, "--strict")
         ranking = self.work / "ranking.json"
         publisher._atomic_write_bytes(ranking, (self.work / "stage1.json").read_bytes())
-        self.script("merge_factors.py", "--ranking", ranking, "--factors", self.research / "factors.json")
-        quality = self.script("validate_ranking_quality.py", ranking, "--evidence", self.research / "evidence.json",
-                              "--strict", "--format", "json", "--repair-targets", self.research / "repair_targets.json",
+        self.script("merge_factors.py", "--ranking", ranking, "--factors", self.research_dir / "factors.json")
+        quality = self.script("validate_ranking_quality.py", ranking, "--evidence", self.research_dir / "evidence.json",
+                              "--strict", "--format", "json", "--repair-targets", self.research_dir / "repair_targets.json",
                               accepted=(0, 1))
         _atomic_write_json(self.work / "quality-ranking.json", json.loads(quality.stdout))
         if quality.returncode:
             raise ValueError("ranking quality requires repair; see quality-ranking.json")
-        require_compiled_evidence(read_json(ranking), self.research)
+        require_compiled_evidence(read_json(ranking), self.research_dir)
         market_failure = None
         try:
             self.script("build_market_stats.py", "--date", self.session, "--out-dir", self.market)
-            self.script("build_market_brief.py", "--ranking", ranking, "--evidence", self.research / "evidence.json",
+            self.script("build_market_brief.py", "--ranking", ranking, "--evidence", self.research_dir / "evidence.json",
                         "--stats", self.market / f"market_stats_{self.session}.json",
                         "--out", self.market / f"market_brief_{self.session}.json")
         except (RuntimeError, ValueError) as exc:
@@ -195,7 +195,7 @@ class Pipeline:
             failure = failure or "market narrative is unavailable"
         # Passing a missing private path explicitly excludes any prior public draft.
         report = publisher.build(read_json(self.work / "ranking.json"), self.root / "docs",
-                                 research_dir=self.research,
+                                 research_dir=self.research_dir,
                                  market_path=draft if not failure else self.market / "unavailable.json")
         _atomic_write_json(self.work / "quality-market.json", {
             "session": self.session, "passed": not (failure or report["market_failure"]),
@@ -209,7 +209,7 @@ class Pipeline:
             print("WARN market skipped: " + (failure or report["market_failure"]))
 
     def deploy(self, _):
-        require_compiled_evidence(read_json(self.work / "ranking.json"), self.research)
+        require_compiled_evidence(read_json(self.work / "ranking.json"), self.research_dir)
         # A crash after commit/push is recoverable: only create a commit if docs changed.
         changes = self.run(["git", "diff", "--name-only", "HEAD"]).stdout.splitlines()
         if any(not (name == "docs/index.html" or name.startswith("docs/data/")) for name in changes):

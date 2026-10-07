@@ -197,6 +197,24 @@ def test_collect_status_reports_the_stage_the_session_was_inside(tmp_path):
     assert status["delivered"] is False
 
 
+def test_collect_status_defaults_delivered_to_the_sentinel(tmp_path):
+    """A stage-boundary status written after the email went out must carry
+    ``delivered: true`` without every caller remembering to pass it."""
+    writer = telemetry.TelemetryWriter(tmp_path)
+    writer.record_stage("2026-07-27", "notify", "start")
+
+    assert run_status.collect_status(tmp_path, "2026-07-27")["delivered"] is False
+
+    marker = telemetry.delivered_marker_path(tmp_path, "2026-07-27")
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    marker.write_text("ok\n", encoding="utf-8")
+    writer.record_stage("2026-07-27", "notify", "end")
+
+    assert run_status.collect_status(tmp_path, "2026-07-27")["delivered"] is True
+    # An explicit value still wins (the guard reports a dead run as undelivered).
+    assert run_status.collect_status(tmp_path, "2026-07-27", delivered=False)["delivered"] is False
+
+
 def test_collect_status_of_a_completed_run_names_no_stage(tmp_path):
     writer = telemetry.TelemetryWriter(tmp_path)
     writer.record_stage("2026-07-27", "publish", "start")

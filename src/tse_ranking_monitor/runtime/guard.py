@@ -26,7 +26,7 @@ from pathlib import Path
 
 from ..publishing import failure_notify
 from . import status as run_status
-from .telemetry import TelemetryWriter, read_session_pointer, utc_now
+from .telemetry import TelemetryWriter, delivered_marker_path, read_session_pointer, utc_now
 
 DEFAULT_REASON = "session ended without a completed delivery"
 
@@ -40,7 +40,7 @@ def _telemetry_dir(root, session):
 
 
 def delivered_marker(root, session):
-    return _telemetry_dir(root, session) / ".delivered"
+    return delivered_marker_path(root, session)
 
 
 def notified_marker(root, session):
