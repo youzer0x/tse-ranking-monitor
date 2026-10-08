@@ -65,6 +65,25 @@ def test_factor_html_passes_plain_text_unchanged():
     assert hg._factor_html("前日引け後の開示を好感し大幅高。") == "前日引け後の開示を好感し大幅高。"
 
 
+def test_email_omits_yahoo_mcap_note():
+    # Yahoo 補完の時価総額もメールでは数値のみ（行内注記はスマホで列幅を広げるため省く。2026-10-08）。
+    # 出典は足注の「新規上場は Yahoo Finance JP」で示す。
+    data = _data(1)
+    data["rows"][0].update({"mcap_oku": 327, "mcap_source": "yahoo", "mcap_date": None})
+    html = hg.generate_email_html(data, "https://x/")
+    assert "Yahoo参照" not in html
+    assert ">327</td>" in html
+    assert "新規上場は Yahoo Finance JP" in html
+
+
+def test_email_name_wraps_on_mobile_only():
+    # スマホ幅では銘柄名を折り返して表を画面内に収め、Gmail iOS の縮小表示を避ける（2026-10-08）。
+    # PC 幅は従来どおり1行表示。
+    html = hg.generate_email_html(_data(1), "https://x/")
+    assert ".col-name{white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;}" in html
+    assert '<td class="col-name" style="padding:7px 8px;border-bottom:1px solid #eee;white-space:nowrap;">テスト銘柄0</td>' in html
+
+
 def test_email_renders_factor_markdown_link():
     data = _data(1)
     data["rows"][0]["factor"] = "格上げ（[日経](https://www.nikkei.com/article/x)）。"

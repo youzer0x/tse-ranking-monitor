@@ -143,7 +143,7 @@
 
 ## 公開直前の検証と通知履歴
 
-- 時価総額の取得失敗は基準未満と区別して停止する。判定は丸める前の `mcap_oku_exact` を使い、`mcap_status` / `mcap_date` に取得状態と評価日を残す。Yahoo補完は評価日不明として表示で明示する。
+- 時価総額の取得失敗は基準未満と区別して停止する。判定は丸める前の `mcap_oku_exact` を使い、`mcap_status` / `mcap_date` に取得状態と評価日を残す。Yahoo補完は評価日不明としてPagesの表示で明示する（メールは行内注記を省き、足注の出典表記で示す）。
 - 出典の `published_at` はタイムゾーン必須。日本時間に正規化し、前営業日15:30以上・当日15:30未満かを実日時で照合する。`na` / `unavailable` は `check_reasons` 必須で、適用条件外の `na` を拒否する。
 - buildは元のbatch結果をstrict compileし直す。Stage1の数値・日付・コードのdigestと、全行のfactor / factor_kindを公開予定JSONと比較する。ERROR/WARNは1件でも公開停止。
 - 市場分析は `.work/` で結合・検査する。不合格なら公開場所へコピーしない。既に公開場所に残っている不合格の当日ドラフトは `.work/<S>/quarantine/` に移して保持する。

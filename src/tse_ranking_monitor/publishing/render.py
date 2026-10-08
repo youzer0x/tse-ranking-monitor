@@ -3,6 +3,10 @@
 Gmail 本文（generate_email_html）のトンマナ・書式・カラーは PTS 版
 （pts-ranking-monitor/scripts/html_generator.py）と**同一**。TSE 固有のデータ
 （列＝PTS気配なし・終値(円)／抽出条件＝≥+5%・¥10M・100億・上位30社／出典）のみ差し替えている。
+例外（2026-10-08）：スマホ幅（≤600px）では銘柄名を折り返し（収まらない英字の長語も途中で折る）、
+時価総額セルの「（Yahoo参照）」注記は出さない。表がスマホ幅を超えると Gmail iOS がメール全体を
+縮小表示して判読しづらくなるため（10-08 は「TWOSTONE&Sons」が折り返せず縮小された）。
+Yahoo 補完の出典は足注の「新規上場は Yahoo Finance JP」で示し、Pages の行内注記は従来どおり。
 
 Pages SPA（generate_pages_html）は 2026-07 の「金融紙エディトリアル」リデザインで PTS 版から
 **意図的に分岐**した（明色ペーパー基調・セリフ見出し（Noto Serif JP）・ヘアライン罫線・
@@ -83,15 +87,15 @@ def generate_email_html(data, pages_url, max_items=25):
         trs.append(f"""<tr>
           <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-family:Arial,sans-serif;">{escape(r.get('rank',''))}</td>
           <td style="padding:7px 8px;border-bottom:1px solid #eee;font-family:Arial,sans-serif;white-space:nowrap;">{escape(r.get('code',''))}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid #eee;white-space:nowrap;">{escape(r.get('name',''))}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;font-family:Arial,sans-serif;">{escape(fmt_mcap(r.get('mcap_oku'), r.get('mcap_flag')))}{'（Yahoo参照）' if r.get('mcap_source') == 'yahoo' else ''}{'（' + escape(r['mcap_date']) + '時点）' if r.get('mcap_date') and r['mcap_date'] != data.get('session_date') else ''}</td>
+          <td class="col-name" style="padding:7px 8px;border-bottom:1px solid #eee;white-space:nowrap;">{escape(r.get('name',''))}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;font-family:Arial,sans-serif;">{escape(fmt_mcap(r.get('mcap_oku'), r.get('mcap_flag')))}{'（' + escape(r['mcap_date']) + '時点）' if r.get('mcap_date') and r['mcap_date'] != data.get('session_date') else ''}</td>
           <td style="padding:7px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;font-family:Arial,sans-serif;color:#c0392b;font-weight:600;">{fmt_pct(r.get('pct'))}</td>
           <td class="col-factor" style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;line-height:1.5;">{badge}{factor}</td>
         </tr>""")
     table_rows = "\n".join(trs)
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<style>@media screen and (max-width:600px){{ .col-factor{{display:none!important;}} }}</style>
+<style>@media screen and (max-width:600px){{ .col-factor{{display:none!important;}} .col-name{{white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;}} }}</style>
 </head>
 <body style="font-family:'Helvetica Neue',Arial,'Hiragino Sans',sans-serif;color:#333;margin:0;padding:0;background:#f5f5f5;">
   <div style="max-width:980px;margin:20px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
