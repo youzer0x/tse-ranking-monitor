@@ -220,7 +220,7 @@ function fmtPct(p){return p==null?'—':'+'+Number(p).toFixed(2)+'%';}
 function fmtPct5(p){return p==null?'':'('+(p>0?'+':'')+Number(p).toFixed(2)+'%)';}
 function fmtNum(x){return x==null?'—':Number(x).toLocaleString('ja-JP');}
 function fmtTurnover(t){return t==null?'—':Math.round(Number(t)).toLocaleString('ja-JP');}
-function fmtTurnoverOku(r){let v=(r.turnover_yen!=null)?Number(r.turnover_yen)/1e8:(r.turnover_m!=null?Number(r.turnover_m)/100:null);if(v==null||!Number.isFinite(v))return '—';return v<1?(v*10000).toLocaleString('ja-JP',{maximumFractionDigits:1})+'万円':v.toLocaleString('ja-JP',{maximumFractionDigits:1})+'億円';}
+function fmtTurnoverOku(r){let v=(r.turnover_yen!=null)?Number(r.turnover_yen)/1e8:(r.turnover_m!=null?Number(r.turnover_m)/100:null);if(v==null||!Number.isFinite(v))return '—';return v<1?'1億円未満':Math.round(v).toLocaleString('ja-JP')+'億円';}
 function fmtMarket(m){m=m||'';if(m.indexOf('プライム')>=0)return 'Prime';if(m.indexOf('スタンダード')>=0)return 'Standard';if(m.indexOf('グロース')>=0)return 'Growth';return m;}
 function fmtCode(c){c=(c==null?'':String(c));return (c.length===5&&c.endsWith('0'))?c.slice(0,4):c;}
 function fmtMcapCell(o,f){if(o==null)return '—';return Math.round(Number(o)).toLocaleString('ja-JP')+'億円'+esc(f||'');}

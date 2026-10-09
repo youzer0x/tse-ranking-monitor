@@ -76,7 +76,7 @@ def test_mobile_units_long_names_and_stock_links(browser_page):
     expect(page.locator(".stock-link")).to_be_visible()
     expect(page.locator(".stock-link")).to_contain_text(long_name)
     assert page.locator(".stock-link").get_attribute("href").endswith("code=7000")
-    expect(page.locator("#tableArea")).to_contain_text("1,000万円")
+    expect(page.locator("#tableArea")).to_contain_text("1億円未満")
     expect(page.locator(".mcap")).to_have_text("12,345億円（Yahoo参照）")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     box = page.locator(".stock-link").bounding_box()
