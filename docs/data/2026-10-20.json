@@ -1,0 +1,549 @@
+{
+  "schema_version": 1,
+  "session_date": "2026-10-20",
+  "prev_date": "2026-10-19",
+  "prev5_date": "2026-10-13",
+  "session_window": "2026-10-20 09:00–15:30 JST（前場9:00-11:30／後場12:30-15:30）",
+  "generated_at": "2026-10-20 16:36 JST",
+  "criteria": {
+    "min_pct": 5.0,
+    "min_turnover_yen": 10000000,
+    "min_mcap_oku": 100,
+    "max_rank": 30
+  },
+  "capped": false,
+  "counts": {
+    "qualifying": 3,
+    "ranked": 3,
+    "dropped_turnover": 2,
+    "dropped_mcap": 12,
+    "excluded": 803
+  },
+  "rows": [
+    {
+      "code": "3556",
+      "name": "リネットジャパングループ",
+      "market": "グロース",
+      "sec17": "14",
+      "sec17_name": "小売",
+      "sec33": "6100",
+      "sec33_name": "小売業",
+      "scale_cat": "-",
+      "mcap_oku": 132,
+      "mcap_oku_exact": 132.33,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "pct": 20.0,
+      "pct5": 15.24,
+      "close": 900.0,
+      "adj_close": 900.0,
+      "prev_adj_close": 750.0,
+      "turnover_yen": 45360000,
+      "turnover_m": 45.4,
+      "disclosures": [
+        {
+          "time": "16:30",
+          "code": "3556",
+          "name": "Ｇ－リネットジャパン",
+          "title": "業界大手３社との資本業務提携、第三者割当による新株式、第26回新株予約権及び第27回新株予約権の発行、主要株主の異動並びに第25回新株予約権の取得及び消却",
+          "pdf_url": "https://www.release.tdnet.info/inbs/140120261019552994.pdf",
+          "origin": "prev",
+          "date": "2026-10-19"
+        }
+      ],
+      "kabutan_news": [
+        {
+          "datetime": "2026-10-20T15:47:39+09:00",
+          "category": "材料",
+          "title": "新興市場銘柄ダイジェスト:リネットジャパンがストップ高、サイバートラストが大幅続落",
+          "url": "https://kabutan.jp/stock/news?code=3556&b=n202610200841"
+        },
+        {
+          "datetime": "2026-10-20T15:40:03+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 9 銘柄　　S安＝ 5 銘柄　(10月20日)",
+          "url": "https://kabutan.jp/stock/news?code=3556&b=n202610200808"
+        },
+        {
+          "datetime": "2026-10-20T15:32:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・２０日＞（大引け）＝コーテクＨＤ、キユーピー、ユビＡＩなど",
+          "url": "https://kabutan.jp/stock/news?code=3556&b=n202610200784"
+        },
+        {
+          "datetime": "2026-10-20T15:30:00+09:00",
+          "category": "開示",
+          "title": "環境省事業に採択、リネットジャパンとLINEヤフーが共同実証　ECを活用した使用済小型家電の「買い替え回収」を開始",
+          "url": "https://kabutan.jp/disclosures/pdf/20261020/140120261020553476/"
+        },
+        {
+          "datetime": "2026-10-20T11:32:00+09:00",
+          "category": "材料",
+          "title": "＜動意株・２０日＞（前引け）＝シライ電子、ウェリタス、リネットＪ",
+          "url": "https://kabutan.jp/stock/news?code=3556&b=n202610200500"
+        },
+        {
+          "datetime": "2026-10-20T10:06:21+09:00",
+          "category": "材料",
+          "title": "リネットジャパン---ストップ高買い気配、業界大手3社との資本業務提携を発表",
+          "url": "https://kabutan.jp/stock/news?code=3556&b=n202610200359"
+        },
+        {
+          "datetime": "2026-10-20T09:17:00+09:00",
+          "category": "材料",
+          "title": "リネットＪに買い注文殺到、ＳＧＨＤなど３社と資本・業務提携し新展開へ",
+          "url": "https://kabutan.jp/stock/news?code=3556&b=n202610200282"
+        },
+        {
+          "datetime": "2026-10-19T16:30:00+09:00",
+          "category": "開示",
+          "title": "業界大手３社との資本業務提携、第三者割当による新株式、第26回新株予約権及び第27回新株予約権の発行、主要株主の異動並びに第25回新株予約権の取得及び消却",
+          "url": "https://kabutan.jp/disclosures/pdf/20261019/140120261019552994/"
+        },
+        {
+          "datetime": "2026-09-29T13:00:00+09:00",
+          "category": "開示",
+          "title": "ファイティングイーグルス名古屋のスポンサーとして地域社会の活性化を応援",
+          "url": "https://kabutan.jp/disclosures/pdf/20260929/140120260929541813/"
+        },
+        {
+          "datetime": "2026-09-16T15:07:00+09:00",
+          "category": "材料",
+          "title": "リネットＪが３日続伸、カンボジア人材では業界初の「国際運転免許証」保持者の人材送り出し開始",
+          "url": "https://kabutan.jp/stock/news?code=3556&b=n202609160785"
+        },
+        {
+          "datetime": "2026-09-16T13:00:00+09:00",
+          "category": "開示",
+          "title": "カンボジア人材では業界初　「国際運転免許証」保持者の人材送り出しを開始 ～入国直後から日本で運転可能。自動車整備・物流・建設・訪問介護等の業界に貢献～",
+          "url": "https://kabutan.jp/disclosures/pdf/20260916/140120260916537021/"
+        },
+        {
+          "datetime": "2026-09-01T14:31:00+09:00",
+          "category": "開示",
+          "title": "定款 2025/12/25",
+          "url": "https://kabutan.jp/disclosures/pdf/20260901/140120260831528299/"
+        }
+      ],
+      "factor": "19日引け後、SGホールディングス・JX金属サーキュラーソリューションズ・米PCS Wirelessとの資本業務提携と第三者割当増資(最大約54.8億円)を開示。回収から再資源化までの基盤共同構築や中古端末の調達網拡大が好感され、20日は[ストップ高水準まで買われた](https://www.nikkei.com/article/DGXZQOFL200OD0Q6A021C2000000/)。",
+      "factor_kind": "開示",
+      "rank": 1,
+      "sector_cluster": {
+        "sec33": "6100",
+        "name": "小売業",
+        "size": 2,
+        "peers": [
+          {
+            "code": "3542",
+            "name": "ベガコーポレーション",
+            "rank": 2,
+            "pct": 9.9,
+            "turnover_m": 87.7,
+            "has_disclosure": false
+          }
+        ],
+        "leader_code": "3556",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "3542",
+      "name": "ベガコーポレーション",
+      "market": "グロース",
+      "sec17": "14",
+      "sec17_name": "小売",
+      "sec33": "6100",
+      "sec33_name": "小売業",
+      "scale_cat": "-",
+      "mcap_oku": 182,
+      "mcap_oku_exact": 181.81,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "pct": 9.9,
+      "pct5": 13.77,
+      "close": 1710.0,
+      "adj_close": 1710.0,
+      "prev_adj_close": 1556.0,
+      "turnover_yen": 87748800,
+      "turnover_m": 87.7,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-10-14T15:45:25+09:00",
+          "category": "材料",
+          "title": "新興市場銘柄ダイジェスト:ココナラがストップ高、スキー場開発が続伸",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202610140859"
+        },
+        {
+          "datetime": "2026-10-14T15:35:02+09:00",
+          "category": "５％",
+          "title": "ベガコーポについて、浮城智和氏は保有割合が減少したと報告、保有株数は変わらず [変更報告書No.7]",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202610140814"
+        },
+        {
+          "datetime": "2026-10-14T14:04:49+09:00",
+          "category": "材料",
+          "title": "VEGA---反発、9月の売上高32.1％増、伸び加速",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202610140712"
+        },
+        {
+          "datetime": "2026-10-14T10:41:00+09:00",
+          "category": "材料",
+          "title": "ベガコーポは反発、ＬＯＷＹＡ事業の９月売上高は３２.１％増でプラス基調継続",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202610140380"
+        },
+        {
+          "datetime": "2026-10-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年９月の月次業績に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261013/140120261009548373/"
+        },
+        {
+          "datetime": "2026-09-10T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年８月の月次業績に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260910/140120260909533681/"
+        },
+        {
+          "datetime": "2026-08-10T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年７月の月次業績に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260810/140120260807515772/"
+        },
+        {
+          "datetime": "2026-08-04T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2フィーチャ、菱友システムズ、 Abalanceなど",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202608040185"
+        },
+        {
+          "datetime": "2026-08-03T16:11:12+09:00",
+          "category": "材料",
+          "title": "新興市場銘柄ダイジェスト:unerryが急落、TDSEがもみ合い",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202608030885"
+        },
+        {
+          "datetime": "2026-08-03T11:13:43+09:00",
+          "category": "材料",
+          "title": "VEGA---続伸、好調な27年3月期第1四半期業績を発表",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202608030367"
+        },
+        {
+          "datetime": "2026-07-31T18:02:42+09:00",
+          "category": "注目",
+          "title": "★本日の【サプライズ決算】続報 (07月31日)",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=n202607311335"
+        },
+        {
+          "datetime": "2026-07-31T15:30:00+09:00",
+          "category": "決算",
+          "title": "ベガコーポ、4-6月期(1Q)経常は32％増益で着地",
+          "url": "https://kabutan.jp/stock/news?code=3542&b=k202607310200"
+        }
+      ],
+      "factor": "9月度月次(LOWYA全体)は前年同月比32.1%増と8月の27.4%増から伸びが加速し、4-9月累計も27年3月期Q2計画(92億円)を上回ったと10/14に報じられた。10/30の中間決算を控え、上振れ期待を背景にした買いが続いているとみられる。[ザイ・オンライン](https://diamond.jp/zai/articles/-/1074086)",
+      "factor_kind": "テーマ",
+      "rank": 2,
+      "sector_cluster": {
+        "sec33": "6100",
+        "name": "小売業",
+        "size": 2,
+        "peers": [
+          {
+            "code": "3556",
+            "name": "リネットジャパングループ",
+            "rank": 1,
+            "pct": 20.0,
+            "turnover_m": 45.4,
+            "has_disclosure": true
+          }
+        ],
+        "leader_code": "3556",
+        "leader_basis": "disclosure"
+      }
+    },
+    {
+      "code": "4712",
+      "name": "KeyHolder",
+      "market": "スタンダード",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "9050",
+      "sec33_name": "サービス業",
+      "scale_cat": "-",
+      "mcap_oku": 162,
+      "mcap_oku_exact": 162.4,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "pct": 6.54,
+      "pct5": 6.15,
+      "close": 863.0,
+      "adj_close": 863.0,
+      "prev_adj_close": 810.0,
+      "turnover_yen": 60417900,
+      "turnover_m": 60.4,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-08-24T15:30:00+09:00",
+          "category": "開示",
+          "title": "（経過開示）株主優待“ライブチケット抽選”企画に関するご案内 （ご提供コンテンツ「ＳＫＥ48」の情報更新）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260824/140120260824525078/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "持分法による投資利益の計上に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514197/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期 第２四半期（中間期）決算資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514180/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期 第２四半期（中間期）決算短信〔ＩＦＲＳ〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260807/140120260807514035/"
+        },
+        {
+          "datetime": "2026-08-07T15:30:00+09:00",
+          "category": "決算",
+          "title": "ＫｅｙＨ、上期最終が81％増益で着地・4-6月期は黒字浮上",
+          "url": "https://kabutan.jp/stock/news?code=4712&b=k202608070451"
+        },
+        {
+          "datetime": "2026-06-22T12:00:00+09:00",
+          "category": "開示",
+          "title": "（経過開示）株主優待“ライブチケット抽選”企画に関するご案内（ご提供コンテンツの情報更新）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260622/140120260622575627/"
+        },
+        {
+          "datetime": "2026-05-15T12:00:00+09:00",
+          "category": "開示",
+          "title": "【ＰＲ】株式会社ＫＡＤＯＫＡＷＡとの「日本ホラー映画大賞」共催に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260515/140120260515536716/"
+        },
+        {
+          "datetime": "2026-05-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "持分法による投資利益の計上に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20260514/140120260514532738/"
+        },
+        {
+          "datetime": "2026-05-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期 第1四半期決算補足資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20260514/140120260514532683/"
+        },
+        {
+          "datetime": "2026-05-14T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年12月期 第１四半期決算短信〔ＩＦＲＳ〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20260514/140120260514532298/"
+        },
+        {
+          "datetime": "2026-05-14T15:30:00+09:00",
+          "category": "決算",
+          "title": "ＫｅｙＨ、1-3月期(1Q)最終は7％増益で着地",
+          "url": "https://kabutan.jp/stock/news?code=4712&b=k202605140392"
+        }
+      ],
+      "factor": "8/7引け後に開示した2026年12月期上期(1-6月)決算は最終利益が前年同期比81%増益、4-6月期は黒字に転換した。これを手掛かりにした見直し買いが本日入ったとみられる。[2026年12月期第2四半期決算短信](https://www2.jpx.co.jp/disc/47120/140120260807514035.pdf)",
+      "factor_kind": "テーマ",
+      "rank": 3
+    }
+  ],
+  "theme_clusters": [
+    {
+      "sec33": "6100",
+      "name": "小売業",
+      "size": 2,
+      "members": [
+        "3556",
+        "3542"
+      ],
+      "leader_code": "3556",
+      "leader_basis": "disclosure"
+    }
+  ],
+  "dropped_turnover": [
+    {
+      "code": "4074",
+      "name": "ラキール",
+      "pct": 5.35,
+      "pct5": 2.93,
+      "turnover_m": 3.9
+    },
+    {
+      "code": "6898",
+      "name": "トミタ電機",
+      "pct": 5.05,
+      "pct5": 1.39,
+      "turnover_m": 2.5
+    }
+  ],
+  "dropped_mcap": [
+    {
+      "code": "3133",
+      "name": "海帆",
+      "pct": 53.57,
+      "pct5": 30.3,
+      "turnover_m": 887.9,
+      "mcap_oku": 30,
+      "mcap_oku_exact": 29.93,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "7360",
+      "name": "オンデック",
+      "pct": 38.21,
+      "pct5": 94.76,
+      "turnover_m": 736.1,
+      "mcap_oku": 31,
+      "mcap_oku_exact": 31.1,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "130A",
+      "name": "Veritas In Silico",
+      "pct": 23.67,
+      "pct5": -2.79,
+      "turnover_m": 247.1,
+      "mcap_oku": 27,
+      "mcap_oku_exact": 27.12,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "2388",
+      "name": "ウェッジホールディングス",
+      "pct": 20.0,
+      "pct5": -14.29,
+      "turnover_m": 29.8,
+      "mcap_oku": 5,
+      "mcap_oku_exact": 5.09,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "6658",
+      "name": "シライ電子工業",
+      "pct": 18.1,
+      "pct5": 16.52,
+      "turnover_m": 53.9,
+      "mcap_oku": 78,
+      "mcap_oku_exact": 78.28,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "4883",
+      "name": "モダリス",
+      "pct": 10.34,
+      "pct5": 6.67,
+      "turnover_m": 177.3,
+      "mcap_oku": 36,
+      "mcap_oku_exact": 36.36,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "9244",
+      "name": "デジタリフト",
+      "pct": 9.24,
+      "pct5": 21.04,
+      "turnover_m": 109.3,
+      "mcap_oku": 19,
+      "mcap_oku_exact": 18.74,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "8995",
+      "name": "誠建設工業",
+      "pct": 7.82,
+      "pct5": 0.77,
+      "turnover_m": 384.1,
+      "mcap_oku": 34,
+      "mcap_oku_exact": 34.12,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "3858",
+      "name": "ユビキタスAI",
+      "pct": 6.06,
+      "pct5": 8.53,
+      "turnover_m": 3312.0,
+      "mcap_oku": 44,
+      "mcap_oku_exact": 43.93,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "5242",
+      "name": "アイズ",
+      "pct": 5.99,
+      "pct5": 52.45,
+      "turnover_m": 107.2,
+      "mcap_oku": 29,
+      "mcap_oku_exact": 29.4,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "4490",
+      "name": "ビザスク",
+      "pct": 5.13,
+      "pct5": 17.16,
+      "turnover_m": 56.4,
+      "mcap_oku": 74,
+      "mcap_oku_exact": 74.19,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "3710",
+      "name": "ジョルダン",
+      "pct": 5.1,
+      "pct5": 6.58,
+      "turnover_m": 20.8,
+      "mcap_oku": 35,
+      "mcap_oku_exact": 34.68,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-10-20",
+      "reason": "below_floor"
+    }
+  ]
+}
