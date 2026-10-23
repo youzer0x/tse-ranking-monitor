@@ -293,6 +293,37 @@ def test_earnings_next_day_with_distant_uke_marker_no_warn(ranking_golden):
     assert not any("自社決算を上昇要因に挙げる" in w for w in vrq.check_ranking_warnings(doc))
 
 
+@pytest.mark.parametrize("factor", [
+    # 2026-10-23 サイプレスHD(428A)：他社決算を起点とする連想は自社決算帰属ではない
+    "同業ブロンコビリー(3091)の10/22引け後の決算(経常44%増益)を好感した外食株への連想買いとみられる。",
+    "同業ブロンコビリー（3091）の決算を受けた連想買いとみられる。",
+    "米エヌビディアの決算を好感した半導体株への連れ高とみられる。",
+    "競合大手の好決算を材料視した連想買い。",
+])
+def test_peer_earnings_association_is_not_self_earnings(ranking_golden, factor):
+    doc = copy.deepcopy(ranking_golden)
+    doc["rows"][1]["factor"] = factor
+    doc["rows"][1]["disclosures"] = []
+    warns = vrq.check_ranking_warnings(doc)
+    assert not any("自社決算を上昇要因に挙げる" in w for w in warns)
+    assert not any("自社決算が要因の行に「連想（買い）」" in w for w in warns)
+
+
+@pytest.mark.parametrize("factor", [
+    # 「同社」は自社。読点で区切られた前置きの他社語は決算の所有者ではない。自社コードも自社。
+    "同社の第1四半期決算（経常+51%）への好感が連想買いを呼び急伸。",
+    "米株高の中、第1四半期決算（経常+51%）を好感した連想買い。",
+    "同業比で見劣りしない自社({code})の決算を好感した連想買い。",
+])
+def test_self_earnings_still_warns_next_to_peer_words(ranking_golden, factor):
+    doc = copy.deepcopy(ranking_golden)
+    doc["rows"][1]["factor"] = factor.format(code=doc["rows"][1]["code"])
+    doc["rows"][1]["disclosures"] = []
+    warns = vrq.check_ranking_warnings(doc)
+    assert any("自社決算を上昇要因に挙げる" in w for w in warns)
+    assert any("自社決算が要因の行に「連想（買い）」" in w for w in warns)
+
+
 # ── 旧スキーマ（items）／構造破損 ─────────────────────────────────
 def test_items_variant_emits_warn(ranking_golden):
     doc = copy.deepcopy(ranking_golden)
