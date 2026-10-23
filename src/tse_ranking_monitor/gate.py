@@ -19,11 +19,13 @@ CATCH_UP_WINDOW_DAYS 営業日以内（既定1＝直近の完了セッション�
   3) master 件数も取得して診断表示するが、当日barsだけを必須の合否判定に使う。
   ratio は早期確定 --ready-ratio（既定0.95）／締切ハードフロア --floor-ratio（既定0.90）。
   前日barsの基準件数または当日bars全件が取得不能なら「未準備」として再試行する。
+  ただし HTTP 401/403（APIキー無効・失効・権限外）は待っても回復しないので再試行せず即停止する。
 
 出力（stdout は必ず1トークン行のみ。進捗・WARN・エラーは stderr）:
   SKIP              休場日（exit 0）
   SESSION=YYYY-MM-DD  当日データ確定 or 締切時に準完全（exit 0。準完全時は stderr WARN）
   TIMEOUT           締切までに四本値が未到達＝配信しない（exit 2、--on-timeout=skip 既定）
+  AUTH_ERROR        J-Quants が 401/403 を返した＝配信しない（exit 3。応答本文を stderr に出す）
   （APIキー未設定は stderr にエラーを出して exit 1・stdout 無し）
 
 usage:
@@ -37,6 +39,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 from datetime import date, datetime, time as wall_time, timedelta, timezone
 from pathlib import Path
 
@@ -69,6 +72,25 @@ def elog(*a):
     print(*a, file=sys.stderr, flush=True)
 
 
+class AuthFailure(Exception):
+    """J-Quants が 401/403 を返した。ポーリングを続けても回復しない。"""
+
+
+def _raise_if_auth(exc):
+    """401/403 なら応答本文つきの :class:`AuthFailure` に変換する。
+
+    2026-10-23：クラウド環境のキー失効で全リクエストが 403 になったが、ゲートが
+    「未準備」として18:10まで51分待ち、`TIMEOUT`（遅延/障害を疑う）と誤報した。
+    J-Quants は本文に理由（`The incoming api key is invalid or expired.` 等）を返す。
+    """
+    if isinstance(exc, urllib.error.HTTPError) and exc.code in (401, 403):
+        try:
+            body = exc.read().decode("utf-8", "replace").strip()
+        except Exception:
+            body = ""
+        raise AuthFailure("HTTP %d %s" % (exc.code, body[:300] or exc.reason)) from exc
+
+
 def _prev_counts(session_iso):
     """前営業日の bars/master 件数を独立取得する。
 
@@ -79,6 +101,7 @@ def _prev_counts(session_iso):
     try:
         pb = len(jquants.bars_by_date(prev_iso))
     except Exception as e:
+        _raise_if_auth(e)
         elog("[wait_for_data] WARN 前営業日bars件数の取得に失敗（未準備として再試行）: %s" % e)
         pb = None
     if not pb:
@@ -86,6 +109,7 @@ def _prev_counts(session_iso):
     try:
         pm = len(jquants.master_by_date(prev_iso))
     except Exception as e:
+        _raise_if_auth(e)
         elog("[wait_for_data] WARN 前営業日master件数の取得に失敗（診断値のみ欠落）: %s" % e)
         pm = None
     if not pm:
@@ -105,6 +129,7 @@ def evaluate(session_iso, prev_bars_n, prev_master_n, ready_ratio, floor_ratio):
     try:
         last = jquants.last_confirmed_session(session_iso)
     except Exception as e:
+        _raise_if_auth(e)
         elog("[wait_for_data] WARN プローブ取得に失敗: %s" % e)
         return dict(strict=False, near=False, probe_ok=False,
                     bars_ratio=None, master_ratio=None, bars_n=None, master_n=None)
@@ -116,6 +141,7 @@ def evaluate(session_iso, prev_bars_n, prev_master_n, ready_ratio, floor_ratio):
     try:
         bars_n = len(jquants.bars_by_date(session_iso))
     except Exception as e:
+        _raise_if_auth(e)
         elog("[wait_for_data] WARN 当日bars全件の取得に失敗（未準備として再試行）: %s" % e)
         return dict(strict=False, near=False, probe_ok=True,
                     bars_ratio=None, master_ratio=None, bars_n=None, master_n=None)
@@ -124,6 +150,7 @@ def evaluate(session_iso, prev_bars_n, prev_master_n, ready_ratio, floor_ratio):
     try:
         master_n = len(jquants.master_by_date(session_iso))
     except Exception as e:
+        _raise_if_auth(e)
         elog("[wait_for_data] WARN 当日master件数の取得に失敗（診断値のみ欠落）: %s" % e)
         master_n = None
 
@@ -355,6 +382,17 @@ def main():
         elog("[wait_for_data] ERROR JQUANTS_API_KEY 未設定")
         return 1
 
+    try:
+        return _wait_for_session(session_iso, catch_up, now_jst, args)
+    except AuthFailure as exc:
+        elog("[wait_for_data] ERROR J-Quants 認証/権限エラー（%s）。APIキーの無効・失効・権限外で、"
+             "待機しても回復しないため即停止する。実行環境の JQUANTS_API_KEY を確認する。" % exc)
+        print("AUTH_ERROR")   # ← stdout
+        return 3
+
+
+def _wait_for_session(session_iso, catch_up, now_jst, args):
+    """当日データの確定をポーリングし、SESSION=／TIMEOUT を出して exit code を返す。"""
     # 2) 完全性比較の分母。失敗時はポーリング中に再取得する。
     prev_iso, prev_bars_n, prev_master_n = _prev_counts(session_iso)
     elog("[wait_for_data] session=%s prev=%s prev_bars=%s prev_master=%s "

@@ -104,6 +104,7 @@ git push -u origin main
 ## Step 6：J-Quants の API キーを用意する
 
 - J-Quants（https://jpx-jquants.com）の **Light プラン以上**の `x-api-key` 用キーを控える。**Free は当日値が取れない（遅延）ため不可**。
+- **キーを再発行・プラン変更したら、旧キーは即座に無効になる**。ローカルだけでなく、claude.ai のクラウド環境（本リポジトリの環境と、同じキーを使う PTS 版の環境）の `JQUANTS_API_KEY` を同時に差し替える。差し替え漏れは翌朝の PTS ルーチンと当日の東証ルーチン（バックアップ含む）がゲートで `AUTH_ERROR` 停止する（2026-10-23 実例）。差し替え後は Run now で1回発火し、ゲートを通過することを確認する。
 
 ## Step 7：Claude に「カスタム環境」を作る（環境変数・ネット許可・初期化）
 
@@ -203,6 +204,7 @@ python -m tse_ranking_monitor pipeline notify --session "$SESSION" --pages-url "
 | 症状 | 対処 |
 |------|------|
 | 時価総額取得で停止 | APIキー・当日valuation・許容された過去日・Yahoo補完の結果を確認。取得不能を基準未満として除外せず公開停止する |
+| `AUTH_ERROR`（J-Quants 401/403） | 応答本文が `The incoming api key is invalid or expired.` ならキーの失効・再発行漏れ。クラウド環境の `JQUANTS_API_KEY` を有効なキーに差し替えて Run now で再発火する（Step 6）。待っても回復しないためゲートは待機しない。本文が `The requested endpoint does not exist` なら API のパス変更を疑う |
 | 当日データが空 / `TIMEOUT` | `wait_for_data.py` が当日四本値の確定を待つ（通常16:30台に確定・遅延日は待機）。`TIMEOUT`＝締切 18:10 JST までに四本値が未到達＝J-Quants の遅延/障害を疑う（この場合は生成・配信しない）。休場日は `SKIP` |
 | メール不達 | Gmail API の3変数（CLIENT_ID/SECRET/REFRESH_TOKEN）と `GMAIL_ADDRESS` を確認。**OAuth 同意画面を本番公開**したか（テストだと7日で失効） |
 | メールのリンク先が前営業日のまま | `--notify`（step6）を**必ず push の後**に実行しているか／ネット許可に `github.io` が入っているか確認。`--notify` が Pages 上のartifact digest一致を確認してから送る。確認タイムアウト時は未送信で失敗する |

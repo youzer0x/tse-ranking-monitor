@@ -31,12 +31,12 @@
 ## 起動とゲート
 
 - **cron：当日 16:35 JST**（`scripts/wait_for_data.py` が直近の完了セッションを選ぶ適応型ゲート）。ゲートで待つ対象は対象日の `/equities/bars/daily`。Stage1では銘柄マスタ・比較日の価格・必要な時価総額の取得も検証する。当日分は確定まで待ち、打ち切りは18:10 JSTとする。catch-up窓は1営業日（`gate.CATCH_UP_WINDOW_DAYS`）で、休場日の発火が直近営業日（例：土曜に金曜）を未公開ならその過去日をcatch-up対象として一度だけ鮮度確認し、壁時計待機をしない。窓より古い未公開営業日と再開下限（`gate.PUBLICATION_FLOOR`＝2026-09-24。08-17〜09-18 の停止期間は復元しない）より前は切り捨て、`WARN 切り捨て=` で列挙する。
-- **営業日ゲート＋鮮度ガード**：`wait_for_data.py` が `docs/data/manifest.json` の最新公開日とJST時刻から対象日を決める。処理対象が無ければ `SKIP`、確定済みなら `SESSION=`、当日データが締切までに未到達またはcatch-upデータが不整合なら `TIMEOUT` とし**配信しない**。Stage1 自身も件数比・masterカバー率・日付整合を検証する。
+- **営業日ゲート＋鮮度ガード**：`wait_for_data.py` が `docs/data/manifest.json` の最新公開日とJST時刻から対象日を決める。処理対象が無ければ `SKIP`、確定済みなら `SESSION=`、当日データが締切までに未到達またはcatch-upデータが不整合なら `TIMEOUT`、J-Quants が401/403（キーの無効・失効・権限外）を返したら待機せず即 `AUTH_ERROR` とし、いずれも**配信しない**。Stage1 自身も件数比・masterカバー率・日付整合を検証する。
 - 使用モデル：Sonnet 5（`claude-sonnet-5`）・effort=max。調査サブエージェント（`tse-factor-batch-researcher`）も同じモデルに固定する（2026-09-24 の再開時に Sonnet 4.6 から切替）。
 
 ## フロー
 
-1. **契約とゲート**：`python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json` を最初に実行し、不一致なら停止する。続いて `python scripts/wait_for_data.py` を実行する。`SKIP` なら更新せず終了、`SESSION=YYYY-MM-DD` ならその日付を使い、`TIMEOUT` なら生成・配信せず原因を報告する。当日待機と過去日catch-upの別、切り捨て日、待機時間、WARNを最終報告に含める。
+1. **契約とゲート**：`python tools/runtime_contract.py check --contract runbook/runtime_contract.lock.json` を最初に実行し、不一致なら停止する。続いて `python scripts/wait_for_data.py` を実行する。`SKIP` なら更新せず終了、`SESSION=YYYY-MM-DD` ならその日付を使い、`TIMEOUT`／`AUTH_ERROR` なら生成・配信せず原因を報告する。当日待機と過去日catch-upの別、切り捨て日、待機時間、WARNを最終報告に含める。
 2. **Stage1（決定的）**：`build_day_ranking.py --date <today> --kabutan-news --out ranking.json` を実行（`JQUANTS_API_KEY` 必須）。
    - 抽出条件：東証個別株のみ／値上がり率≥+5%／売買代金≥¥10M／時価総額≥100億。`rows`/`dropped_turnover`/`dropped_mcap` を得る。
    - **掲載上限＝値上がり率上位30社**（該当が30社超なら上位30社のみ `rows` に入る。`--max-rank` 既定30）。`counts.qualifying`＝該当総数、`counts.ranked`＝掲載数。
@@ -127,6 +127,7 @@
 ## 監視と失敗通知
 
 - **コード不具合は修復せず停止**：pipeline CLI や scripts がコード起因の例外で止まったら、ルーチンは追跡コードを編集・commitせず、回避策（checkpointの手編集・削除、git plumbingによるmain直接push、インタプリタの付け替え）も取らず、失敗メールを送って非ゼロ終了する（`RUNTIME_CONTRACT.md` §1）。2026-10-06/07 は `pipeline.py` の属性名が `research()` フェーズを遮蔽する不具合をルーチンが2日連続で自己修復し、10-07 はその修正commitが公開commitに混入して deploy の単一commit検証と checkpoint の `code_digest` 検査に挟まれ、main へ手動pushはできたが通知できずに終わった。修正は対話セッションで行い、再発火は手動で行う。
+- **APIキー失効は即停止**：2026-10-23 はクラウド環境の `JQUANTS_API_KEY` が無効化され（前夜から全リクエストが `403 The incoming api key is invalid or expired.`）、ゲートが403を「未準備」として18:10まで51分ポーリングした末に `TIMEOUT`（遅延/障害を疑う）と誤った案内で停止した。20:35バックアップも同じ環境変数を使うため救えない。ゲートは401/403を待たずに `AUTH_ERROR`（exit 3）で止め、応答本文をstderrに出す。キーを再発行したら旧キーは即無効になるため、クラウド環境（本ルーチンとPTS版）の環境変数を同時に更新する（`SETUP.md` Step 6）。
 - **ルーチン内失敗メール**：契約ゲート成功後にSKIP以外で停止する場合、`python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"` が停止stage・理由・telemetry要約・validator残件をGmail平文で送る（best-effort。送信失敗でも当初の非ゼロ終了を維持する。`RUNTIME_CONTRACT.md` §6）。telemetry要約は `.work/<S>/telemetry/` のstageイベントと `.work/_runtime/` のフックイベント（セッション明示分のみ）をマージして集計する。
 - **終了時ガード（コード強制）**：`.claude/settings.json` の `SessionEnd`／`StopFailure` が `.claude/hooks/routine_guard.py` を実行する。ゲートが `.work/_runtime/current_session.json` に記録した in-flight セッションがあり `.delivered` センチネルが無ければ、未完了stageを停止stageとして自動で失敗メールを送る（`.notified` で冪等化・送信失敗時はマーカーを書かず再試行可能）。**上のメールがエージェントの散文指示に依存していた穴を塞ぐ層**であり、エージェントが諦めた・エラー終了した・公開せず終わったケースを拾う。`StopFailure` は実測で発火しないことがあるため `SessionEnd` を主とする。
 - **SessionEnd の限界**：クラウドの実測（2026-10-05・10-07）では、ターン終了後にプロセスが idle のまま残る、または基盤都合で再起動される場合に `SessionEnd` フックが走らず、ガードの失敗メールもステータスの `died_at` も残らない。終了時ガードは対話セッション・正常終了時の層と位置づけ、無人実行の最終防衛線は下記 watchdog（`MISSING`／`STALLED`／`PAGES_STALE`／`UNNOTIFIED`）とする。

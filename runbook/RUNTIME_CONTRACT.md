@@ -19,6 +19,7 @@ python -m pip install -r requirements.lock && python -m pip install --no-deps .
 
 - `SKIP`：生成・push・通知をせず正常終了。
 - `TIMEOUT`：生成・push・通知をせず非ゼロ終了し、原因を報告。
+- `AUTH_ERROR`：J-Quants が401/403を返した（APIキーの無効・失効・権限外）。待機・再発火で回復しないため、キーの探索や差し替えを試みず、生成・push・通知をせず非ゼロ終了する。stderrの応答本文を§6の理由に含め、実行環境の `JQUANTS_API_KEY` 更新が必要と報告する。
 - `SESSION=YYYY-MM-DD`：その日付を以後の `<S>` とする。対象はゲートが選ぶ直近の完了セッションのみ（catch-up窓＝1営業日・再開下限あり）。それより古い未公開営業日はゲートが切り捨てて `WARN 切り捨て=` を出すので最終報告に含め、手動で遡らない。過去日は壁時計待機しない。
 
 Stage1の入力整合検証・時価総額取得が失敗したら停止する。pipelineは前段の成果物とコード版を照合し、stageの開始・終了・失敗を記録する。途中からは `pipeline resume --session <S>` で最初の未完了段階を一つ実行できる。調査JSONとナラティブはAIが作成する。
@@ -84,7 +85,7 @@ buildは元のbatch結果をstrict compileし直し、Stage1のdigestとfactor�
 
 ## 6. 失敗時の通知
 
-契約ゲート成功後にSKIP以外で停止する場合（TIMEOUT、Stage・検証・公開・通知の失敗、§1のコード起因の停止）、終了前に次を実行し、送信可否に関わらず当初の非ゼロ終了と失敗報告を維持する。
+契約ゲート成功後にSKIP以外で停止する場合（TIMEOUT、AUTH_ERROR、Stage・検証・公開・通知の失敗、§1のコード起因の停止）、終了前に次を実行し、送信可否に関わらず当初の非ゼロ終了と失敗報告を維持する。
 
 ```text
 python scripts/notify_failure.py --stage <停止stage> --reason "<一文>"
