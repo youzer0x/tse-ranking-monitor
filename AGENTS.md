@@ -24,7 +24,7 @@ Scheduled Routineの日次実行だけは、`python tools/runtime_contract.py ch
 
 - ゲートが `SKIP` なら生成・push・通知を行わない。
 - runtime contractの欠落・hash不一致なら日次実行を開始しない。
-- ゲートが `TIMEOUT`、Stage1の入力整合検証失敗、Stage2 evidenceのstrict compile失敗、ランキングに空の `factor`、またはランキング品質validatorの未対応ERROR/WARNが残る場合はランキングを公開しない。
+- ゲートが `TIMEOUT` または `AUTH_ERROR`、Stage1の入力整合検証失敗、Stage2 evidenceのstrict compile失敗、ランキングに空の `factor`、またはランキング品質validatorの未対応ERROR/WARNが残る場合はランキングを公開しない。
 - 市場分析はbest-effortであり、その生成失敗だけでランキング公開を止めない。失敗理由は最終報告する。
 - 公開ファイルをpushする前にメールを送らない。Pages上の当日artifact digestがローカル公開物と一致しない限り通知しない。
 - Pages確認のタイムアウト、Gmail認証不足、Gmail API失敗時は未送信のまま非ゼロ終了し、失敗を報告する。

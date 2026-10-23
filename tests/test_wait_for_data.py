@@ -1,5 +1,7 @@
 """鮮度ゲートのbars必須判定と障害時フェイルセーフ。"""
+import io
 import json
+import urllib.error
 from datetime import date, datetime
 
 import pytest
@@ -333,3 +335,58 @@ def test_select_target_session_honours_the_window_size(monkeypatch):
     assert wfd._impl.abandoned_sessions(now, [], window=1) == []
     with pytest.raises(ValueError):
         wfd.select_target_session(now, published, window=0)
+
+
+# --- authentication failures ---------------------------------------------------
+
+def _http_error(code, body):
+    return urllib.error.HTTPError(
+        "https://api.jquants.com/v2/equities/bars/daily", code, "Forbidden", {}, io.BytesIO(body))
+
+
+def _raise(exc):
+    def fail(*_args, **_kwargs):
+        raise exc
+    return fail
+
+
+def test_forbidden_probe_is_an_auth_failure_not_a_retryable_not_ready(monkeypatch):
+    monkeypatch.setattr(
+        wfd.jquants, "last_confirmed_session",
+        _raise(_http_error(403, b'{"message": "The incoming api key is invalid or expired."}')))
+
+    with pytest.raises(wfd._impl.AuthFailure, match="HTTP 403 .*invalid or expired"):
+        wfd.evaluate("2026-07-15", 100, 100, 0.95, 0.90)
+
+
+def test_server_error_stays_retryable(monkeypatch):
+    monkeypatch.setattr(
+        wfd.jquants, "last_confirmed_session", _raise(_http_error(503, b"unavailable")))
+
+    info = wfd.evaluate("2026-07-15", 100, 100, 0.95, 0.90)
+
+    assert info["probe_ok"] is False
+    assert info["strict"] is False
+
+
+def test_expired_key_stops_the_same_day_gate_without_waiting(
+        monkeypatch, capsys, isolated_runtime_root):
+    # 2026-10-23：キー失効の403を「未準備」として18:10まで待ち TIMEOUT と誤報した再発防止。
+    _fix_now(monkeypatch, "2026-07-15T16:40:00+09:00")
+    monkeypatch.setenv("JQUANTS_API_KEY", "expired")
+    body = b'{"message": "The incoming api key is invalid or expired."}'
+    for name in ("bars_by_date", "master_by_date", "last_confirmed_session"):
+        monkeypatch.setattr(wfd.jquants, name, _raise(_http_error(403, body)))
+    monkeypatch.setattr(
+        wfd._impl.time, "sleep",
+        lambda _seconds: (_ for _ in ()).throw(AssertionError("auth failure must not wait")),
+    )
+    monkeypatch.setattr(wfd._impl.sys, "argv", ["wait_for_data.py", "--date", "2026-07-15"])
+
+    assert wfd.main() == 3
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "AUTH_ERROR"
+    assert "invalid or expired" in captured.err
+    assert "JQUANTS_API_KEY" in captured.err
+    assert "TIMEOUT" not in captured.out
+    assert not (isolated_runtime_root / ".work" / "_runtime" / "current_session.json").exists()
