@@ -84,6 +84,13 @@ _EARNINGS_DRIVER_RE = re.compile(
     r"[^。]{0,15}(?:好感|受け|材料視|評価|好調|サプライズ)")
 _EARNINGS_DISC_RE = re.compile(
     r"決算短信|業績予想|配当予想|通期|四半期|決算|上方修正|下方修正|業績修正")
+# 他社の決算を起点とする連想・連れ高（「同業ブロンコビリー(3091)の決算を好感した連想買い」）は
+# 自社決算の帰属ではない。決算語の直前が「同業/他社/競合/米… や 自社以外のコード」を含む
+# 「〜の」名詞句（読点・句点を挟まない）なら他社決算とみなす。「同社の決算」は自社なので対象外。
+# 2026-10-23：サイプレスHD(428A)の正しい連想記述を自社決算と誤検知し、再調査上限で公開停止した。
+_PEER_EARNINGS_OWNER_RE = re.compile(
+    r"(?:(?P<marker>同業|他社|競合|米国?|海外|親会社|取引先)"
+    r"|[(〔\[]\s*(?P<code>[0-9][0-9A-Z]{3})\s*[)〕\]])[^。、]{0,20}の$")
 
 # 日付トークン抽出（NFKC 済みテキストに適用）。年は落として (月,日) で比較する
 # （factor 本文は「6/30」「7/1」を年無しで書き、disclosures[].date は "YYYY-MM-DD" のため）。
@@ -186,6 +193,17 @@ FactorUnit = collections.namedtuple(
 
 def _nfkc(v):
     return unicodedata.normalize("NFKC", v) if isinstance(v, str) else ""
+
+
+def _has_self_earnings_driver(norm, own_code):
+    """決算語×帰属語の共起のうち、他社決算と読めないものが1つでもあれば True。"""
+    own = _nfkc(str(own_code or "")).strip().upper()
+    for m in _EARNINGS_DRIVER_RE.finditer(norm):
+        sentence_start = norm.rfind("。", 0, m.start()) + 1
+        peer = _PEER_EARNINGS_OWNER_RE.search(norm[sentence_start:m.start()])
+        if not peer or (own and own in peer.group(0).upper()):
+            return True
+    return False
 
 
 def _norm_kind(v):
@@ -446,7 +464,7 @@ def check_ranking_warnings(doc):
         # 3c) 自社決算を要因に挙げるが窓内に決算開示が無い＝決算が窓外（当日15:30以降＝翌日材料、
         #     または前営業日より前の旧材料）で当日の日中要因にできない（ローツェ〔6323〕型）。
         #     あわせて、自社の確定材料に「連想（買い）」を使う矛盾も監査する。
-        has_earn_driver = bool(_EARNINGS_DRIVER_RE.search(norm))
+        has_earn_driver = _has_self_earnings_driver(norm, u.code)
         if has_earn_driver:
             has_inwindow_earn_disc = any(
                 _EARNINGS_DISC_RE.search(_nfkc(d.get("title", ""))) for d in u.disclosures)
