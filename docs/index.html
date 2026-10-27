@@ -223,7 +223,7 @@ function fmtTurnover(t){return t==null?'—':Math.round(Number(t)).toLocaleStrin
 function fmtTurnoverOku(r){let v=(r.turnover_yen!=null)?Number(r.turnover_yen)/1e8:(r.turnover_m!=null?Number(r.turnover_m)/100:null);if(v==null||!Number.isFinite(v))return '—';return v<1?'1億円未満':Math.round(v).toLocaleString('ja-JP')+'億円';}
 function fmtMarket(m){m=m||'';if(m.indexOf('プライム')>=0)return 'Prime';if(m.indexOf('スタンダード')>=0)return 'Standard';if(m.indexOf('グロース')>=0)return 'Growth';return m;}
 function fmtCode(c){c=(c==null?'':String(c));return (c.length===5&&c.endsWith('0'))?c.slice(0,4):c;}
-function fmtMcapCell(o,f){if(o==null)return '—';return Math.round(Number(o)).toLocaleString('ja-JP')+'億円'+esc(f||'');}
+function fmtMcapCell(o,f){if(o==null)return '—';o=Math.round(Number(o));return (o>=10000?(Math.floor(o/1000)/10).toFixed(1)+'兆円':o.toLocaleString('ja-JP')+'億円')+esc(f||'');}
 function mcapNote(r){return (r.mcap_source==='yahoo'?'（Yahoo参照）':'')+(r.mcap_date&&r.mcap_date!==data.session_date?'（'+esc(r.mcap_date)+'時点）':'');}
 function changeYen(r){if(r==null||r.close==null||r.adj_close==null||r.prev_adj_close==null)return null;var a=Number(r.adj_close);if(!a)return null;return Math.round(Number(r.close)-Number(r.prev_adj_close)*Number(r.close)/a);}
 function fmtSigned(v){if(v==null)return '—';var n=Number(v);return (n>=0?'+':'')+n.toLocaleString('ja-JP');}
@@ -304,7 +304,7 @@ function render(){
   document.getElementById('infoBody').innerHTML=
     '<div class="k">データ対象日時</div><div class="v">'+esc(data.session_window||'—')+'</div>'+
     '<div class="k">生成日時</div><div class="v">'+esc(data.generated_at||'—')+'</div>'+
-    '<div class="k">抽出条件</div><div class="v">'+esc('値上がり率≥+'+(c.min_pct??5)+'% かつ 売買代金≥'+((c.min_turnover_yen??1e7)/1e6)+'百万円／東証個別株のみ・時価総額≥'+(c.min_mcap_oku??100)+'億円'+(c.max_rank?'・上昇率上位'+c.max_rank+'社':'')+'。時価総額は J-Quants の当日終値×自己株式控除後株式数（億円・四捨五入）。†（2026-09-24 以前のデータのみ）は旧方式で増資・自己株により株探最新株数と>1%乖離。')+'</div>';
+    '<div class="k">抽出条件</div><div class="v">'+esc('値上がり率≥+'+(c.min_pct??5)+'% かつ 売買代金≥'+((c.min_turnover_yen??1e7)/1e6)+'百万円／東証個別株のみ・時価総額≥'+(c.min_mcap_oku??100)+'億円'+(c.max_rank?'・上昇率上位'+c.max_rank+'社':'')+'。時価総額は J-Quants の当日終値×自己株式控除後株式数（億円・四捨五入。1兆円以上は兆円・小数第1位、第2位以下切り捨て）。†（2026-09-24 以前のデータのみ）は旧方式で増資・自己株により株探最新株数と>1%乖離。')+'</div>';
   let h='<table><thead><tr><th class="r">#</th><th>コード</th><th>銘柄</th><th>市場</th><th class="r">前日比%<br>(5営業日)</th><th class="r">終値<br>(前日比)</th><th class="r">売買代金</th><th>変動要因</th></tr></thead><tbody>';
   rows.forEach(r=>{
     let factor=mdInline(r.factor||'（材料未確認）');

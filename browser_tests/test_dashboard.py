@@ -77,7 +77,8 @@ def test_mobile_units_long_names_and_stock_links(browser_page):
     expect(page.locator(".stock-link")).to_contain_text(long_name)
     assert page.locator(".stock-link").get_attribute("href").endswith("code=7000")
     expect(page.locator("#tableArea")).to_contain_text("1億円未満")
-    expect(page.locator(".mcap")).to_have_text("12,345億円（Yahoo参照）")
+    # 1兆円以上は「X.X兆円」（小数第1位・切り捨て。方法論 v1.6、2026-10-27）。
+    expect(page.locator(".mcap")).to_have_text("1.2兆円（Yahoo参照）")
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     box = page.locator(".stock-link").bounding_box()
     assert box["x"] >= 0 and box["x"] + box["width"] <= 375

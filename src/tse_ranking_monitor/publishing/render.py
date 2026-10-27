@@ -15,7 +15,9 @@ Pages SPA（generate_pages_html）は 2026-07 の「金融紙エディトリア�
 
 公開データ（docs/data/YYYY-MM-DD.json）は build_day_ranking.py の出力に各行の変動要因（factor /
 factor_kind）を埋めたもの（rows に disclosures/pdf_url・counts・capped を含むフルデータ）。
-時価総額は要件により **常に億円の整数（カンマ区切り、1兆円以上も億円表示）** とする。
+時価総額は要件により **億円の整数（カンマ区切り）** とし、**1兆円（10,000億円）以上は「X.X兆円」**
+（小数第1位、第2位以下切り捨て。例：245,135億円→24.5兆円、50,625億円→5.0兆円）とする（2026-10-27 変更）。
+メール列見出しは「(億円)」のまま、兆円セルだけ単位を付けて区別する。
 """
 import re
 from ..text import escape, inline_html, session_url
@@ -24,6 +26,8 @@ from ..text import escape, inline_html, session_url
 def fmt_mcap(oku, flag=""):
     if oku is None:
         return "—"
+    if oku >= 10000:
+        return f"{int(oku) // 1000 / 10:.1f}兆円{flag or ''}"
     return f"{oku:,}{flag or ''}"
 
 
