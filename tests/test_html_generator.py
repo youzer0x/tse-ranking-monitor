@@ -11,6 +11,15 @@ def test_fmt_mcap():
     assert hg.fmt_mcap(1234, "†") == "1,234†"   # 株数乖離フラグ付き
 
 
+def test_fmt_mcap_shows_cho_yen_above_one_trillion():
+    # 1兆円（10,000億円）以上は「X.X兆円」（小数第1位・第2位以下切り捨て。2026-10-27 変更）。
+    assert hg.fmt_mcap(9999) == "9,999"
+    assert hg.fmt_mcap(10000) == "1.0兆円"
+    assert hg.fmt_mcap(245135) == "24.5兆円"   # アドバンテスト 2026-10-27
+    assert hg.fmt_mcap(50625) == "5.0兆円"     # イビデン 2026-10-27（5.06 は四捨五入せず切り捨て）
+    assert hg.fmt_mcap(19999) == "1.9兆円"
+
+
 def test_fmt_pct():
     assert hg.fmt_pct(None) == "—"
     assert hg.fmt_pct(15.09) == "+15.09%"
@@ -74,6 +83,30 @@ def test_email_omits_yahoo_mcap_note():
     assert "Yahoo参照" not in html
     assert ">327</td>" in html
     assert "新規上場は Yahoo Finance JP" in html
+
+
+def test_email_shows_cho_yen_for_large_caps():
+    data = _data(2)
+    data["rows"][0]["mcap_oku"] = 245135
+    data["rows"][1]["mcap_oku"] = 50625
+    html = hg.generate_email_html(data, "https://x/")
+    assert ">24.5兆円</td>" in html and ">5.0兆円</td>" in html
+    assert "245,135" not in html and "50,625" not in html
+
+
+def test_pages_mcap_cell_shows_cho_yen_above_one_trillion():
+    # SPA の fmtMcapCell を実際に評価する（Node が無い環境では skip）。
+    import json, re, shutil, subprocess
+    import pytest
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node not available")
+    js = hg.generate_pages_html()
+    fn = re.search(r"function fmtMcapCell\(o,f\)\{.*?\}\n", js).group(0)
+    script = ("function esc(s){return String(s);}\n" + fn +
+              "console.log(JSON.stringify([245135,50625,10000,9999,327,null].map(v=>fmtMcapCell(v,''))));")
+    out = subprocess.run([node, "-e", script], capture_output=True, check=True).stdout
+    assert json.loads(out.decode("utf-8")) == ["24.5兆円", "5.0兆円", "1.0兆円", "9,999億円", "327億円", "—"]
 
 
 def test_email_name_wraps_on_mobile_only():
