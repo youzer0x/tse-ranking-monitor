@@ -1,0 +1,343 @@
+{
+  "schema_version": 1,
+  "session_date": "2026-11-20",
+  "prev_date": "2026-11-19",
+  "prev5_date": "2026-11-13",
+  "session_window": "2026-11-20 09:00–15:30 JST（前場9:00-11:30／後場12:30-15:30）",
+  "generated_at": "2026-11-20 16:36 JST",
+  "criteria": {
+    "min_pct": 5.0,
+    "min_turnover_yen": 10000000,
+    "min_mcap_oku": 100,
+    "max_rank": 30
+  },
+  "capped": false,
+  "counts": {
+    "qualifying": 2,
+    "ranked": 2,
+    "dropped_turnover": 3,
+    "dropped_mcap": 9,
+    "excluded": 797
+  },
+  "rows": [
+    {
+      "code": "3624",
+      "name": "アクセルマーク",
+      "market": "グロース",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "5250",
+      "sec33_name": "情報･通信業",
+      "scale_cat": "-",
+      "mcap_oku": 121,
+      "mcap_oku_exact": 120.83,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "pct": 33.09,
+      "pct5": 496.77,
+      "close": 185.0,
+      "adj_close": 185.0,
+      "prev_adj_close": 139.0,
+      "turnover_yen": 3348829400,
+      "turnover_m": 3348.8,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-11-16T15:40:18+09:00",
+          "category": "材料",
+          "title": "本日の【ストップ高／ストップ安】 引け　　S高＝ 22 銘柄　　S安＝ 12 銘柄　(11月16日)",
+          "url": "https://kabutan.jp/stock/news?code=3624&b=n202611160961"
+        },
+        {
+          "datetime": "2026-11-13T16:30:00+09:00",
+          "category": "開示",
+          "title": "第三者割当による第34回新株予約権の発行に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261113578718/"
+        },
+        {
+          "datetime": "2026-11-13T16:30:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期 通期決算説明会資料",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261112575951/"
+        },
+        {
+          "datetime": "2026-11-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期 決算短信〔日本基準〕（連結）",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261113578583/"
+        },
+        {
+          "datetime": "2026-11-13T15:30:00+09:00",
+          "category": "決算",
+          "title": "アクセルＭ、今期最終は赤字縮小へ",
+          "url": "https://kabutan.jp/stock/news?code=3624&b=k202611130780"
+        },
+        {
+          "datetime": "2026-11-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "2026年９月期通期連結業績予想値と実績値との差異に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261113577602/"
+        },
+        {
+          "datetime": "2026-11-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "個別決算における営業外費用、特別損失の計上及び個別業績の前期実績値との差異に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261112575935/"
+        },
+        {
+          "datetime": "2026-11-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "（訂正）「決算期（事業年度の末日）の変更及び定款の一部変更に関するお知らせ」の一部訂正について",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261112575913/"
+        },
+        {
+          "datetime": "2026-11-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "連結決算における営業外費用、特別損失及び法人税等調整額の計上に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261112575732/"
+        },
+        {
+          "datetime": "2026-11-13T15:30:00+09:00",
+          "category": "開示",
+          "title": "第26回新株予約権及び第28回新株予約権の全部並びに第33回新株予約権の一部の取得・消却に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261113/140120261112575472/"
+        }
+      ],
+      "factor": "11/13開示の2026年9月期は純損失7.6億円で前期より縮小した（[EDINET-DB](https://edinetdb.jp/company/E05707)）。親会社コンヴァノ(6574)は同日、トレカ事業の立て直し資金を確保するため新株予約権の全部引受けを決議し、資金支援継続の方針が材料視されて薄商いの低位株に見直し買いが波及。ストップ高を連日繰り返し、本日も急伸が続いたとみられる。",
+      "factor_kind": "テーマ",
+      "rank": 1
+    },
+    {
+      "code": "446A",
+      "name": "ノースサンド",
+      "market": "グロース",
+      "sec17": "10",
+      "sec17_name": "情報通信・サービスその他",
+      "sec33": "9050",
+      "sec33_name": "サービス業",
+      "scale_cat": "-",
+      "mcap_oku": 1648,
+      "mcap_oku_exact": 1648.41,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "pct": 6.89,
+      "pct5": -8.26,
+      "close": 2389.0,
+      "adj_close": 2389.0,
+      "prev_adj_close": 2235.0,
+      "turnover_yen": 4436465800,
+      "turnover_m": 4436.5,
+      "disclosures": [],
+      "kabutan_news": [
+        {
+          "datetime": "2026-11-20T13:24:00+09:00",
+          "category": "材料",
+          "title": "ノースサンドが逆行高、売出価格を上回って推移",
+          "url": "https://kabutan.jp/stock/news?code=446A&b=n202611200823"
+        },
+        {
+          "datetime": "2026-11-18T10:27:00+09:00",
+          "category": "材料",
+          "title": "ノースサンドが３日続落、売出価格にサヤ寄せ",
+          "url": "https://kabutan.jp/stock/news?code=446A&b=n202611180438"
+        },
+        {
+          "datetime": "2026-11-17T17:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Determination of Selling Price and Other Terms",
+          "url": "https://kabutan.jp/disclosures/pdf/20261117/140120261117582261/"
+        },
+        {
+          "datetime": "2026-11-17T17:00:00+09:00",
+          "category": "開示",
+          "title": "売出価格等の決定に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261117/140120261117582038/"
+        },
+        {
+          "datetime": "2026-11-11T07:32:00+09:00",
+          "category": "材料",
+          "title": "前日に動いた銘柄 part2日本電子材料、santec、オキサイドなど",
+          "url": "https://kabutan.jp/stock/news?code=446A&b=n202611110243"
+        },
+        {
+          "datetime": "2026-11-10T09:20:00+09:00",
+          "category": "材料",
+          "title": "ノースサンドは大幅反落、既存株主による１０９５万６６００株の売り出しなど発表",
+          "url": "https://kabutan.jp/stock/news?code=446A&b=n202611100448"
+        },
+        {
+          "datetime": "2026-11-09T16:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Secondary Offering of Shares",
+          "url": "https://kabutan.jp/disclosures/pdf/20261109/140120261106568088/"
+        },
+        {
+          "datetime": "2026-11-09T16:00:00+09:00",
+          "category": "開示",
+          "title": "Notice Concerning Approval of Change of Market Segment to Tokyo Stock Exchange Prime Market",
+          "url": "https://kabutan.jp/disclosures/pdf/20261109/140120261106568086/"
+        },
+        {
+          "datetime": "2026-11-09T16:00:00+09:00",
+          "category": "開示",
+          "title": "東京証券取引所プライム市場への上場市場区分変更承認に関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261109/140120261105565631/"
+        },
+        {
+          "datetime": "2026-11-09T16:00:00+09:00",
+          "category": "開示",
+          "title": "株式の売出しに関するお知らせ",
+          "url": "https://kabutan.jp/disclosures/pdf/20261109/140120261007547553/"
+        }
+      ],
+      "factor": "11/17終値後に決定した売出価格2235円を上回って推移し逆行高。11/9のプライム市場変更承認とあわせた売出決議で生じた需給懸念の一巡を好感し、2027年1月期に売上高5割増・最終利益7割増を計画する成長性の見直し買いが入ったとみられる。11/25のプライム移行も意識された。[株探](https://s.kabutan.jp/news/n202611200823/)",
+      "factor_kind": "報道",
+      "rank": 2
+    }
+  ],
+  "theme_clusters": [],
+  "dropped_turnover": [
+    {
+      "code": "9258",
+      "name": "CS−C",
+      "pct": 18.45,
+      "pct5": -4.31,
+      "turnover_m": 3.8
+    },
+    {
+      "code": "4370",
+      "name": "モビルス",
+      "pct": 5.12,
+      "pct5": -2.55,
+      "turnover_m": 3.7
+    },
+    {
+      "code": "469A",
+      "name": "フィットクルー",
+      "pct": 5.1,
+      "pct5": 4.76,
+      "turnover_m": 4.9
+    }
+  ],
+  "dropped_mcap": [
+    {
+      "code": "4586",
+      "name": "メドレックス",
+      "pct": 38.96,
+      "pct5": 181.58,
+      "turnover_m": 4430.0,
+      "mcap_oku": 76,
+      "mcap_oku_exact": 76.3,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "3416",
+      "name": "ピクスタ",
+      "pct": 18.38,
+      "pct5": 11.94,
+      "turnover_m": 374.0,
+      "mcap_oku": 17,
+      "mcap_oku_exact": 16.75,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "5240",
+      "name": "monoAI technology",
+      "pct": 14.66,
+      "pct5": -0.75,
+      "turnover_m": 539.1,
+      "mcap_oku": 16,
+      "mcap_oku_exact": 16.34,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "5133",
+      "name": "テリロジーホールディングス",
+      "pct": 9.81,
+      "pct5": 5.61,
+      "turnover_m": 1667.2,
+      "mcap_oku": 69,
+      "mcap_oku_exact": 68.94,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "3664",
+      "name": "WIZE",
+      "pct": 7.14,
+      "pct5": 15.38,
+      "turnover_m": 466.9,
+      "mcap_oku": 18,
+      "mcap_oku_exact": 17.95,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "6573",
+      "name": "CRAVIA",
+      "pct": 6.25,
+      "pct5": 6.25,
+      "turnover_m": 92.7,
+      "mcap_oku": 13,
+      "mcap_oku_exact": 13.38,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "3815",
+      "name": "メディア工房",
+      "pct": 6.11,
+      "pct5": -6.47,
+      "turnover_m": 16.7,
+      "mcap_oku": 53,
+      "mcap_oku_exact": 52.82,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "9331",
+      "name": "キャスター",
+      "pct": 5.93,
+      "pct5": 4.95,
+      "turnover_m": 20.4,
+      "mcap_oku": 11,
+      "mcap_oku_exact": 11.21,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    },
+    {
+      "code": "5721",
+      "name": "エスクリプトエナジー",
+      "pct": 5.56,
+      "pct5": 5.56,
+      "turnover_m": 75.0,
+      "mcap_oku": 69,
+      "mcap_oku_exact": 68.67,
+      "mcap_source": "jquants",
+      "mcap_status": "current",
+      "mcap_date": "2026-11-20",
+      "reason": "below_floor"
+    }
+  ]
+}
